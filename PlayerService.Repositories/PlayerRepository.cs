@@ -22,9 +22,23 @@ internal class PlayerRepository : IPlayerRepository
         return player?.AccumulatedDeposit;
     }
 
-    public ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
+    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
     {
-        throw new NotImplementedException();
+        var player = await _context.Players
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        return player == null
+            ? null
+            : new PlayerInfo(
+                player.PlayerCode,
+                player.BrandId,
+                player.Username,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                (PlayerStatus)player.Status,
+                player.WithdrawPassword.Length > 0,
+                player.VipId);
     }
 
     public ValueTask<IReadOnlyDictionary<string, string?>?> GetPlayerPropertiesAsync(string playerCode)
