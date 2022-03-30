@@ -41,8 +41,23 @@ internal class PlayerRepository : IPlayerRepository
                 player.VipId);
     }
 
-    public ValueTask<IReadOnlyDictionary<string, string?>?> GetPlayerPropertiesAsync(string playerCode)
+    public async ValueTask<IReadOnlyDictionary<string, string?>?> GetPlayerPropertiesAsync(string playerCode)
     {
-        throw new NotImplementedException();
+        var player = await _context.Players
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        return player == null
+            ? null
+            : new Dictionary<string, string?>
+            {
+                ["RealName"] = player.RealName,
+                ["IdNumber"] = player.IdNumber,
+                ["Wechat"] = player.Wechat,
+                ["QQ"] = player.Qq,
+                ["AreaCode"] = player.AreaCode,
+                ["Phone"] = player.Phone,
+                ["Email"] = player.Email
+            };
     }
 }
