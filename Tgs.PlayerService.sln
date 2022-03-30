@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerService.Repositories"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerService.Core.UnitTests", "PlayerService.Core.UnitTests\PlayerService.Core.UnitTests.csproj", "{402DBAC5-372F-4044-B264-4B98A986A7B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerService.Repositories.UnitTests", "PlayerService.Repositories.UnitTests\PlayerService.Repositories.UnitTests.csproj", "{922DCE89-A9C6-4C2A-88EC-F5B9CA22D6C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{402DBAC5-372F-4044-B264-4B98A986A7B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{402DBAC5-372F-4044-B264-4B98A986A7B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{402DBAC5-372F-4044-B264-4B98A986A7B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{922DCE89-A9C6-4C2A-88EC-F5B9CA22D6C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{922DCE89-A9C6-4C2A-88EC-F5B9CA22D6C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{922DCE89-A9C6-4C2A-88EC-F5B9CA22D6C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{922DCE89-A9C6-4C2A-88EC-F5B9CA22D6C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Tgs.PlayerService.Core;
 using Tgs.PlayerService.Core.ApplicationServices;
 using Tgs.PlayerService.ViewModels;
@@ -10,46 +12,60 @@ namespace Tgs.PlayerService.Controllers;
 [ApiController]
 public class PlayerController : ControllerBase
 {
-    [HttpGet("{playerCode}/deposited_amount", Name = "GetPlayerDepositedAmount")]
+    [HttpGet("deposited/{playerCode}", Name = "GetPlayerDepositedAmount")]
     public async ValueTask<decimal?> GetPlayerDepositedAmountAsync(
         [FromServices] IGetService<GetPlayerDepositedAmountQuery, decimal?> getService,
         [FromRoute] string playerCode)
     {
-        var amount = await getService.GetAsync(new GetPlayerDepositedAmountQuery(playerCode))
+        var amount = await getService
+            .GetAsync(new GetPlayerDepositedAmountQuery(playerCode))
             .ConfigureAwait(false);
 
         return amount;
     }
 
-    [HttpGet("{playerCode}/detail", Name = "GetPlayerDetailInfo")]
-    public async ValueTask<PlayerDetailViewModel> GetPlayerDetailInfoAsync(
-        [FromServices] IGetService<GetPlayerDetailQuery, PlayerDetailInfo> getService,
+    [HttpGet("prop/{playerCode}", Name = "GetPlayerDetailInfo")]
+    public async ValueTask<JsonDocument?> GetPlayerDetailInfoAsync(
+        [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string?>?> getService,
+        [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
         [FromRoute] string playerCode)
     {
-        var playerInfo = await getService.GetAsync(new GetPlayerDetailQuery(playerCode))
+        var jsonSerializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
+
+        var properties = await getService
+            .GetAsync(new GetPlayerPropertiesQuery(playerCode))
             .ConfigureAwait(false);
 
-        return new PlayerDetailViewModel(
-            playerInfo.PlayerCode,
-            playerInfo.Properties);
+        if (properties != null)
+        {
+            return JsonSerializer.SerializeToDocument(properties, jsonSerializerOptions);
+        }
+
+        return null;
     }
 
     [HttpGet("{playerCode}", Name = "GetPlayerInfo")]
-    public async ValueTask<PlayerViewModel> GetPlayerInfoAsync(
-        [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getService,
+    public async ValueTask<PlayerViewModel?> GetPlayerInfoAsync(
+        [FromServices] IGetService<GetPlayerQuery, PlayerInfo?> getService,
         [FromRoute] string playerCode)
     {
-        var playerInfo = await getService.GetAsync(new GetPlayerQuery(playerCode))
+        var playerInfo = await getService
+            .GetAsync(new GetPlayerQuery(playerCode))
             .ConfigureAwait(false);
 
-        return new PlayerViewModel(
-            playerInfo.PlayerCode,
-            playerInfo.BrandId,
-            playerInfo.Username,
-            playerInfo.IdentityAuthentication,
-            playerInfo.PhoneAuthentication,
-            playerInfo.Status,
-            playerInfo.IsSetPayPassword,
-            playerInfo.VipLevelId);
+        if (playerInfo != null)
+        {
+            return new PlayerViewModel(
+                playerInfo.PlayerCode,
+                playerInfo.BrandId,
+                playerInfo.Username,
+                playerInfo.IdentityAuthentication,
+                playerInfo.PhoneAuthentication,
+                playerInfo.Status,
+                playerInfo.IsSetPayPassword,
+                playerInfo.VipLevelId);
+        }
+
+        return null;
     }
 }

@@ -32,15 +32,15 @@ public class PlayerTests
 
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 
-        var sut = new GetPlayerDetailQueryService(fakePlayerRepository);
+        var sut = new GetPlayerPropertiesQueryService(fakePlayerRepository);
 
-        var query = new GetPlayerDetailQuery(playerCode);
+        var query = new GetPlayerPropertiesQuery(playerCode);
 
         _ = await sut.GetAsync(query).ConfigureAwait(false);
 
         _ = fakePlayerRepository
             .Received(1)
-            .GetPlayerDetailAsync(playerCode);
+            .GetPlayerPropertiesAsync(playerCode);
     }
 
     [Test]
