@@ -10,6 +10,24 @@ namespace Tgs.PlayerService.Controllers;
 [ApiController]
 public class PlayerController : ControllerBase
 {
+    [HttpGet("{playerCode}", Name = "GetPlayerDetailInfo")]
+    public async ValueTask<PlayerDetailViewModel> GetPlayerDetailInfoAsync(
+        [FromServices] IGetService<GetPlayerDetailQuery, PlayerDetailInfo> getService,
+        [FromRoute] string playerCode)
+    {
+        var playerInfo = await getService.GetAsync(new GetPlayerDetailQuery(playerCode))
+            .ConfigureAwait(false);
+
+        return new PlayerDetailViewModel(
+            playerInfo.PlayerCode,
+            playerInfo.RealName,
+            playerInfo.DepositedAmount,
+            playerInfo.AreaCode,
+            playerInfo.Phone,
+            playerInfo.Email,
+            playerInfo.Properties);
+    }
+
     [HttpGet("{playerCode}", Name = "GetPlayerInfo")]
     public async ValueTask<PlayerViewModel> GetPlayerInfoAsync(
         [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getService,

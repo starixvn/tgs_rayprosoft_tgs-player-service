@@ -8,6 +8,24 @@ namespace Tgs.PlayerService.Core.UnitTests;
 public class PlayerTests
 {
     [Test]
+    public async Task Can_Get_PlayerDetailInfo()
+    {
+        var playerCode = "4ucmqplxb029";
+
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerDetailQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerDetailQuery(playerCode);
+
+        _ = await sut.GetAsync(query).ConfigureAwait(false);
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .GetPlayerDetailAsync(playerCode);
+    }
+
+    [Test]
     public async Task Can_Get_PlayerInfo()
     {
         var playerCode = "4ucmqplxb029";
