@@ -18,6 +18,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerService.Repositories"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerService.Core.UnitTests", "PlayerService.Core.UnitTests\PlayerService.Core.UnitTests.csproj", "{402DBAC5-372F-4044-B264-4B98A986A7B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.PlayerService.Client", "Tgs.PlayerService.Client\Tgs.PlayerService.Client.csproj", "{724CD676-C3EF-4211-BEF9-5A664DE0ACB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerService.IntegrationTests", "PlayerService.IntegrationTests\PlayerService.IntegrationTests.csproj", "{838FF75A-6979-4756-BC2F-EFD0332F55FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +44,14 @@ Global
 		{402DBAC5-372F-4044-B264-4B98A986A7B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{402DBAC5-372F-4044-B264-4B98A986A7B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{402DBAC5-372F-4044-B264-4B98A986A7B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{724CD676-C3EF-4211-BEF9-5A664DE0ACB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{724CD676-C3EF-4211-BEF9-5A664DE0ACB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{724CD676-C3EF-4211-BEF9-5A664DE0ACB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{724CD676-C3EF-4211-BEF9-5A664DE0ACB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{838FF75A-6979-4756-BC2F-EFD0332F55FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{838FF75A-6979-4756-BC2F-EFD0332F55FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{838FF75A-6979-4756-BC2F-EFD0332F55FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{838FF75A-6979-4756-BC2F-EFD0332F55FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
