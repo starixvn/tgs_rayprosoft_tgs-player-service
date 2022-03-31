@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,14 @@ builder.Services
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
+builder.Services
+    .AddPlayerServiceCore()
+    .AddPlayerServiceRepositories((sp, optionsBuilder) =>
+    {
+        var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString("Tgs");
+        _ = optionsBuilder.UseNpgsql(connectionString);
+    });
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -26,7 +35,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     options.ApplyWebApiToolkitSupport();
-    //options.ApplyDisplayNameSchemaId();
+    options.ApplyDisplayNameSchemaId();
 });
 
 builder.Services.AddHealthChecks();

@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿// ReSharper disable CheckNamespace
+
+using Microsoft.EntityFrameworkCore;
 using Tgs.PlayerService.Core;
+using Tgs.PlayerService.Repositories;
 using Tgs.PlayerService.Repositories.Entities;
 
-namespace Tgs.PlayerService.Repositories.DependencyInjection;
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {

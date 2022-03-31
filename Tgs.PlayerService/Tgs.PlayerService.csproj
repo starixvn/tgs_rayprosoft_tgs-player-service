@@ -7,12 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
+
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+
     <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.10" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PlayerService.Core\PlayerService.Core.csproj" />
+    <ProjectReference Include="..\PlayerService.Repositories\PlayerService.Repositories.csproj" />
   </ItemGroup>
 
 </Project>
