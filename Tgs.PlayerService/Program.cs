@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ builder.Configuration
 builder.Services
     .AddRouting(options => options.LowercaseUrls = true)
     .AddControllers()
+    .AddMvcOptions(options => options.AddWebApiToolkitFilters())
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -22,6 +24,9 @@ builder.Services.AddSwaggerGen(options =>
         Title = "Player Service",
         Version = "v1"
     });
+
+    options.ApplyWebApiToolkitSupport();
+    //options.ApplyDisplayNameSchemaId();
 });
 
 builder.Services.AddHealthChecks();

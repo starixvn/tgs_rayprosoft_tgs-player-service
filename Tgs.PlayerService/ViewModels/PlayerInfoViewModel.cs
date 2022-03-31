@@ -2,7 +2,7 @@
 
 namespace Tgs.PlayerService.ViewModels;
 
-public record PlayerViewModel(
+public record PlayerInfoViewModel(
     string PlayerCode,
     Guid BrandId,
     string Username,
