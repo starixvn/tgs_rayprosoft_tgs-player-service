@@ -2,7 +2,7 @@
 
 namespace Tgs.PlayerService.Core.ApplicationServices;
 
-internal class GetPlayerDepositedAmountQueryService : IGetService<GetPlayerDepositedAmountQuery, decimal?>
+internal class GetPlayerDepositedAmountQueryService : IGetService<GetPlayerDepositedAmountQuery, decimal>
 {
     private readonly IPlayerRepository _playerRepository;
 
@@ -12,8 +12,8 @@ internal class GetPlayerDepositedAmountQueryService : IGetService<GetPlayerDepos
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
     }
 
-    public ValueTask<decimal?> GetAsync(
+    public ValueTask<decimal> GetAsync(
         GetPlayerDepositedAmountQuery query,
-        CancellationToken cancellationToken = default) =>
-        _playerRepository.GetPlayerDepositedAmountAsync(query.PlayerCode);
+        CancellationToken cancellationToken = default)
+        => _playerRepository.GetPlayerDepositedAmountAsync(query.PlayerCode);
 }

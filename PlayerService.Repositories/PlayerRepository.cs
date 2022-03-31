@@ -13,13 +13,13 @@ internal class PlayerRepository : IPlayerRepository
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public async ValueTask<decimal?> GetPlayerDepositedAmountAsync(string playerCode)
+    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode)
     {
         var player = await _context.Players
             .FindAsync(playerCode)
             .ConfigureAwait(false);
 
-        return player?.AccumulatedDeposit;
+        return player?.AccumulatedDeposit ?? 0;
     }
 
     public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
@@ -41,23 +41,27 @@ internal class PlayerRepository : IPlayerRepository
                 player.VipId);
     }
 
-    public async ValueTask<IReadOnlyDictionary<string, string?>?> GetPlayerPropertiesAsync(string playerCode)
+    public async ValueTask<IReadOnlyDictionary<string, string?>> GetPlayerPropertiesAsync(string playerCode)
     {
         var player = await _context.Players
             .FindAsync(playerCode)
             .ConfigureAwait(false);
 
-        return player == null
-            ? null
-            : new Dictionary<string, string?>
-            {
-                ["RealName"] = player.RealName,
-                ["IdNumber"] = player.IdNumber,
-                ["Wechat"] = player.Wechat,
-                ["QQ"] = player.Qq,
-                ["AreaCode"] = player.AreaCode,
-                ["Phone"] = player.Phone,
-                ["Email"] = player.Email
-            };
+        var properties = new Dictionary<string, string?>();
+
+        if (player == null)
+        {
+            return properties;
+        }
+
+        properties["RealName"] = player.RealName;
+        properties["IdNumber"] = player.IdNumber;
+        properties["Wechat"] = player.Wechat;
+        properties["QQ"] = player.Qq;
+        properties["AreaCode"] = player.AreaCode;
+        properties["Phone"] = player.Phone;
+        properties["Email"] = player.Email;
+
+        return properties;
     }
 }

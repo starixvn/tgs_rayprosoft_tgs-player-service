@@ -13,8 +13,8 @@ namespace Tgs.PlayerService.Controllers;
 public class PlayerController : ControllerBase
 {
     [HttpGet("deposited/{playerCode}", Name = "GetPlayerDepositedAmount")]
-    public async ValueTask<decimal?> GetPlayerDepositedAmountAsync(
-        [FromServices] IGetService<GetPlayerDepositedAmountQuery, decimal?> getService,
+    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(
+        [FromServices] IGetService<GetPlayerDepositedAmountQuery, decimal> getService,
         [FromRoute] string playerCode)
     {
         var amount = await getService
@@ -22,26 +22,6 @@ public class PlayerController : ControllerBase
             .ConfigureAwait(false);
 
         return amount;
-    }
-
-    [HttpGet("prop/{playerCode}", Name = "GetPlayerDetailInfo")]
-    public async ValueTask<JsonDocument?> GetPlayerDetailInfoAsync(
-        [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string?>?> getService,
-        [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-        [FromRoute] string playerCode)
-    {
-        var jsonSerializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
-
-        var properties = await getService
-            .GetAsync(new GetPlayerPropertiesQuery(playerCode))
-            .ConfigureAwait(false);
-
-        if (properties != null)
-        {
-            return JsonSerializer.SerializeToDocument(properties, jsonSerializerOptions);
-        }
-
-        return null;
     }
 
     [HttpGet("{playerCode}", Name = "GetPlayerInfo")]
@@ -53,9 +33,9 @@ public class PlayerController : ControllerBase
             .GetAsync(new GetPlayerQuery(playerCode))
             .ConfigureAwait(false);
 
-        if (playerInfo != null)
-        {
-            return new PlayerViewModel(
+        return playerInfo == null
+            ? null
+            : new PlayerViewModel(
                 playerInfo.PlayerCode,
                 playerInfo.BrandId,
                 playerInfo.Username,
@@ -64,8 +44,20 @@ public class PlayerController : ControllerBase
                 playerInfo.Status,
                 playerInfo.IsSetPayPassword,
                 playerInfo.VipLevelId);
-        }
+    }
 
-        return null;
+    [HttpGet("prop/{playerCode}", Name = "GetPlayerProperties")]
+    public async ValueTask<JsonDocument> GetPlayerPropertiesAsync(
+        [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string?>> getService,
+        [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+        [FromRoute] string playerCode)
+    {
+        var jsonSerializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
+
+        var properties = await getService
+            .GetAsync(new GetPlayerPropertiesQuery(playerCode))
+            .ConfigureAwait(false);
+
+        return JsonSerializer.SerializeToDocument(properties, jsonSerializerOptions);
     }
 }
