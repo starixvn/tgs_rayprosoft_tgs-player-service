@@ -116,21 +116,7 @@ pipeline {
                             {
                                 "nodeSelector": $node_selector,
                                 "tolerations": [$dedicated],
-                                "resources": $resources,
-                                "ingress":{
-                                    "enabled": true,
-                                    "hosts": [
-                                        {
-                                            "host": "player-api.rpgp.cc",
-                                            "paths": [
-                                                {
-                                                    "path": "/",
-                                                    "pathType": "Prefix"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
+                                "resources": $resources
                             }
                         """
                         sh """
@@ -142,21 +128,7 @@ pipeline {
                             {
                                 "nodeSelector": $node_selector,
                                 "tolerations": [$dedicated],
-                                "resources": $resources,
-                                "ingress":{
-                                    "enabled": true,
-                                    "hosts": [
-                                        {
-                                            "host": "player-api.rpgp.cc",
-                                            "paths": [
-                                                {
-                                                    "path": "/",
-                                                    "pathType": "Prefix"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
+                                "resources": $resources
                             }
                         """
                     }
