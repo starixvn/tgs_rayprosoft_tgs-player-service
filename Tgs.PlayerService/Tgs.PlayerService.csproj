@@ -7,9 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-
+    <PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.1.2" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" Version="1.0.0-rc9.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc9.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.1" />
+    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-
     <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.10" />
   </ItemGroup>
 
