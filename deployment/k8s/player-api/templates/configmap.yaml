@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-{{ include "player-api.fullname" . }}
+  labels:
+    {{- include "player-api.labels" . | nindent 4 }}
+data:
+  appsettings.json: |
+    {
+    }

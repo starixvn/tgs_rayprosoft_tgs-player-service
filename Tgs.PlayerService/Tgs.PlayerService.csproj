@@ -4,12 +4,23 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <UserSecretsId>0323e457-f31b-4a28-ae5d-37c780c3b49f</UserSecretsId>
+    <GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
+    <GlobalNugetConfig Condition="'$(UserProfile)'==''">$(HOME)/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
+    <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
+    <DockerfileTag Condition="$(DockerfileTag) == ''">player-api</DockerfileTag>
   </PropertyGroup>
 
   <ItemGroup>
-
+    <PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.1.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" Version="1.0.0-rc9.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc9.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.1" />
+    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-
     <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.10" />
   </ItemGroup>
 
