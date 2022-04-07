@@ -65,4 +65,26 @@ internal class PlayerRepository : IPlayerRepository
             .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)
             .ToDictionaryAsync(pp => pp.Name, pp => pp.Value)
             .ConfigureAwait(false);
+
+    public async ValueTask SetPlayerPropertiesAsync(
+        Guid brandId,
+        string playerCode,
+        IReadOnlyDictionary<string, string> properties)
+    {
+        var oldProperties = _context.PlayerProperties
+            .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode);
+
+        _context.PlayerProperties.RemoveRange(oldProperties);
+
+        var newProperties = properties.Select(pp => new PlayerProperty
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            Name = pp.Key,
+            Value = pp.Value
+        });
+
+        await _context.PlayerProperties.AddRangeAsync(newProperties).ConfigureAwait(false);
+        _ = await _context.SaveChangesAsync().ConfigureAwait(false);
+    }
 }

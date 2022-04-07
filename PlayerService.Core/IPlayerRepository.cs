@@ -9,4 +9,9 @@ public interface IPlayerRepository
     ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode);
 
     ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(Guid brandId, string playerCode);
+
+    ValueTask SetPlayerPropertiesAsync(
+        Guid brandId,
+        string playerCode,
+        IReadOnlyDictionary<string, string> properties);
 }
