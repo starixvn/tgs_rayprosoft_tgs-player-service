@@ -26,24 +26,6 @@ public class PlayerTests
     }
 
     [Test]
-    public async Task Can_Get_PlayerDetailInfo()
-    {
-        var playerCode = "4ucmqplxb029";
-
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-
-        var sut = new GetPlayerPropertiesQueryService(fakePlayerRepository);
-
-        var query = new GetPlayerPropertiesQuery(playerCode);
-
-        _ = await sut.GetAsync(query).ConfigureAwait(false);
-
-        _ = fakePlayerRepository
-            .Received(1)
-            .GetPlayerPropertiesAsync(playerCode);
-    }
-
-    [Test]
     public async Task Can_Get_PlayerInfo()
     {
         var playerCode = "4ucmqplxb029";
@@ -59,5 +41,66 @@ public class PlayerTests
         _ = fakePlayerRepository
             .Received(1)
             .GetPlayerInfoAsync(playerCode);
+    }
+
+    [Test]
+    public async Task Can_Get_PlayerProperties()
+    {
+        var expected = new Dictionary<string, string?>
+        {
+            ["RealName"] = "player1",
+            ["IdNumber"] = null,
+            ["Wechat"] = null,
+            ["QQ"] = null,
+            ["AreaCode"] = null,
+            ["Phone"] = null,
+            ["Email"] = null,
+            ["Viber"] = "ViberId"
+        };
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var playerInfo = new Core.PlayerInfo(
+            playerCode,
+            brandId,
+            playerCode,
+            false,
+            false,
+            Core.PlayerStatus.Enabled,
+            false,
+            null);
+
+        var extraData = new Core.PlayerExtraData(
+            "player1",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+
+        var playerProperties = new Dictionary<string, string>
+        {
+            ["Viber"] = "ViberId"
+        };
+
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+            .Returns(playerInfo);
+
+        _ = fakePlayerRepository.GetPlayerExtraDataAsync(playerCode)
+            .Returns(extraData);
+
+        _ = fakePlayerRepository.GetPlayerPropertiesAsync(brandId, playerCode)
+            .Returns(playerProperties);
+
+        var sut = new GetPlayerPropertiesQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerPropertiesQuery(playerCode);
+
+        var actual = await sut.GetAsync(query).ConfigureAwait(false);
+
+        CollectionAssert.AreEqual(expected, actual);
     }
 }

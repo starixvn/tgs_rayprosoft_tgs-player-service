@@ -125,7 +125,35 @@ public class PlayerTests
             ["QQ"] = null,
             ["AreaCode"] = null,
             ["Phone"] = null,
-            ["Email"] = null
+            ["Email"] = null,
+            ["Viber"] = "ViberId"
+        };
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var playerInfo = new Core.PlayerInfo(
+            playerCode,
+            brandId,
+            playerCode,
+            false,
+            false,
+            Core.PlayerStatus.Enabled,
+            false,
+            null);
+
+        var extraData = new Core.PlayerExtraData(
+            "player1",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+
+        var playerProperties = new Dictionary<string, string>
+        {
+            ["Viber"] = "ViberId"
         };
 
         await using var web = new TestPlayerServiceApplication(
@@ -134,8 +162,14 @@ public class PlayerTests
                 _ = hostBuilder.ConfigureServices(services =>
                 {
                     var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-                    _ = fakePlayerRepository.GetPlayerPropertiesAsync("player1")
-                        .Returns(expected);
+                    _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+                        .Returns(playerInfo);
+
+                    _ = fakePlayerRepository.GetPlayerExtraDataAsync(playerCode)
+                        .Returns(extraData);
+
+                    _ = fakePlayerRepository.GetPlayerPropertiesAsync(brandId, playerCode)
+                        .Returns(playerProperties);
 
                     _ = services.AddSingleton(fakePlayerRepository);
                 });

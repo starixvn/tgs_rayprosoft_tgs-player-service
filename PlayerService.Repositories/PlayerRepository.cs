@@ -1,4 +1,5 @@
-﻿using Tgs.PlayerService.Core;
+﻿using Microsoft.EntityFrameworkCore;
+using Tgs.PlayerService.Core;
 using Tgs.PlayerService.Repositories.Entities;
 
 namespace Tgs.PlayerService.Repositories;
@@ -22,6 +23,24 @@ internal class PlayerRepository : IPlayerRepository
         return player?.AccumulatedDeposit ?? 0;
     }
 
+    public async ValueTask<PlayerExtraData?> GetPlayerExtraDataAsync(string playerCode)
+    {
+        var player = await _context.Players
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        return player == null
+            ? null
+            : new PlayerExtraData(
+                player.RealName,
+                player.IdNumber,
+                player.Wechat,
+                player.Qq,
+                player.AreaCode,
+                player.Phone,
+                player.Email);
+    }
+
     public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
     {
         var player = await _context.Players
@@ -41,27 +60,9 @@ internal class PlayerRepository : IPlayerRepository
                 player.VipId);
     }
 
-    public async ValueTask<IReadOnlyDictionary<string, string?>> GetPlayerPropertiesAsync(string playerCode)
-    {
-        var player = await _context.Players
-            .FindAsync(playerCode)
+    public async ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(Guid brandId, string playerCode)
+        => await _context.PlayerProperties
+            .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)
+            .ToDictionaryAsync(pp => pp.Name, pp => pp.Value)
             .ConfigureAwait(false);
-
-        var properties = new Dictionary<string, string?>();
-
-        if (player == null)
-        {
-            return properties;
-        }
-
-        properties["RealName"] = player.RealName;
-        properties["IdNumber"] = player.IdNumber;
-        properties["Wechat"] = player.Wechat;
-        properties["QQ"] = player.Qq;
-        properties["AreaCode"] = player.AreaCode;
-        properties["Phone"] = player.Phone;
-        properties["Email"] = player.Email;
-
-        return properties;
-    }
 }
