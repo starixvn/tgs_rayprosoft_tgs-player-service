@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Tgs.PlayerService.Core.ApplicationServices;
+namespace Tgs.PlayerService.ApplicationServices;
 
 public record SetPlayerPropertiesCommand(
     string PlayerCode, IReadOnlyDictionary<string, string?> Properties,

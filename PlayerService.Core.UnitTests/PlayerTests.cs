@@ -1,6 +1,6 @@
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.PlayerService.Core.ApplicationServices;
+using Tgs.PlayerService.ApplicationServices;
 
 namespace Tgs.PlayerService.Core.UnitTests;
 
@@ -61,17 +61,17 @@ public class PlayerTests
         var brandId = Guid.NewGuid();
         var playerCode = "player1";
 
-        var playerInfo = new Core.PlayerInfo(
+        var playerInfo = new Tgs.PlayerService.PlayerInfo(
             playerCode,
             brandId,
             playerCode,
             false,
             false,
-            Core.PlayerStatus.Enabled,
+Tgs.PlayerService.PlayerStatus.Enabled,
             false,
             null);
 
-        var extraData = new Core.PlayerExtraData(
+        var extraData = new Tgs.PlayerService.PlayerExtraData(
             "player1",
             null,
             null,

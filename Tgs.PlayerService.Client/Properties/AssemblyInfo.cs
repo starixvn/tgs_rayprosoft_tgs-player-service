@@ -1,3 +1,3 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("PlayerService.IntegrationTests")] 
+[assembly: InternalsVisibleTo("PlayerService.IntegrationTests")]

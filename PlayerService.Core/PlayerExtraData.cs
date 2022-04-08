@@ -1,4 +1,4 @@
-﻿namespace Tgs.PlayerService.Core;
+﻿namespace Tgs.PlayerService;
 
 public record PlayerExtraData(
     string? RealName,

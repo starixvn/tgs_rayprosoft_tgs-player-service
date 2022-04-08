@@ -1,9 +1,7 @@
-﻿using System.Net;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Tgs.PlayerService.Core;
-using Tgs.PlayerService.Core.ApplicationServices;
+using Tgs.PlayerService.ApplicationServices;
 using Tgs.PlayerService.ViewModels;
 using Tgs.ServiceUtility;
 using Tgs.WebApi.Toolkits;
@@ -71,7 +69,7 @@ public class PlayerController : ControllerBase
         return JsonSerializer.SerializeToDocument(properties, jsonSerializerOptions);
     }
 
-    [HttpPost("/prop/{playerCode}", Name = "SetPlayerProperties")]
+    [HttpPost("prop/{playerCode}", Name = "SetPlayerProperties")]
     [SuccessStatusCode(200, "Set player properties success")]
     [FailStatusCode(400, "Input properties is empty")]
     public async ValueTask SetPlayerPropertiesAsync(

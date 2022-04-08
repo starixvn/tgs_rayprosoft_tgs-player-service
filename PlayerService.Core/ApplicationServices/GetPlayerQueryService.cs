@@ -1,6 +1,6 @@
 ﻿using Tgs.ServiceUtility;
 
-namespace Tgs.PlayerService.Core.ApplicationServices;
+namespace Tgs.PlayerService.ApplicationServices;
 
 internal class GetPlayerQueryService : IGetService<GetPlayerQuery, PlayerInfo?>
 {

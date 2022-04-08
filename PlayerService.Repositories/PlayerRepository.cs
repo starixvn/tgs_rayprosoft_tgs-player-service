@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Tgs.PlayerService.Core;
 using Tgs.PlayerService.Repositories.Entities;
 
 namespace Tgs.PlayerService.Repositories;

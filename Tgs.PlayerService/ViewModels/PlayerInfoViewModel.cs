@@ -1,6 +1,4 @@
-﻿using Tgs.PlayerService.Core;
-
-namespace Tgs.PlayerService.ViewModels;
+﻿namespace Tgs.PlayerService.ViewModels;
 
 public record PlayerInfoViewModel(
     string PlayerCode,

@@ -1,3 +1,3 @@
-﻿namespace Tgs.PlayerService.Core.ApplicationServices;
+﻿namespace Tgs.PlayerService.ApplicationServices;
 
 public record GetPlayerDepositedAmountQuery(string PlayerCode);

@@ -12,6 +12,7 @@
     <PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-player-service</PackageProjectUrl>
     <RepositoryUrl>https://gitlab.com/rayprosoft/tgs-player-service.git</RepositoryUrl>
     <PackageTags>tgs player service</PackageTags>
+    <RootNamespace>Tgs.PlayerService.Client</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

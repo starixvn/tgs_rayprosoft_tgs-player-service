@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.PlayerService.Client;
-using Tgs.PlayerService.Core;
 
 namespace Tgs.PlayerService.IntegrationTests;
 
@@ -16,17 +15,15 @@ public class PlayerTests
     public async Task Get_Deposited_Amount()
     {
         await using var web = new TestPlayerServiceApplication(
-            hostBuilder =>
-            {
-                _ = hostBuilder.ConfigureServices(services =>
-                 {
-                     var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-                     _ = fakePlayerRepository.GetPlayerDepositedAmountAsync("player1")
-                         .Returns(1000m);
+            hostBuilder => hostBuilder
+                .ConfigureServices(services =>
+                {
+                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+                    _ = fakePlayerRepository.GetPlayerDepositedAmountAsync("player1")
+                        .Returns(1000m);
 
-                     _ = services.AddSingleton(fakePlayerRepository);
-                 });
-            });
+                    _ = services.AddSingleton(fakePlayerRepository);
+                }));
 
         var httpClient = web.CreateClient();
 
@@ -57,24 +54,22 @@ public class PlayerTests
         };
 
         await using var web = new TestPlayerServiceApplication(
-            hostBuilder =>
-            {
-                _ = hostBuilder.ConfigureServices(services =>
+            hostBuilder => hostBuilder
+                .ConfigureServices(services =>
                 {
                     var fakePlayerRepository = Substitute.For<IPlayerRepository>();
                     _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
-                        .Returns(new Core.PlayerInfo(
+                        .Returns(new Tgs.PlayerService.PlayerInfo(
                             playerCode,
                             brandId,
                             playerCode,
                             false,
                             false,
-                            Core.PlayerStatus.Enabled,
+Tgs.PlayerService.PlayerStatus.Enabled,
                             false, null));
 
                     _ = services.AddSingleton(fakePlayerRepository);
-                });
-            });
+                }));
 
         var httpClient = web.CreateClient();
 
@@ -92,17 +87,15 @@ public class PlayerTests
         var playerCode = "player1";
 
         await using var web = new TestPlayerServiceApplication(
-            hostBuilder =>
-            {
-                _ = hostBuilder.ConfigureServices(services =>
+            hostBuilder => hostBuilder
+                .ConfigureServices(services =>
                 {
                     var fakePlayerRepository = Substitute.For<IPlayerRepository>();
                     _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
-                        .Returns((Core.PlayerInfo?)null);
+                        .Returns((Tgs.PlayerService.PlayerInfo?)null);
 
                     _ = services.AddSingleton(fakePlayerRepository);
-                });
-            });
+                }));
 
         var httpClient = web.CreateClient();
 
@@ -132,17 +125,17 @@ public class PlayerTests
         var brandId = Guid.NewGuid();
         var playerCode = "player1";
 
-        var playerInfo = new Core.PlayerInfo(
+        var playerInfo = new Tgs.PlayerService.PlayerInfo(
             playerCode,
             brandId,
             playerCode,
             false,
             false,
-            Core.PlayerStatus.Enabled,
+Tgs.PlayerService.PlayerStatus.Enabled,
             false,
             null);
 
-        var extraData = new Core.PlayerExtraData(
+        var extraData = new Tgs.PlayerService.PlayerExtraData(
             "player1",
             null,
             null,
@@ -157,9 +150,8 @@ public class PlayerTests
         };
 
         await using var web = new TestPlayerServiceApplication(
-            hostBuilder =>
-            {
-                _ = hostBuilder.ConfigureServices(services =>
+            hostBuilder => hostBuilder
+                .ConfigureServices(services =>
                 {
                     var fakePlayerRepository = Substitute.For<IPlayerRepository>();
                     _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
@@ -172,8 +164,7 @@ public class PlayerTests
                         .Returns(playerProperties);
 
                     _ = services.AddSingleton(fakePlayerRepository);
-                });
-            });
+                }));
 
         var httpClient = web.CreateClient();
 
