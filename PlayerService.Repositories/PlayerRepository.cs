@@ -70,6 +70,11 @@ internal class PlayerRepository : IPlayerRepository
         string playerCode,
         IReadOnlyDictionary<string, string> properties)
     {
+        var player = await _context.Players.FindAsync(playerCode).ConfigureAwait(false);
+
+        if (player == null)
+            return;
+
         var oldProperties = _context.PlayerProperties
             .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode);
 
@@ -87,6 +92,8 @@ internal class PlayerRepository : IPlayerRepository
 
             await _context.PlayerProperties.AddRangeAsync(newProperties).ConfigureAwait(false);
         }
+
+        player.UpdatedOn = DateTime.UtcNow;
 
         _ = await _context.SaveChangesAsync().ConfigureAwait(false);
     }
