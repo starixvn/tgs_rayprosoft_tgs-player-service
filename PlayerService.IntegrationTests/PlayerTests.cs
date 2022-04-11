@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.PlayerService.Client;
-using Tgs.PlayerService.Repositories.Entities;
 
 namespace Tgs.PlayerService.IntegrationTests;
 
