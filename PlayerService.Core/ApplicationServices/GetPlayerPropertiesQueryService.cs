@@ -29,13 +29,13 @@ internal class GetPlayerPropertiesQueryService : IGetService<GetPlayerProperties
         var extraData = (await _playerRepository.GetPlayerExtraDataAsync(query.PlayerCode)
             .ConfigureAwait(false))!;
 
-        properties["RealName"] = extraData.RealName;
-        properties["IdNumber"] = extraData.IdNumber;
-        properties["Wechat"] = extraData.WeChat;
-        properties["QQ"] = extraData.Qq;
-        properties["AreaCode"] = extraData.AreaCode;
-        properties["Phone"] = extraData.Phone;
-        properties["Email"] = extraData.Email;
+        properties["RealName"] = extraData.GetValueOrDefault("RealName");
+        properties["IdNumber"] = extraData.GetValueOrDefault("IdNumber");
+        properties["Wechat"] = extraData.GetValueOrDefault("Wechat");
+        properties["QQ"] = extraData.GetValueOrDefault("QQ");
+        properties["AreaCode"] = extraData.GetValueOrDefault("AreaCode");
+        properties["Phone"] = extraData.GetValueOrDefault("Phone");
+        properties["Email"] = extraData.GetValueOrDefault("Email");
 
         var playerProperties = await _playerRepository
             .GetPlayerPropertiesAsync(player.BrandId, player.PlayerCode)

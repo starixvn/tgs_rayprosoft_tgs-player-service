@@ -135,14 +135,16 @@ Tgs.PlayerService.PlayerStatus.Enabled,
             false,
             null);
 
-        var extraData = new Tgs.PlayerService.PlayerExtraData(
-            "player1",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null);
+        var extraData = new Dictionary<string, string?>
+        {
+            ["RealName"] = "player1",
+            ["IdNumber"] = null,
+            ["Wechat"] = null,
+            ["QQ"] = null,
+            ["AreaCode"] = null,
+            ["Phone"] = null,
+            ["Email"] = null
+        };
 
         var playerProperties = new Dictionary<string, string>
         {
