@@ -1,4 +1,4 @@
-﻿using Tgs.PlayerService.Core;
+﻿using Microsoft.EntityFrameworkCore;
 using Tgs.PlayerService.Repositories.Entities;
 
 namespace Tgs.PlayerService.Repositories;
@@ -22,6 +22,28 @@ internal class PlayerRepository : IPlayerRepository
         return player?.AccumulatedDeposit ?? 0;
     }
 
+    public async ValueTask<IReadOnlyDictionary<string, string?>> GetPlayerExtraDataAsync(string playerCode)
+    {
+        var player = await _context.Players
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        var properties = new Dictionary<string, string?>();
+
+        if (player == null)
+            return properties;
+
+        properties["RealName"] = player.RealName;
+        properties["IdNumber"] = player.IdNumber;
+        properties["Wechat"] = player.Wechat;
+        properties["QQ"] = player.Qq;
+        properties["AreaCode"] = player.AreaCode;
+        properties["Phone"] = player.Phone;
+        properties["Email"] = player.Email;
+
+        return properties;
+    }
+
     public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
     {
         var player = await _context.Players
@@ -41,27 +63,42 @@ internal class PlayerRepository : IPlayerRepository
                 player.VipId);
     }
 
-    public async ValueTask<IReadOnlyDictionary<string, string?>> GetPlayerPropertiesAsync(string playerCode)
-    {
-        var player = await _context.Players
-            .FindAsync(playerCode)
+    public async ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(Guid brandId, string playerCode)
+        => await _context.PlayerProperties
+            .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)
+            .ToDictionaryAsync(pp => pp.Name, pp => pp.Value)
             .ConfigureAwait(false);
 
-        var properties = new Dictionary<string, string?>();
+    public async ValueTask SetPlayerPropertiesAsync(
+        Guid brandId,
+        string playerCode,
+        IReadOnlyDictionary<string, string> properties)
+    {
+        var player = await _context.Players.FindAsync(playerCode).ConfigureAwait(false);
 
         if (player == null)
+            return;
+
+        var oldProperties = _context.PlayerProperties
+            .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode);
+
+        _context.PlayerProperties.RemoveRange(oldProperties);
+
+        if (properties.Count > 0)
         {
-            return properties;
+            var newProperties = properties.Select(pp => new PlayerProperty
+            {
+                PlayerCode = playerCode,
+                BrandId = brandId,
+                Name = pp.Key,
+                Value = pp.Value
+            });
+
+            await _context.PlayerProperties.AddRangeAsync(newProperties).ConfigureAwait(false);
         }
 
-        properties["RealName"] = player.RealName;
-        properties["IdNumber"] = player.IdNumber;
-        properties["Wechat"] = player.Wechat;
-        properties["QQ"] = player.Qq;
-        properties["AreaCode"] = player.AreaCode;
-        properties["Phone"] = player.Phone;
-        properties["Email"] = player.Email;
+        player.UpdatedOn = DateTime.UtcNow;
 
-        return properties;
+        _ = await _context.SaveChangesAsync().ConfigureAwait(false);
     }
 }

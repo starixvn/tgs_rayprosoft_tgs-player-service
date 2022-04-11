@@ -16,12 +16,14 @@ namespace Tgs.PlayerService.Repositories.Entities
         }
 
         public virtual DbSet<Player> Players { get; set; } = null!;
+        public virtual DbSet<PlayerProperty> PlayerProperties { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresExtension("pg_trgm");
 
             modelBuilder.ApplyConfiguration(new Configurations.PlayerConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PlayerPropertyConfiguration());
             OnModelCreatingPartial(modelBuilder);
         }
 

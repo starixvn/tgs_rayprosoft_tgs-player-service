@@ -4,7 +4,7 @@
     <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.0.1-alpha</Version>
+    <Version>0.0.3-alpha</Version>
     <LangVersion>10</LangVersion>
     <Authors>Raypro</Authors>
     <PackageId>Tgs.PlayerService.Client</PackageId>
@@ -12,6 +12,7 @@
     <PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-player-service</PackageProjectUrl>
     <RepositoryUrl>https://gitlab.com/rayprosoft/tgs-player-service.git</RepositoryUrl>
     <PackageTags>tgs player service</PackageTags>
+    <RootNamespace>Tgs.PlayerService.Client</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

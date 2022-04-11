@@ -1,43 +1,47 @@
 ﻿{
-   "CodeGenerationMode": 2,
-   "ContextClassName": "TgsContext",
-   "ContextNamespace": "Entities",
-   "DefaultDacpacSchema": null,
-   "FilterSchemas": true,
-   "IncludeConnectionString": false,
-   "ModelNamespace": "Entities",
-   "OutputContextPath": "Entities\/Tgs",
-   "OutputPath": "Entities\/Tgs\/Models",
-   "ProjectRootNamespace": "Tgs.PlayerService.Repositories",
-   "Schemas": [
-      {
-         "Name": "dbo"
-      }
-   ],
-   "SelectedHandlebarsLanguage": 0,
-   "SelectedToBeGenerated": 0,
-   "Tables": [
-      {
-         "Name": "dbo.players",
-         "ObjectType": 0
-      }
-   ],
-   "UiHint": "Tgs",
-   "UseBoolPropertiesWithoutDefaultSql": true,
-   "UseDatabaseNames": false,
-   "UseDbContextSplitting": true,
-   "UseFluentApiOnly": true,
-   "UseHandleBars": false,
-   "UseHierarchyId": false,
-   "UseInflector": true,
-   "UseLegacyPluralizer": false,
-   "UseManyToManyEntity": false,
-   "UseNoConstructor": true,
-   "UseNoDefaultConstructor": true,
-   "UseNoNavigations": true,
-   "UseNoObjectFilter": false,
-   "UseNodaTime": false,
-   "UseNullableReferences": true,
-   "UseSchemaFolders": false,
-   "UseSpatial": false
+	"CodeGenerationMode": 2,
+	"ContextClassName": "TgsContext",
+	"ContextNamespace": "Entities",
+	"DefaultDacpacSchema": null,
+	"FilterSchemas": true,
+	"IncludeConnectionString": false,
+	"ModelNamespace": "Entities",
+	"OutputContextPath": "Entities\/Tgs",
+	"OutputPath": "Entities\/Tgs\/Models",
+	"ProjectRootNamespace": "Tgs.PlayerService.Repositories",
+	"Schemas": [
+		{
+			"Name": "dbo"
+		}
+	],
+	"SelectedHandlebarsLanguage": 0,
+	"SelectedToBeGenerated": 0,
+	"Tables": [
+		{
+			"Name": "dbo.player_properties",
+			"ObjectType": 0
+		},
+		{
+			"Name": "dbo.players",
+			"ObjectType": 0
+		}
+	],
+	"UiHint": "Tgs",
+	"UseBoolPropertiesWithoutDefaultSql": true,
+	"UseDatabaseNames": false,
+	"UseDbContextSplitting": true,
+	"UseFluentApiOnly": true,
+	"UseHandleBars": false,
+	"UseHierarchyId": false,
+	"UseInflector": true,
+	"UseLegacyPluralizer": false,
+	"UseManyToManyEntity": false,
+	"UseNoConstructor": true,
+	"UseNoDefaultConstructor": true,
+	"UseNoNavigations": true,
+	"UseNoObjectFilter": false,
+	"UseNodaTime": false,
+	"UseNullableReferences": true,
+	"UseSchemaFolders": false,
+	"UseSpatial": false
 }

@@ -1,7 +1,7 @@
 ﻿// ReSharper disable CheckNamespace
 
 using Microsoft.EntityFrameworkCore;
-using Tgs.PlayerService.Core;
+using Tgs.PlayerService;
 using Tgs.PlayerService.Repositories;
 using Tgs.PlayerService.Repositories.Entities;
 
