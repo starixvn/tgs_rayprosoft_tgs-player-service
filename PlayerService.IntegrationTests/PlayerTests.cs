@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.PlayerService.Client;
+using Tgs.PlayerService.Repositories.Entities;
 
 namespace Tgs.PlayerService.IntegrationTests;
 
@@ -174,5 +175,56 @@ Tgs.PlayerService.PlayerStatus.Enabled,
             .ConfigureAwait(false);
 
         CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public async Task Set_Player_Properties()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var playerInfo = new Tgs.PlayerService.PlayerInfo(
+            playerCode,
+            brandId,
+            playerCode,
+            false,
+            false,
+Tgs.PlayerService.PlayerStatus.Enabled,
+            false,
+            null);
+
+        var oldProperties = new Dictionary<string, string>
+        {
+            ["Viber"] = "ViberId",
+            ["Line"] = "LineId"
+        };
+
+        var playerProperties = new Dictionary<PlayerPropertyName, string?>
+        {
+            [PlayerPropertyName.Viber] = null,
+            [PlayerPropertyName.Line] = "NewLineId",
+            [PlayerPropertyName.Telegram] = "TelegramId"
+        };
+
+        await using var web = new TestPlayerServiceApplication(
+            hostBuilder => hostBuilder
+                .ConfigureServices(services =>
+                {
+                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+                    _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+                        .Returns(playerInfo);
+
+                    _ = fakePlayerRepository.GetPlayerPropertiesAsync(brandId, playerCode)
+                        .Returns(oldProperties);
+
+                    _ = services.AddSingleton(fakePlayerRepository);
+                }));
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties)
+            .ConfigureAwait(false);
     }
 }
