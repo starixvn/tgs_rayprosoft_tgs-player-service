@@ -75,15 +75,19 @@ internal class PlayerRepository : IPlayerRepository
 
         _context.PlayerProperties.RemoveRange(oldProperties);
 
-        var newProperties = properties.Select(pp => new PlayerProperty
+        if (properties.Count > 0)
         {
-            PlayerCode = playerCode,
-            BrandId = brandId,
-            Name = pp.Key,
-            Value = pp.Value
-        });
+            var newProperties = properties.Select(pp => new PlayerProperty
+            {
+                PlayerCode = playerCode,
+                BrandId = brandId,
+                Name = pp.Key,
+                Value = pp.Value
+            });
 
-        await _context.PlayerProperties.AddRangeAsync(newProperties).ConfigureAwait(false);
+            await _context.PlayerProperties.AddRangeAsync(newProperties).ConfigureAwait(false);
+        }
+
         _ = await _context.SaveChangesAsync().ConfigureAwait(false);
     }
 }
