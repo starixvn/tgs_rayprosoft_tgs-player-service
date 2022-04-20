@@ -1,0 +1,21 @@
+{
+	"$schema": "https://json.schemastore.org/launchsettings.json",
+	"profiles": {
+		"Tgs.PlayerService": {
+			"commandName": "Project",
+			"launchBrowser": true,
+			"launchUrl": "healthz",
+			"environmentVariables": {
+				"ASPNETCORE_ENVIRONMENT": "Development"
+			},
+			"applicationUrl": "http://localhost:5105",
+			"dotnetRunMessages": true
+		},
+		"Docker": {
+			"commandName": "Docker",
+			"launchBrowser": true,
+			"launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/healthz",
+			"publishAllPorts": true
+		}
+	}
+}
