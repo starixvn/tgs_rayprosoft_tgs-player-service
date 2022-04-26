@@ -15,5 +15,5 @@ internal class GetPlayerDepositedAmountQueryService : IGetService<GetPlayerDepos
     public ValueTask<decimal> GetAsync(
         GetPlayerDepositedAmountQuery query,
         CancellationToken cancellationToken = default)
-        => _playerRepository.GetPlayerDepositedAmountAsync(query.PlayerCode);
+        => _playerRepository.GetPlayerDepositedAmountAsync(query.PlayerCode, cancellationToken);
 }

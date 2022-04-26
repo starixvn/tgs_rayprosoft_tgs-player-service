@@ -37,7 +37,8 @@ namespace Tgs.PlayerService.Repositories.Entities
         public DateTime? FirstDepositOn { get; set; }
         public string? AreaCode { get; set; }
         public DateTime? FirstPromotionOn { get; set; }
-        public DateTime? Birthday { get; set; }
         public string? Remark { get; set; }
+        public DateOnly? Birthdate { get; set; }
+        public string? Birthday { get; set; }
     }
 }
