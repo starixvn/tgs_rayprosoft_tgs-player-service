@@ -26,9 +26,11 @@ internal class PlayerPutDataCommand : PutDataCommand
                     .AddAsync(new PlayerProperty
                     {
                         PlayerCode = modifyContext.Player.PlayerCode,
-                        BrandId = modifyContext.Player.BrandId
+                        BrandId = modifyContext.Player.BrandId,
+                        Name = Name,
+                        Value = Value
                     }, cancellationToken)
                     .ConfigureAwait(false);
         }
-}
     }
+}
