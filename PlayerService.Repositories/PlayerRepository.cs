@@ -22,7 +22,6 @@ internal class PlayerRepository : IPlayerRepository
         return player?.AccumulatedDeposit ?? 0;
     }
 
-
     public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
@@ -71,6 +70,8 @@ internal class PlayerRepository : IPlayerRepository
             properties["Phone"] = player.Phone;
         if (!string.IsNullOrEmpty(player.Email))
             properties["Email"] = player.Email;
+        if (player.Birthdate != null)
+            properties["Birthdate"] = player.Birthdate.ToString()!;
 
         foreach (var prop in await _dbContext.PlayerProperties.AsQueryable()
             .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)
