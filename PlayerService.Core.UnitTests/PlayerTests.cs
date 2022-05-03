@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.PlayerService.ApplicationServices;
@@ -48,64 +46,18 @@ public class PlayerTests
     [Test]
     public async Task Can_Get_PlayerProperties()
     {
-        var expected = new Dictionary<string, string?>
-        {
-            ["RealName"] = "player1",
-            ["IdNumber"] = null,
-            ["Wechat"] = null,
-            ["QQ"] = null,
-            ["AreaCode"] = null,
-            ["Phone"] = null,
-            ["Email"] = null,
-            ["Viber"] = "ViberId"
-        };
-
-        var brandId = Guid.NewGuid();
         var playerCode = "player1";
 
-        var playerInfo = new Tgs.PlayerService.PlayerInfo(
-            playerCode,
-            brandId,
-            playerCode,
-            false,
-            false,
-            Tgs.PlayerService.PlayerStatus.Enabled,
-            false,
-            null);
-
-        var extraData = new Dictionary<string, string?>
-        {
-            ["RealName"] = "player1",
-            ["IdNumber"] = null,
-            ["Wechat"] = null,
-            ["QQ"] = null,
-            ["AreaCode"] = null,
-            ["Phone"] = null,
-            ["Email"] = null
-        };
-
-        var playerProperties = new Dictionary<string, string>
-        {
-            ["Viber"] = "ViberId"
-        };
-
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
-            .Returns(playerInfo);
-
-        _ = fakePlayerRepository.GetPlayerExtraDataAsync(playerCode)
-            .Returns(extraData);
-
-        _ = fakePlayerRepository.GetPlayerPropertiesAsync(brandId, playerCode)
-            .Returns(playerProperties);
 
         var sut = new GetPlayerPropertiesQueryService(fakePlayerRepository);
 
         var query = new GetPlayerPropertiesQuery(playerCode);
 
-        var actual = await sut.GetAsync(query).ConfigureAwait(false);
+        _ = await sut.GetAsync(query);
 
-        CollectionAssert.AreEqual(expected, actual);
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerPropertiesAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>());
     }
 
     [Test]
@@ -120,55 +72,86 @@ public class PlayerTests
             playerCode,
             false,
             false,
-            Tgs.PlayerService.PlayerStatus.Enabled,
+            PlayerStatus.Enabled,
             false,
             null);
-
-        var oldProperties = new Dictionary<string, string>
-        {
-            ["Viber"] = "viber1",
-            ["Telegram"] = "telegram"
-        };
 
         var playerProperties = new Dictionary<string, string?>
         {
             ["Viber"] = null,
             ["Telegram"] = "telegram1",
-            ["Line"] = "line123"
-        };
-
-        var mergedProperties = new Dictionary<string, string>
-        {
-            ["Telegram"] = "telegram1",
-            ["Line"] = "line123"
-        };
-
-        var jsonSerializerOptions = new JsonSerializerOptions
-        {
-            WriteIndented = false,
-            Converters = { new JsonStringEnumConverter() }
+            ["line"] = "line123",
+            ["invalid"] = "test"
         };
 
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties);
+
         _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
             .Returns(playerInfo);
 
-        _ = fakePlayerRepository.GetPlayerPropertiesAsync(brandId, playerCode)
-             .Returns(oldProperties);
-
-        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository);
-
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties, jsonSerializerOptions);
-
         await sut.ExecuteAsync(command).ConfigureAwait(false);
 
-        _ = fakePlayerRepository
-             .Received(1)
+        _ = fakeDataCommandBuilder.Received(1)
+            .CreateDeleteCommand(Arg.Is("Viber"));
+
+        _ = fakeDataCommandBuilder.Received(1)
+            .CreatePutCommand(Arg.Is("Telegram"), Arg.Is("telegram1"));
+
+        _ = fakeDataCommandBuilder.Received(1)
+            .CreatePutCommand(Arg.Is("Line"), Arg.Is("line123"));
+
+        _ = fakePlayerRepository.Received(1)
              .SetPlayerPropertiesAsync(
                  playerInfo.BrandId,
                  playerInfo.PlayerCode,
-                 Arg.Is<Dictionary<string, string>>(x =>
-                     x.Count == mergedProperties.Count &&
-                     x.Keys.All(key => mergedProperties.ContainsKey(key))));
+                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 3));
+    }
+
+    [Test]
+    public async Task Can_Set_Player_Birthdate()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var playerInfo = new PlayerInfo(
+            playerCode,
+            brandId,
+            playerCode,
+            false,
+            false,
+            PlayerStatus.Enabled,
+            false,
+            null);
+
+        var playerProperties = new Dictionary<string, string?>
+        {
+            ["Birthdate"] = "2022/04/26"
+        };
+
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties);
+
+        _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+            .Returns(playerInfo);
+
+        await sut.ExecuteAsync(command).ConfigureAwait(false);
+
+        _ = fakeDataCommandBuilder.Received(1)
+            .CreatePutCommand(Arg.Is(nameof(PlayerPropertyName.Birthdate)), Arg.Is("2022/04/26"));
+
+        _ = fakePlayerRepository.Received(1)
+             .SetPlayerPropertiesAsync(
+                 playerInfo.BrandId,
+                 playerInfo.PlayerCode,
+                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
     }
 }

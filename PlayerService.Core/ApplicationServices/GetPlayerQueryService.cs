@@ -15,5 +15,5 @@ internal class GetPlayerQueryService : IGetService<GetPlayerQuery, PlayerInfo?>
     public ValueTask<PlayerInfo?> GetAsync(
         GetPlayerQuery query,
         CancellationToken cancellationToken = default)
-        => _playerRepository.GetPlayerInfoAsync(query.PlayerCode);
+        => _playerRepository.GetPlayerInfoAsync(query.PlayerCode, cancellationToken);
 }

@@ -2,16 +2,15 @@
 
 public interface IPlayerRepository
 {
-    ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode);
+    ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
 
-    ValueTask<IReadOnlyDictionary<string, string?>> GetPlayerExtraDataAsync(string playerCode);
+    ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
 
-    ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode);
-
-    ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(Guid brandId, string playerCode);
+    ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(string playerCode, CancellationToken cancellationToken = default);
 
     ValueTask SetPlayerPropertiesAsync(
         Guid brandId,
         string playerCode,
-        IReadOnlyDictionary<string, string> properties);
+        IEnumerable<IDataCommand> modifyCommands,
+        CancellationToken cancellationToken = default);
 }
