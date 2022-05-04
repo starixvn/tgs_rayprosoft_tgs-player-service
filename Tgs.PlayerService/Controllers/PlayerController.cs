@@ -35,15 +35,17 @@ public class PlayerController : ControllerBase
         return playerInfo is null
             ? await this.FailAsync<PlayerInfoViewModel, object?>(404, null)
                 .ConfigureAwait(false)
-            : new PlayerInfoViewModel(
-                playerInfo.PlayerCode,
-                playerInfo.BrandId,
-                playerInfo.Username,
-                playerInfo.IdentityAuthentication,
-                playerInfo.PhoneAuthentication,
-                playerInfo.Status,
-                playerInfo.IsSetPayPassword,
-                playerInfo.VipLevelId);
+            : new PlayerInfoViewModel
+            {
+                PlayerCode = playerInfo.PlayerCode,
+                BrandId = playerInfo.BrandId,
+                UserName = playerInfo.UserName,
+                IdentityAuthentication = playerInfo.IdentityAuthentication,
+                PhoneAuthentication = playerInfo.PhoneAuthentication,
+                Status = playerInfo.Status,
+                IsSetPayPassword = playerInfo.IsSetPayPassword,
+                VipLevelId = playerInfo.VipLevelId
+            };
     }
 
     [HttpGet("prop/{playerCode}", Name = "GetPlayerProperties")]

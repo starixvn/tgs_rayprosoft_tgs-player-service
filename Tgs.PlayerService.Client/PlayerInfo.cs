@@ -1,4 +1,6 @@
-﻿namespace Tgs.PlayerService.Client;
+﻿using System.Text.Json.Serialization;
+
+namespace Tgs.PlayerService.Client;
 
 public record PlayerInfo
 {
@@ -14,7 +16,8 @@ public record PlayerInfo
 
     public PlayerStatus Status { get; init; }
 
-    public string Username { get; init; } = default!;
+    [JsonPropertyName("username")]
+    public string UserName { get; init; } = default!;
 
     public Guid? VipLevelId { get; init; }
 }

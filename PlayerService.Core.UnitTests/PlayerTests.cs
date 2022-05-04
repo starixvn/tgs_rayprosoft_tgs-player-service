@@ -4,7 +4,6 @@ using Tgs.PlayerService.ApplicationServices;
 
 namespace Tgs.PlayerService.Core.UnitTests;
 
-[TestFixture]
 public class PlayerTests
 {
     [Test]
@@ -61,6 +60,49 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task Can_Set_Player_Birthdate()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var playerInfo = new PlayerInfo(
+            playerCode,
+            brandId,
+            playerCode,
+            false,
+            false,
+            PlayerStatus.Enabled,
+            false,
+            null);
+
+        var playerProperties = new Dictionary<string, string?>
+        {
+            ["Birthdate"] = "2022/04/26"
+        };
+
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties);
+
+        _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+            .Returns(playerInfo);
+
+        await sut.ExecuteAsync(command).ConfigureAwait(false);
+
+        _ = fakeDataCommandBuilder.Received(1)
+            .CreatePutCommand(Arg.Is(nameof(PlayerPropertyName.Birthdate)), Arg.Is("2022/04/26"));
+
+        _ = fakePlayerRepository.Received(1)
+             .SetPlayerPropertiesAsync(
+                 playerInfo.BrandId,
+                 playerInfo.PlayerCode,
+                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+    }
+
+    [Test]
     public async Task Can_Set_PlayerProperties()
     {
         var brandId = Guid.NewGuid();
@@ -110,48 +152,5 @@ public class PlayerTests
                  playerInfo.BrandId,
                  playerInfo.PlayerCode,
                  Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 3));
-    }
-
-    [Test]
-    public async Task Can_Set_Player_Birthdate()
-    {
-        var brandId = Guid.NewGuid();
-        var playerCode = "player1";
-
-        var playerInfo = new PlayerInfo(
-            playerCode,
-            brandId,
-            playerCode,
-            false,
-            false,
-            PlayerStatus.Enabled,
-            false,
-            null);
-
-        var playerProperties = new Dictionary<string, string?>
-        {
-            ["Birthdate"] = "2022/04/26"
-        };
-
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
-
-        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
-
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties);
-
-        _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
-            .Returns(playerInfo);
-
-        await sut.ExecuteAsync(command).ConfigureAwait(false);
-
-        _ = fakeDataCommandBuilder.Received(1)
-            .CreatePutCommand(Arg.Is(nameof(PlayerPropertyName.Birthdate)), Arg.Is("2022/04/26"));
-
-        _ = fakePlayerRepository.Received(1)
-             .SetPlayerPropertiesAsync(
-                 playerInfo.BrandId,
-                 playerInfo.PlayerCode,
-                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
     }
 }
