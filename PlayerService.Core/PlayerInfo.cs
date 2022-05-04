@@ -3,7 +3,7 @@
 public record PlayerInfo(
     string PlayerCode,
     Guid BrandId,
-    string Username,
+    string UserName,
     bool IdentityAuthentication,
     bool PhoneAuthentication,
     PlayerStatus Status,
