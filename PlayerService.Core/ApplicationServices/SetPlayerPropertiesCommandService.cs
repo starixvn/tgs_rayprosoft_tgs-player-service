@@ -4,44 +4,48 @@ namespace Tgs.PlayerService.ApplicationServices;
 
 internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerPropertiesCommand>
 {
+    private readonly IDataCommandBuilder _dataCommandBuilder;
     private readonly IPlayerRepository _playerRepository;
 
     public SetPlayerPropertiesCommandService(
-        IPlayerRepository playerRepository)
+        IPlayerRepository playerRepository,
+        IDataCommandBuilder dataCommandBuilder)
     {
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        _dataCommandBuilder = dataCommandBuilder ?? throw new ArgumentNullException(nameof(dataCommandBuilder));
     }
 
-    public async ValueTask ExecuteAsync(SetPlayerPropertiesCommand command,
+    public async ValueTask ExecuteAsync(
+        SetPlayerPropertiesCommand command,
         CancellationToken cancellationToken = default)
     {
-        var player = await _playerRepository.GetPlayerInfoAsync(command.PlayerCode);
+        var player = await _playerRepository.GetPlayerInfoAsync(command.PlayerCode, cancellationToken);
 
         if (player == null)
-        {
             return;
-        }
 
-        var oldProperties = await _playerRepository
-            .GetPlayerPropertiesAsync(player.BrandId, player.PlayerCode)
-            .ConfigureAwait(false);
+        var availablePropertyNames = new HashSet<string>(
+            Enum.GetNames<PlayerPropertyName>(),
+            StringComparer.OrdinalIgnoreCase);
+        var dataCommands = new List<IDataCommand>();
 
-        var mergedProperties = new Dictionary<string, string>(oldProperties);
-
-        foreach (var (key, value) in command.Properties)
+        foreach (var (key, value) in command.Properties
+            .Select(kv => (
+                KV: kv,
+                RegularName: availablePropertyNames.TryGetValue(kv.Key, out var regularName)
+                    ? regularName
+                    : default))
+            .Where(g => g.RegularName is not null)
+            .ToDictionary(g => g.RegularName!, g => g.KV.Value))
         {
             if (value == null)
-            {
-                _ = mergedProperties.Remove(key);
-            }
+                dataCommands.Add(_dataCommandBuilder.CreateDeleteCommand(key));
             else
-            {
-                mergedProperties[key] = value;
-            }
+                dataCommands.Add(_dataCommandBuilder.CreatePutCommand(key, value));
         }
 
         await _playerRepository
-            .SetPlayerPropertiesAsync(player.BrandId, player.PlayerCode, mergedProperties)
+            .SetPlayerPropertiesAsync(player.BrandId, player.PlayerCode, dataCommands, cancellationToken)
             .ConfigureAwait(false);
     }
 }
