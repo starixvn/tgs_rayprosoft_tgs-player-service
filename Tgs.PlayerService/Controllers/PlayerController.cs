@@ -44,7 +44,8 @@ public class PlayerController : ControllerBase
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
                 Status = playerInfo.Status,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
-                VipLevelId = playerInfo.VipLevelId
+                VipLevelId = playerInfo.VipLevelId,
+                RegisteredOn = playerInfo.RegisteredOn
             };
     }
 

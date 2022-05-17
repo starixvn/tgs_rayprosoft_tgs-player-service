@@ -38,7 +38,8 @@ internal class PlayerRepository : IPlayerRepository
                 player.PhoneAuthentication,
                 (PlayerStatus)player.Status,
                 player.WithdrawPassword.Length > 0,
-                player.VipId);
+                player.VipId,
+                player.RegisteredOn);
     }
 
     public async ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(
