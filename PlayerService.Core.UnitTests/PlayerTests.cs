@@ -73,7 +73,8 @@ public class PlayerTests
             false,
             PlayerStatus.Enabled,
             false,
-            null);
+            null,
+            DateTime.Parse("2022/05/17 00:00:00"));
 
         var playerProperties = new Dictionary<string, string?>
         {
@@ -116,7 +117,8 @@ public class PlayerTests
             false,
             PlayerStatus.Enabled,
             false,
-            null);
+            null,
+            DateTime.Parse("2022/05/17 00:00:00"));
 
         var playerProperties = new Dictionary<string, string?>
         {

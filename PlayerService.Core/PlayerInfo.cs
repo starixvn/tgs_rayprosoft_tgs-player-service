@@ -8,4 +8,5 @@ public record PlayerInfo(
     bool PhoneAuthentication,
     PlayerStatus Status,
     bool IsSetPayPassword,
-    Guid? VipLevelId);
+    Guid? VipLevelId,
+    DateTime? RegisteredOn);

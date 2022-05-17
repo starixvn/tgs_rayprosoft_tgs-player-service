@@ -20,4 +20,6 @@ public record PlayerInfo
     public string UserName { get; init; } = default!;
 
     public Guid? VipLevelId { get; init; }
+
+    public DateTime? RegisteredOn { get; init; }
 }

@@ -87,7 +87,8 @@ public class PlayerTests
             PhoneAuthentication = false,
             IsSetPayPassword = false,
             VipLevelId = null,
-            Status = Client.PlayerStatus.Enabled
+            Status = Client.PlayerStatus.Enabled,
+            RegisteredOn = DateTime.Parse("2022/05/17 00:00:00")
         };
 
         await using var web = new TestPlayerServiceApplication(
@@ -103,7 +104,8 @@ public class PlayerTests
                                 false,
                                 false,
                                 PlayerStatus.Enabled,
-                                false, null));
+                                false, null,
+                                DateTime.Parse("2022/05/17 00:00:00")));
 
                     _ = services.AddSingleton(fakePlayerRepository);
                 }));
@@ -197,7 +199,8 @@ public class PlayerTests
             false,
             PlayerStatus.Enabled,
             false,
-            null);
+            null,
+            DateTime.Parse("2022/05/17 00:00:00"));
 
         var oldProperties = new Dictionary<string, string>
         {
