@@ -38,7 +38,8 @@ internal class PlayerRepository : IPlayerRepository
                 player.PhoneAuthentication,
                 (PlayerStatus)player.Status,
                 player.WithdrawPassword.Length > 0,
-                player.VipId);
+                player.VipId,
+                player.RegisteredOn);
     }
 
     public async ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(
@@ -72,6 +73,8 @@ internal class PlayerRepository : IPlayerRepository
             properties["Email"] = player.Email;
         if (player.Birthdate != null)
             properties["Birthdate"] = player.Birthdate.ToString()!;
+
+        properties["DefaultWalletId"] = player.DefaultWalletId.ToString();
 
         foreach (var prop in await _dbContext.PlayerProperties.AsQueryable()
             .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)

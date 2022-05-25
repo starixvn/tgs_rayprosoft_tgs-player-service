@@ -1,11 +1,25 @@
-﻿namespace Tgs.PlayerService.ViewModels;
+﻿using System.Text.Json.Serialization;
 
-public record PlayerInfoViewModel(
-    string PlayerCode,
-    Guid BrandId,
-    string Username,
-    bool IdentityAuthentication,
-    bool PhoneAuthentication,
-    PlayerStatus Status,
-    bool IsSetPayPassword,
-    Guid? VipLevelId);
+namespace Tgs.PlayerService.ViewModels;
+
+public class PlayerInfoViewModel
+{
+    public Guid BrandId { get; init; }
+
+    public bool IdentityAuthentication { get; init; }
+
+    public bool IsSetPayPassword { get; init; }
+
+    public bool PhoneAuthentication { get; init; }
+
+    public string PlayerCode { get; init; } = default!;
+
+    public PlayerStatus Status { get; init; }
+
+    [JsonPropertyName("username")]
+    public string UserName { get; init; } = default!;
+
+    public Guid? VipLevelId { get; init; }
+
+    public DateTime? RegisteredOn { get; set; }
+}

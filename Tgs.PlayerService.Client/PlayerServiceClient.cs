@@ -22,30 +22,32 @@ internal class PlayerServiceClient : IPlayerServiceClient
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode)
+    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var response = await _client
-            .GetAsync($"/player/deposited/{playerCode}")
+            .GetAsync($"/player/deposited/{playerCode}", cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();
 
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
         return JsonSerializer.Deserialize<decimal>(content, _SerializerOptions);
     }
 
-    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
+    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var response = await _client
-            .GetAsync($"/player/{playerCode}")
+            .GetAsync($"/player/{playerCode}", cancellationToken)
             .ConfigureAwait(false);
 
         switch (response.StatusCode)
         {
             case HttpStatusCode.OK:
                 {
-                    var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var content = await response.Content
+                        .ReadAsStringAsync(cancellationToken)
+                        .ConfigureAwait(false);
 
                     return JsonSerializer.Deserialize<PlayerInfo>(content, _SerializerOptions);
                 }
@@ -57,31 +59,31 @@ internal class PlayerServiceClient : IPlayerServiceClient
         }
     }
 
-    public async ValueTask<IReadOnlyDictionary<string, string?>> GetPlayerPropertiesAsync(string playerCode)
+    public async ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var response = await _client
-            .GetAsync($"/player/prop/{playerCode}")
+            .GetAsync($"/player/prop/{playerCode}", cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();
 
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        return JsonSerializer.Deserialize<Dictionary<string, string?>>(content, _SerializerOptions)!;
+        return JsonSerializer.Deserialize<Dictionary<string, string>>(content, _SerializerOptions)!;
     }
 
-    public async ValueTask SetPlayerPropertiesAsync(string playerCode, IReadOnlyDictionary<PlayerPropertyName, string?> properties)
+    public async ValueTask SetPlayerPropertiesAsync(
+        string playerCode,
+        IReadOnlyDictionary<PlayerPropertyName, string?> properties,
+        CancellationToken cancellationToken = default)
     {
-        var items = properties
-            .ToDictionary(prop => prop.Key.ToString(), prop => prop.Value);
-
         var requestContent = new StringContent(
-            JsonSerializer.Serialize(items, _SerializerOptions),
+            JsonSerializer.Serialize(properties, _SerializerOptions),
             Encoding.UTF8,
             MediaTypeNames.Application.Json);
 
         var response = await _client
-            .PostAsync($"/player/prop/{playerCode}", requestContent)
+            .PostAsync($"/player/prop/{playerCode}", requestContent, cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();

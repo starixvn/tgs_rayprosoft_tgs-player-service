@@ -13,6 +13,41 @@ namespace Tgs.PlayerService.IntegrationTests;
 public class PlayerTests
 {
     [Test]
+    public async Task Get_DefaultWalletId()
+    {
+        var walletId = Guid.NewGuid();
+
+        var playerCode = "player1";
+
+        var playerProperties = new Dictionary<string, string>
+        {
+            ["RealName"] = "player1",
+            ["DefaultWalletId"] = walletId.ToString()
+        };
+
+        await using var web = new TestPlayerServiceApplication(
+            hostBuilder => hostBuilder
+                .ConfigureServices(services =>
+                {
+                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+                    _ = fakePlayerRepository
+                        .GetPlayerPropertiesAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
+                        .Returns(playerProperties);
+
+                    _ = services.AddSingleton(fakePlayerRepository);
+                }));
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var actual = await sut.GetPlayerPropertiesAsync("player1");
+
+        CollectionAssert.AreEqual(walletId.ToString(), actual["DefaultWalletId"]);
+    }
+
+    [Test]
     public async Task Get_Deposited_Amount()
     {
         await using var web = new TestPlayerServiceApplication(
@@ -47,12 +82,13 @@ public class PlayerTests
         {
             BrandId = brandId,
             PlayerCode = playerCode,
-            Username = playerCode,
+            UserName = playerCode,
             IdentityAuthentication = false,
             PhoneAuthentication = false,
             IsSetPayPassword = false,
             VipLevelId = null,
-            Status = Client.PlayerStatus.Enabled
+            Status = Client.PlayerStatus.Enabled,
+            RegisteredOn = DateTime.Parse("2022/05/17 00:00:00")
         };
 
         await using var web = new TestPlayerServiceApplication(
@@ -68,134 +104,136 @@ public class PlayerTests
                                 false,
                                 false,
                                 PlayerStatus.Enabled,
-                                false, null));
+                                false, null,
+                                DateTime.Parse("2022/05/17 00:00:00")));
 
                     _ = services.AddSingleton(fakePlayerRepository);
                 }));
 
         var httpClient = web.CreateClient();
 
-    var sut = new PlayerServiceClient(httpClient);
+        var sut = new PlayerServiceClient(httpClient);
 
-    var actual = await sut.GetPlayerInfoAsync(playerCode)
-        .ConfigureAwait(false);
+        var actual = await sut.GetPlayerInfoAsync(playerCode)
+            .ConfigureAwait(false);
 
-    Assert.AreEqual(expected, actual);
+        Assert.AreEqual(expected, actual);
     }
 
-[Test]
-public async Task Get_Player_Info_When_Player_Not_Found()
-{
-    var playerCode = "player1";
-
-    await using var web = new TestPlayerServiceApplication(
-        hostBuilder => hostBuilder
-            .ConfigureServices(services =>
-            {
-                var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-                _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
-                    .Returns((Tgs.PlayerService.PlayerInfo?)null);
-
-                _ = services.AddSingleton(fakePlayerRepository);
-            }));
-
-    var httpClient = web.CreateClient();
-
-    var sut = new PlayerServiceClient(httpClient);
-
-    var actual = await sut.GetPlayerInfoAsync(playerCode)
-        .ConfigureAwait(false);
-
-    Assert.IsNull(actual);
-}
-
-[Test]
-public async Task Get_Player_Properties()
-{
-    var expected = new Dictionary<string, string>
+    [Test]
+    public async Task Get_Player_Info_When_Player_Not_Found()
     {
-        ["RealName"] = "player1",
-        ["Viber"] = "ViberId"
-    };
+        var playerCode = "player1";
 
-    var playerCode = "player1";
+        await using var web = new TestPlayerServiceApplication(
+            hostBuilder => hostBuilder
+                .ConfigureServices(services =>
+                {
+                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+                    _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+                        .Returns((Tgs.PlayerService.PlayerInfo?)null);
 
-    var playerProperties = new Dictionary<string, string>
+                    _ = services.AddSingleton(fakePlayerRepository);
+                }));
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var actual = await sut.GetPlayerInfoAsync(playerCode)
+            .ConfigureAwait(false);
+
+        Assert.IsNull(actual);
+    }
+
+    [Test]
+    public async Task Get_Player_Properties()
     {
-        ["RealName"] = "player1",
-        ["Viber"] = "ViberId"
-    };
+        var expected = new Dictionary<string, string>
+        {
+            ["RealName"] = "player1",
+            ["Viber"] = "ViberId"
+        };
 
-    await using var web = new TestPlayerServiceApplication(
-        hostBuilder => hostBuilder
-            .ConfigureServices(services =>
-            {
-                var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var playerCode = "player1";
 
-                _ = fakePlayerRepository
-                    .GetPlayerPropertiesAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
-                    .Returns(playerProperties);
+        var playerProperties = new Dictionary<string, string>
+        {
+            ["RealName"] = "player1",
+            ["Viber"] = "ViberId"
+        };
 
-                _ = services.AddSingleton(fakePlayerRepository);
-            }));
+        await using var web = new TestPlayerServiceApplication(
+            hostBuilder => hostBuilder
+                .ConfigureServices(services =>
+                {
+                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 
-    var httpClient = web.CreateClient();
+                    _ = fakePlayerRepository
+                        .GetPlayerPropertiesAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
+                        .Returns(playerProperties);
 
-    var sut = new PlayerServiceClient(httpClient);
+                    _ = services.AddSingleton(fakePlayerRepository);
+                }));
 
-    var actual = await sut.GetPlayerPropertiesAsync("player1");
+        var httpClient = web.CreateClient();
 
-    CollectionAssert.AreEqual(expected, actual);
-}
+        var sut = new PlayerServiceClient(httpClient);
 
-[Test]
-public async Task Set_Player_Properties()
-{
-    var brandId = Guid.NewGuid();
-    var playerCode = "player1";
+        var actual = await sut.GetPlayerPropertiesAsync("player1");
 
-    var playerInfo = new Tgs.PlayerService.PlayerInfo(
-        playerCode,
-        brandId,
-        playerCode,
-        false,
-        false,
-        PlayerStatus.Enabled,
-        false,
-        null);
+        CollectionAssert.AreEqual(expected, actual);
+    }
 
-    var oldProperties = new Dictionary<string, string>
+    [Test]
+    public async Task Set_Player_Properties()
     {
-        ["Viber"] = "ViberId",
-        ["Line"] = "LineId"
-    };
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
 
-    var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
-    {
-        [Client.PlayerPropertyName.Viber] = null,
-        [Client.PlayerPropertyName.Line] = "NewLineId",
-        [Client.PlayerPropertyName.Telegram] = "TelegramId"
-    };
+        var playerInfo = new PlayerInfo(
+            playerCode,
+            brandId,
+            playerCode,
+            false,
+            false,
+            PlayerStatus.Enabled,
+            false,
+            null,
+            DateTime.Parse("2022/05/17 00:00:00"));
 
-    await using var web = new TestPlayerServiceApplication(
-        hostBuilder => hostBuilder
-            .ConfigureServices(services =>
-            {
-                var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-                _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
-                    .Returns(playerInfo);
+        var oldProperties = new Dictionary<string, string>
+        {
+            ["Viber"] = "ViberId",
+            ["Line"] = "LineId"
+        };
 
-                _ = fakePlayerRepository.GetPlayerPropertiesAsync(playerCode)
-                    .Returns(oldProperties);
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.Viber] = null,
+            [Client.PlayerPropertyName.Line] = "NewLineId",
+            [Client.PlayerPropertyName.Telegram] = "TelegramId"
+        };
 
-                _ = services.AddSingleton(fakePlayerRepository);
-            }));
+        await using var web = new TestPlayerServiceApplication(
+            hostBuilder => hostBuilder
+                .ConfigureServices(services =>
+                {
+                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+                    _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+                        .Returns(playerInfo);
 
-    var httpClient = web.CreateClient();
+                    _ = fakePlayerRepository.GetPlayerPropertiesAsync(playerCode)
+                        .Returns(oldProperties);
 
-    var sut = new PlayerServiceClient(httpClient);
+                    _ = services.AddSingleton(fakePlayerRepository);
+                }));
 
-    await sut.SetPlayerPropertiesAsync(playerCode, playerProperties)
-        .ConfigureAwait(false);
-}
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties)
+            .ConfigureAwait(false);
+    }
 }
