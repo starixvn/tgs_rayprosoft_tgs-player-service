@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Immutable;
+using System.Numerics;
+using Microsoft.EntityFrameworkCore;
 using Tgs.PlayerService.Repositories.Entities;
 
 namespace Tgs.PlayerService.Repositories;
@@ -42,7 +44,7 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
-    public async ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(
+    public async ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
         string playerCode,
         CancellationToken cancellationToken = default)
     {
@@ -53,7 +55,7 @@ internal class PlayerRepository : IPlayerRepository
         var properties = new Dictionary<string, string>();
 
         if (player == null)
-            return properties;
+            return properties.ToImmutableDictionary();
 
         var brandId = player.BrandId;
 
@@ -82,7 +84,7 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false))
             properties[prop.Name] = prop.Value;
 
-        return properties;
+        return properties.ToImmutableDictionary();
     }
 
     public async ValueTask SetPlayerPropertiesAsync(
@@ -116,5 +118,50 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default)
+    {
+        var player = await _dbContext.Players.AsQueryable()
+            .Where(player => player.BrandId == brandId
+                && player.AreaCode == areaCode
+                && player.Phone == phone)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return player is null
+            ? null
+            : new PlayerInfo(
+            player.PlayerCode,
+            player.BrandId,
+            player.Username,
+            player.IdentityAuthentication,
+            player.PhoneAuthentication,
+            (PlayerStatus)player.Status,
+            player.WithdrawPassword.Length > 0,
+            player.VipId,
+            player.RegisteredOn);
+    }
+
+    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string email, CancellationToken cancellationToken = default)
+    {
+        var player = await _dbContext.Players.AsQueryable()
+            .Where(player => player.BrandId == brandId
+                && player.Email!.ToLower() == email.ToLower())
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return player is null
+            ? null
+            : new PlayerInfo(
+            player.PlayerCode,
+            player.BrandId,
+            player.Username,
+            player.IdentityAuthentication,
+            player.PhoneAuthentication,
+            (PlayerStatus)player.Status,
+            player.WithdrawPassword.Length > 0,
+            player.VipId,
+            player.RegisteredOn);
     }
 }

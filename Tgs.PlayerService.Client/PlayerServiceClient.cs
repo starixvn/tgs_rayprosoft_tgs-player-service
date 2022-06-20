@@ -59,6 +59,54 @@ internal class PlayerServiceClient : IPlayerServiceClient
         }
     }
 
+    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default)
+    {
+        var response = await _client
+            .GetAsync($"/player/{brandId}/{areaCode}/{phone}", cancellationToken)
+            .ConfigureAwait(false);
+
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.OK:
+                {
+                    var content = await response.Content
+                        .ReadAsStringAsync(cancellationToken)
+                        .ConfigureAwait(false);
+
+                    return JsonSerializer.Deserialize<PlayerInfo>(content, _SerializerOptions);
+                }
+            case HttpStatusCode.NotFound:
+                return null;
+
+            default:
+                throw new PlayerServiceApiException("Unknown error");
+        }
+    }
+
+    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string email, CancellationToken cancellationToken = default)
+    {
+        var response = await _client
+            .GetAsync($"/player/{brandId}/{WebUtility.UrlEncode(email)}", cancellationToken)
+            .ConfigureAwait(false);
+
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.OK:
+                {
+                    var content = await response.Content
+                        .ReadAsStringAsync(cancellationToken)
+                        .ConfigureAwait(false);
+
+                    return JsonSerializer.Deserialize<PlayerInfo>(content, _SerializerOptions);
+                }
+            case HttpStatusCode.NotFound:
+                return null;
+
+            default:
+                throw new PlayerServiceApiException("Unknown error");
+        }
+    }
+
     public async ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var response = await _client

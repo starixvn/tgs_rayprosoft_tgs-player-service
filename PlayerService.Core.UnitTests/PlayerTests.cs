@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.PlayerService.ApplicationServices;
@@ -86,7 +87,7 @@ public class PlayerTests
 
         var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
 
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties);
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
 
         _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
             .Returns(playerInfo);
@@ -133,7 +134,7 @@ public class PlayerTests
 
         var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
 
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties);
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
 
         _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
             .Returns(playerInfo);
@@ -154,5 +155,40 @@ public class PlayerTests
                  playerInfo.BrandId,
                  playerInfo.PlayerCode,
                  Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 3));
+    }
+
+    [Test]
+    public async Task Get_PlayerInfo_By_Phone()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerInfoByPhoneQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerInfoByPhoneQuery(Guid.NewGuid(), "123", "12345678");
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerInfoAsync(
+                Arg.Is(query.BrandId),
+                Arg.Is(query.AreaCode),
+                Arg.Is(query.Phone));
+    }
+
+    [Test]
+    public async Task Get_PlayerInfo_By_Email()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerInfoByEmailQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerInfoByEmailQuery(Guid.NewGuid(), "tester@test.com");
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerInfoAsync(
+                Arg.Is(query.BrandId),
+                Arg.Is(query.Email));
     }
 }
