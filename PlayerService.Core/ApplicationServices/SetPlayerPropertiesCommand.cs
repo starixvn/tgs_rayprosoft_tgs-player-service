@@ -1,7 +1,7 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Immutable;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
 public record SetPlayerPropertiesCommand(
     string PlayerCode,
-    IReadOnlyDictionary<string, string?> Properties);
+    IImmutableDictionary<string, string?> Properties);

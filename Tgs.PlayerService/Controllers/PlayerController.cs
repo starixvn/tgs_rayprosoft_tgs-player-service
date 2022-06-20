@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Immutable;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Tgs.PlayerService.ApplicationServices;
@@ -16,7 +17,7 @@ public class PlayerController : ControllerBase
     [SuccessStatusCode(200, "Player deposited amount returns")]
     public ValueTask<decimal> GetPlayerDepositedAmountAsync(
         [FromServices] IGetService<GetPlayerDepositedAmountQuery, decimal> getService,
-        [FromRoute] string playerCode)
+        string playerCode)
         => getService.GetAsync(
             new GetPlayerDepositedAmountQuery(playerCode),
             HttpContext.RequestAborted);
@@ -26,7 +27,7 @@ public class PlayerController : ControllerBase
     [FailStatusCode(404, "Player info not found")]
     public async ValueTask<PlayerInfoViewModel> GetPlayerInfoAsync(
         [FromServices] IGetService<GetPlayerQuery, PlayerInfo?> getService,
-        [FromRoute] string playerCode)
+        string playerCode)
     {
         var playerInfo = await getService
             .GetAsync(new GetPlayerQuery(playerCode), HttpContext.RequestAborted)
@@ -49,12 +50,72 @@ public class PlayerController : ControllerBase
             };
     }
 
+    [HttpGet("{brandId}/{email:regex(^[[\\w-\\.]]+@([[\\w-]]+\\.)+[[\\w-]]{{2,4}}$)}", Name = "GetPlayerInfoByEmail")]
+    [SuccessStatusCode(200, "Player info found")]
+    [FailStatusCode(404, "Player info not found")]
+    public async Task<PlayerInfoViewModel> GetPlayerInfoByEmailAsync(
+        [FromServices] IGetService<GetPlayerInfoByEmailQuery, PlayerInfo?> getService,
+        Guid brandId,
+        string email)
+    {
+        var playerInfo = await getService
+            .GetAsync(new GetPlayerInfoByEmailQuery(brandId, email), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return playerInfo is null
+            ? await this.FailAsync<PlayerInfoViewModel, object?>(404, default)
+            : new PlayerInfoViewModel
+            {
+                PlayerCode = playerInfo.PlayerCode,
+                BrandId = playerInfo.BrandId,
+                UserName = playerInfo.UserName,
+                IdentityAuthentication = playerInfo.IdentityAuthentication,
+                PhoneAuthentication = playerInfo.PhoneAuthentication,
+                Status = playerInfo.Status,
+                IsSetPayPassword = playerInfo.IsSetPayPassword,
+                VipLevelId = playerInfo.VipLevelId,
+                RegisteredOn = playerInfo.RegisteredOn
+            };
+    }
+
+    [HttpGet("{brandId}/{areaCode:regex(\\d+)}/{phone}", Name = "GetPlayerInfoByPhone")]
+    [SuccessStatusCode(200, "Player info found")]
+    [FailStatusCode(404, "Player info not found")]
+    public async Task<PlayerInfoViewModel> GetPlayerInfoByPhoneAsync(
+        [FromServices] IGetService<GetPlayerInfoByPhoneQuery, PlayerInfo?> getService,
+        Guid brandId,
+        string areaCode,
+        string phone)
+    {
+        var playerInfo = await getService
+            .GetAsync(
+                new GetPlayerInfoByPhoneQuery(brandId, areaCode, phone),
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return playerInfo is null
+            ? await this.FailAsync<PlayerInfoViewModel, object?>(404, null)
+                .ConfigureAwait(false)
+            : new PlayerInfoViewModel
+            {
+                PlayerCode = playerInfo.PlayerCode,
+                BrandId = playerInfo.BrandId,
+                UserName = playerInfo.UserName,
+                IdentityAuthentication = playerInfo.IdentityAuthentication,
+                PhoneAuthentication = playerInfo.PhoneAuthentication,
+                Status = playerInfo.Status,
+                IsSetPayPassword = playerInfo.IsSetPayPassword,
+                VipLevelId = playerInfo.VipLevelId,
+                RegisteredOn = playerInfo.RegisteredOn
+            };
+    }
+
     [HttpGet("prop/{playerCode}", Name = "GetPlayerProperties")]
     [SuccessStatusCode(200, "Player properties returns")]
     public async ValueTask<JsonDocument> GetPlayerPropertiesAsync(
-        [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>> getService,
+        [FromServices] IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>> getService,
         [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-        [FromRoute] string playerCode)
+        string playerCode)
     {
         var jsonSerializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
 
@@ -70,8 +131,8 @@ public class PlayerController : ControllerBase
     [FailStatusCode(400, "Input properties is empty")]
     public ValueTask SetPlayerPropertiesAsync(
         [FromServices] ICommandService<SetPlayerPropertiesCommand> commandService,
-        [FromBody] IReadOnlyDictionary<string, string?> properties,
-        [FromRoute] string playerCode)
+        string playerCode,
+        [FromBody] IImmutableDictionary<string, string?> properties)
     {
         if (properties.Count == 0)
             return new ValueTask(this.FailAsync(400, "Input properties is empty"));
