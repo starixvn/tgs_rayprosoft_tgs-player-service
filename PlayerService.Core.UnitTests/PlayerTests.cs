@@ -158,24 +158,6 @@ public class PlayerTests
     }
 
     [Test]
-    public async Task Get_PlayerInfo_By_Phone()
-    {
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-
-        var sut = new GetPlayerInfoByPhoneQueryService(fakePlayerRepository);
-
-        var query = new GetPlayerInfoByPhoneQuery(Guid.NewGuid(), "123", "12345678");
-
-        _ = await sut.GetAsync(query);
-
-        _ = fakePlayerRepository.Received(1)
-            .GetPlayerInfoAsync(
-                Arg.Is(query.BrandId),
-                Arg.Is(query.AreaCode),
-                Arg.Is(query.Phone));
-    }
-
-    [Test]
     public async Task Get_PlayerInfo_By_Email()
     {
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
@@ -187,8 +169,41 @@ public class PlayerTests
         _ = await sut.GetAsync(query);
 
         _ = fakePlayerRepository.Received(1)
-            .GetPlayerInfoAsync(
+            .GetPlayerInfoByEmailAsync(
                 Arg.Is(query.BrandId),
                 Arg.Is(query.Email));
+    }
+
+    [Test]
+    public async Task Get_PlayerInfo_By_Phone()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerInfoByPhoneQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerInfoByPhoneQuery(Guid.NewGuid(), "123", "12345678");
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerInfoByPhoneAsync(
+                Arg.Is(query.BrandId),
+                Arg.Is(query.AreaCode),
+                Arg.Is(query.Phone));
+    }
+
+    [Test]
+    public async Task Get_PlayerInfo_By_UserName()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerInfoByUserNameQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerInfoByUserNameQuery(Guid.NewGuid(), "userName");
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerInfoByUserNameAsync(Arg.Is(query.BrandId), Arg.Is(query.UserName));
     }
 }

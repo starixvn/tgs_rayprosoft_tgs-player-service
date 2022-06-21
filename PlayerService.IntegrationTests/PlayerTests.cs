@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -247,7 +248,7 @@ public class PlayerTests
 
         _ = await dbContext.SaveChangesAsync();
 
-        var actual = await sut.GetPlayerInfoAsync(brandId, mail)
+        var actual = await sut.GetPlayerInfoByEmailAsync(brandId, mail)
             .ConfigureAwait(false);
 
         Assert.AreEqual(expected, actual);
@@ -300,7 +301,7 @@ public class PlayerTests
 
         _ = await dbContext.SaveChangesAsync();
 
-        var actual = await sut.GetPlayerInfoAsync(brandId, areaCode, phone)
+        var actual = await sut.GetPlayerInfoByPhoneAsync(brandId, areaCode, phone)
             .ConfigureAwait(false);
 
         Assert.AreEqual(expected, actual);
@@ -358,7 +359,7 @@ public class PlayerTests
             [Client.PlayerPropertyName.Telegram] = "TelegramId"
         };
 
-        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties);
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
 
         var actual = await dbContext.PlayerProperties
             .Where(x => x.PlayerCode == playerCode)
@@ -367,5 +368,59 @@ public class PlayerTests
         Assert.AreEqual(2, dbContext.PlayerProperties.Count());
         Assert.AreEqual("NewLineId", actual["Line"]);
         Assert.AreEqual("TelegramId", actual["Telegram"]);
+    }
+
+    [Test]
+    public async Task Get_PlayerInfo_By_UserName()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+        var userName = "Tester";
+        var phone = "13800138000";
+        var areaCode = "123";
+
+        var expected = new Client.PlayerInfo
+        {
+            BrandId = brandId,
+            PlayerCode = playerCode,
+            UserName = userName,
+            IdentityAuthentication = false,
+            PhoneAuthentication = false,
+            IsSetPayPassword = false,
+            VipLevelId = null,
+            Status = Client.PlayerStatus.Enabled,
+            RegisteredOn = DateTime.Parse("2022/05/17 00:00:00")
+        };
+
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = userName,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Phone = phone,
+            AreaCode = areaCode,
+            RegisteredOn = expected.RegisteredOn
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerInfoByUserNameAsync(brandId, userName)
+            .ConfigureAwait(false);
+
+        Assert.AreEqual(expected, actual);
     }
 }

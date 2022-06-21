@@ -8,9 +8,11 @@ public interface IPlayerRepository
 
     ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
 
-    ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default);
+    ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(Guid brandId, string email, CancellationToken cancellationToken = default);
 
-    ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string email, CancellationToken cancellationToken = default);
+    ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default);
+
+    ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName, CancellationToken cancellationToken = default);
 
     ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(string playerCode, CancellationToken cancellationToken = default);
 

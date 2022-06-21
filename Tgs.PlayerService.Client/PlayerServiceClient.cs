@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Immutable;
+using System.Net;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
@@ -59,31 +60,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
         }
     }
 
-    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default)
-    {
-        var response = await _client
-            .GetAsync($"/player/{brandId}/{areaCode}/{phone}", cancellationToken)
-            .ConfigureAwait(false);
-
-        switch (response.StatusCode)
-        {
-            case HttpStatusCode.OK:
-                {
-                    var content = await response.Content
-                        .ReadAsStringAsync(cancellationToken)
-                        .ConfigureAwait(false);
-
-                    return JsonSerializer.Deserialize<PlayerInfo>(content, _SerializerOptions);
-                }
-            case HttpStatusCode.NotFound:
-                return null;
-
-            default:
-                throw new PlayerServiceApiException("Unknown error");
-        }
-    }
-
-    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string email, CancellationToken cancellationToken = default)
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(Guid brandId, string email, CancellationToken cancellationToken = default)
     {
         var response = await _client
             .GetAsync($"/player/{brandId}/{WebUtility.UrlEncode(email)}", cancellationToken)
@@ -107,7 +84,55 @@ internal class PlayerServiceClient : IPlayerServiceClient
         }
     }
 
-    public async ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(string playerCode, CancellationToken cancellationToken = default)
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default)
+    {
+        var response = await _client
+            .GetAsync($"/player/{brandId}/{areaCode}/{phone}", cancellationToken)
+            .ConfigureAwait(false);
+
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.OK:
+                {
+                    var content = await response.Content
+                        .ReadAsStringAsync(cancellationToken)
+                        .ConfigureAwait(false);
+
+                    return JsonSerializer.Deserialize<PlayerInfo>(content, _SerializerOptions);
+                }
+            case HttpStatusCode.NotFound:
+                return null;
+
+            default:
+                throw new PlayerServiceApiException("Unknown error");
+        }
+    }
+
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName, CancellationToken cancellationToken = default)
+    {
+        var response = await _client
+            .GetAsync($"/player/{brandId}/{WebUtility.UrlEncode(userName)}", cancellationToken)
+            .ConfigureAwait(false);
+
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.OK:
+                {
+                    var content = await response.Content
+                        .ReadAsStringAsync(cancellationToken)
+                        .ConfigureAwait(false);
+
+                    return JsonSerializer.Deserialize<PlayerInfo>(content, _SerializerOptions);
+                }
+            case HttpStatusCode.NotFound:
+                return null;
+
+            default:
+                throw new PlayerServiceApiException("Unknown error");
+        }
+    }
+
+    public async ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var response = await _client
             .GetAsync($"/player/prop/{playerCode}", cancellationToken)
@@ -117,12 +142,12 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        return JsonSerializer.Deserialize<Dictionary<string, string>>(content, _SerializerOptions)!;
+        return JsonSerializer.Deserialize<IImmutableDictionary<string, string>>(content, _SerializerOptions)!;
     }
 
     public async ValueTask SetPlayerPropertiesAsync(
         string playerCode,
-        IReadOnlyDictionary<PlayerPropertyName, string?> properties,
+        IImmutableDictionary<PlayerPropertyName, string?> properties,
         CancellationToken cancellationToken = default)
     {
         var requestContent = new StringContent(

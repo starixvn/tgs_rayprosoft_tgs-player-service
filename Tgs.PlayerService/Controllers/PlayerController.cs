@@ -110,6 +110,35 @@ public class PlayerController : ControllerBase
             };
     }
 
+    [HttpGet("{brandId}/{userName}", Name = "GetPlayerInfoByUserName")]
+    public async Task<PlayerInfoViewModel> GetPlayerInfoByUserNameAsync(
+        [FromServices] IGetService<GetPlayerInfoByUserNameQuery, PlayerInfo?> getService,
+        Guid brandId,
+        string userName)
+    {
+        var playerInfo = await getService
+            .GetAsync(
+                new GetPlayerInfoByUserNameQuery(brandId, userName),
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return playerInfo is null
+            ? await this.FailAsync<PlayerInfoViewModel, object?>(404, null)
+                .ConfigureAwait(false)
+            : new PlayerInfoViewModel
+            {
+                PlayerCode = playerInfo.PlayerCode,
+                BrandId = playerInfo.BrandId,
+                UserName = playerInfo.UserName,
+                IdentityAuthentication = playerInfo.IdentityAuthentication,
+                PhoneAuthentication = playerInfo.PhoneAuthentication,
+                Status = playerInfo.Status,
+                IsSetPayPassword = playerInfo.IsSetPayPassword,
+                VipLevelId = playerInfo.VipLevelId,
+                RegisteredOn = playerInfo.RegisteredOn
+            };
+    }
+
     [HttpGet("prop/{playerCode}", Name = "GetPlayerProperties")]
     [SuccessStatusCode(200, "Player properties returns")]
     public async ValueTask<JsonDocument> GetPlayerPropertiesAsync(
