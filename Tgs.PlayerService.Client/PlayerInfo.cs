@@ -12,6 +12,8 @@ public record PlayerInfo
 
     public bool PhoneAuthentication { get; init; }
 
+    public bool EmailAuthentication { get; init; }
+
     public string PlayerCode { get; init; } = default!;
 
     [JsonPropertyName("username")]

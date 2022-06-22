@@ -43,6 +43,7 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
+                EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
@@ -70,6 +71,7 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
+                EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
@@ -101,6 +103,7 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
+                EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
@@ -129,6 +132,7 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
+                EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
