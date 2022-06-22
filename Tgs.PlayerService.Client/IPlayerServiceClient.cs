@@ -1,4 +1,6 @@
-﻿namespace Tgs.PlayerService.Client;
+﻿using System.Collections.Immutable;
+
+namespace Tgs.PlayerService.Client;
 
 public interface IPlayerServiceClient
 {
@@ -6,16 +8,20 @@ public interface IPlayerServiceClient
 
     ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
 
-    ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default);
+    ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(Guid brandId, string email, CancellationToken cancellationToken = default);
 
-    ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string email, CancellationToken cancellationToken = default);
+    ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default);
 
-    ValueTask<IReadOnlyDictionary<string, string>> GetPlayerPropertiesAsync(
+    ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName, CancellationToken cancellationToken = default);
+
+    ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
         string playerCode,
         CancellationToken cancellationToken = default);
 
+    ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
+
     ValueTask SetPlayerPropertiesAsync(
-        string playerCode,
-        IReadOnlyDictionary<PlayerPropertyName, string?> properties,
+            string playerCode,
+        IImmutableDictionary<PlayerPropertyName, string?> properties,
         CancellationToken cancellationToken = default);
 }

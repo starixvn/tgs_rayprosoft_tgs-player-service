@@ -40,6 +40,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
+            - name: DOTNET_gcServer
+              value: "0"
             - name: ConnectionStrings__Tgs
               valueFrom:
                 secretKeyRef:

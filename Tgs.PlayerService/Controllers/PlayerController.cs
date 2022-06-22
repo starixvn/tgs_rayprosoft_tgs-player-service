@@ -43,7 +43,7 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
-                Status = playerInfo.Status,
+                EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
@@ -71,7 +71,7 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
-                Status = playerInfo.Status,
+                EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
@@ -103,7 +103,36 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
-                Status = playerInfo.Status,
+                EmailAuthentication = playerInfo.EmailAuthentication,
+                IsSetPayPassword = playerInfo.IsSetPayPassword,
+                VipLevelId = playerInfo.VipLevelId,
+                RegisteredOn = playerInfo.RegisteredOn
+            };
+    }
+
+    [HttpGet("{brandId}/{userName}", Name = "GetPlayerInfoByUserName")]
+    public async Task<PlayerInfoViewModel> GetPlayerInfoByUserNameAsync(
+        [FromServices] IGetService<GetPlayerInfoByUserNameQuery, PlayerInfo?> getService,
+        Guid brandId,
+        string userName)
+    {
+        var playerInfo = await getService
+            .GetAsync(
+                new GetPlayerInfoByUserNameQuery(brandId, userName),
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return playerInfo is null
+            ? await this.FailAsync<PlayerInfoViewModel, object?>(404, null)
+                .ConfigureAwait(false)
+            : new PlayerInfoViewModel
+            {
+                PlayerCode = playerInfo.PlayerCode,
+                BrandId = playerInfo.BrandId,
+                UserName = playerInfo.UserName,
+                IdentityAuthentication = playerInfo.IdentityAuthentication,
+                PhoneAuthentication = playerInfo.PhoneAuthentication,
+                EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
@@ -124,6 +153,17 @@ public class PlayerController : ControllerBase
             .ConfigureAwait(false);
 
         return JsonSerializer.SerializeToDocument(properties, jsonSerializerOptions);
+    }
+
+    [HttpGet("status/{playerCode}", Name = "GetPlayerStatus")]
+    [SuccessStatusCode(200, "Player Status")]
+    public ValueTask<PlayerStatus> GetPlayerStatusAsync(
+        [FromServices] IGetService<GetPlayerStatusQuery, PlayerStatus> getService,
+        string playerCode)
+    {
+        var query = new GetPlayerStatusQuery(playerCode);
+
+        return getService.GetAsync(query, HttpContext.RequestAborted);
     }
 
     [HttpPost("prop/{playerCode}", Name = "SetPlayerProperties")]

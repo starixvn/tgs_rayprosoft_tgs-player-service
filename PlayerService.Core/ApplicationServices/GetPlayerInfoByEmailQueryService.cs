@@ -12,5 +12,5 @@ internal class GetPlayerInfoByEmailQueryService : IGetService<GetPlayerInfoByEma
     }
 
     public ValueTask<PlayerInfo?> GetAsync(GetPlayerInfoByEmailQuery query, CancellationToken cancellationToken = default)
-        => _playerRepository.GetPlayerInfoAsync(query.BrandId, query.Email, cancellationToken);
+        => _playerRepository.GetPlayerInfoByEmailAsync(query.BrandId, query.Email, cancellationToken);
 }

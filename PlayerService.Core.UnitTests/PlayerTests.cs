@@ -72,7 +72,7 @@ public class PlayerTests
             playerCode,
             false,
             false,
-            PlayerStatus.Enabled,
+            false,
             false,
             null,
             DateTime.Parse("2022/05/17 00:00:00"));
@@ -116,7 +116,7 @@ public class PlayerTests
             playerCode,
             false,
             false,
-            PlayerStatus.Enabled,
+            false,
             false,
             null,
             DateTime.Parse("2022/05/17 00:00:00"));
@@ -158,21 +158,18 @@ public class PlayerTests
     }
 
     [Test]
-    public async Task Get_PlayerInfo_By_Phone()
+    public async Task Get_Player_Status()
     {
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 
-        var sut = new GetPlayerInfoByPhoneQueryService(fakePlayerRepository);
+        var sut = new GetPlayerStatusQueryService(fakePlayerRepository);
 
-        var query = new GetPlayerInfoByPhoneQuery(Guid.NewGuid(), "123", "12345678");
+        var query = new GetPlayerStatusQuery("player1");
 
         _ = await sut.GetAsync(query);
 
         _ = fakePlayerRepository.Received(1)
-            .GetPlayerInfoAsync(
-                Arg.Is(query.BrandId),
-                Arg.Is(query.AreaCode),
-                Arg.Is(query.Phone));
+            .GetPlayerStatusAsync(Arg.Is(query.PlayerCode));
     }
 
     [Test]
@@ -187,8 +184,41 @@ public class PlayerTests
         _ = await sut.GetAsync(query);
 
         _ = fakePlayerRepository.Received(1)
-            .GetPlayerInfoAsync(
+            .GetPlayerInfoByEmailAsync(
                 Arg.Is(query.BrandId),
                 Arg.Is(query.Email));
+    }
+
+    [Test]
+    public async Task Get_PlayerInfo_By_Phone()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerInfoByPhoneQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerInfoByPhoneQuery(Guid.NewGuid(), "123", "12345678");
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerInfoByPhoneAsync(
+                Arg.Is(query.BrandId),
+                Arg.Is(query.AreaCode),
+                Arg.Is(query.Phone));
+    }
+
+    [Test]
+    public async Task Get_PlayerInfo_By_UserName()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerInfoByUserNameQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerInfoByUserNameQuery(Guid.NewGuid(), "userName");
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerInfoByUserNameAsync(Arg.Is(query.BrandId), Arg.Is(query.UserName));
     }
 }

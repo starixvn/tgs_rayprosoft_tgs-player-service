@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Tgs.PlayerService.Repositories.Entities;
 
@@ -38,14 +37,81 @@ internal class PlayerRepository : IPlayerRepository
                 player.Username,
                 player.IdentityAuthentication,
                 player.PhoneAuthentication,
-                (PlayerStatus)player.Status,
+                !string.IsNullOrEmpty(player.Email),
+                player.WithdrawPassword.Length > 0,
+                player.VipId,
+                player.RegisteredOn);
+    }
+
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(Guid brandId, string email, CancellationToken cancellationToken = default)
+    {
+        var player = await _dbContext.Players.AsQueryable()
+            .Where(player => player.BrandId == brandId
+                && player.Email!.ToLower() == email.ToLower())
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return player is null
+            ? null
+            : new PlayerInfo(
+                player.PlayerCode,
+                player.BrandId,
+                player.Username,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                !string.IsNullOrEmpty(player.Email),
+                player.WithdrawPassword.Length > 0,
+                player.VipId,
+                player.RegisteredOn);
+    }
+
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default)
+    {
+        var player = await _dbContext.Players.AsQueryable()
+            .Where(player => player.BrandId == brandId
+                && player.AreaCode == areaCode
+                && player.Phone == phone)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return player is null
+            ? null
+            : new PlayerInfo(
+                player.PlayerCode,
+                player.BrandId,
+                player.Username,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                !string.IsNullOrEmpty(player.Email),
+                player.WithdrawPassword.Length > 0,
+                player.VipId,
+                player.RegisteredOn);
+    }
+
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName, CancellationToken cancellationToken = default)
+    {
+        var player = await _dbContext.Players.AsQueryable()
+            .Where(player => player.BrandId == brandId
+                && player.Username!.ToLower() == userName.ToLower())
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return player is null
+            ? null
+            : new PlayerInfo(
+                player.PlayerCode,
+                player.BrandId,
+                player.Username,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
                 player.RegisteredOn);
     }
 
     public async ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
-        string playerCode,
+                    string playerCode,
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
@@ -87,8 +153,16 @@ internal class PlayerRepository : IPlayerRepository
         return properties.ToImmutableDictionary();
     }
 
+    public async ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default)
+        => (PlayerStatus)(await _dbContext.Players
+            .Where(player => player.PlayerCode == playerCode)
+            .Select(player => (short?)player.Status)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false)
+            ?? 1);
+
     public async ValueTask SetPlayerPropertiesAsync(
-        Guid brandId,
+            Guid brandId,
         string playerCode,
         IEnumerable<IDataCommand> modifyCommands,
         CancellationToken cancellationToken = default)
@@ -118,50 +192,5 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
-    }
-
-    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default)
-    {
-        var player = await _dbContext.Players.AsQueryable()
-            .Where(player => player.BrandId == brandId
-                && player.AreaCode == areaCode
-                && player.Phone == phone)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        return player is null
-            ? null
-            : new PlayerInfo(
-            player.PlayerCode,
-            player.BrandId,
-            player.Username,
-            player.IdentityAuthentication,
-            player.PhoneAuthentication,
-            (PlayerStatus)player.Status,
-            player.WithdrawPassword.Length > 0,
-            player.VipId,
-            player.RegisteredOn);
-    }
-
-    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(Guid brandId, string email, CancellationToken cancellationToken = default)
-    {
-        var player = await _dbContext.Players.AsQueryable()
-            .Where(player => player.BrandId == brandId
-                && player.Email!.ToLower() == email.ToLower())
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        return player is null
-            ? null
-            : new PlayerInfo(
-            player.PlayerCode,
-            player.BrandId,
-            player.Username,
-            player.IdentityAuthentication,
-            player.PhoneAuthentication,
-            (PlayerStatus)player.Status,
-            player.WithdrawPassword.Length > 0,
-            player.VipId,
-            player.RegisteredOn);
     }
 }

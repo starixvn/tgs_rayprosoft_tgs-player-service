@@ -12,7 +12,7 @@ internal class GetPlayerInfoByPhoneQueryService : IGetService<GetPlayerInfoByPho
     }
 
     public ValueTask<PlayerInfo?> GetAsync(GetPlayerInfoByPhoneQuery query, CancellationToken cancellationToken = default)
-        => _playerRepository.GetPlayerInfoAsync(
+        => _playerRepository.GetPlayerInfoByPhoneAsync(
             query.BrandId,
             query.AreaCode,
             query.Phone,
