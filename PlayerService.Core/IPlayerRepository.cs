@@ -16,6 +16,8 @@ public interface IPlayerRepository
 
     ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(string playerCode, CancellationToken cancellationToken = default);
 
+    ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
+
     ValueTask SetPlayerPropertiesAsync(
         Guid brandId,
         string playerCode,

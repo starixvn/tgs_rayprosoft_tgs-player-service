@@ -72,7 +72,7 @@ public class PlayerTests
             playerCode,
             false,
             false,
-            PlayerStatus.Enabled,
+            false,
             false,
             null,
             DateTime.Parse("2022/05/17 00:00:00"));
@@ -116,7 +116,7 @@ public class PlayerTests
             playerCode,
             false,
             false,
-            PlayerStatus.Enabled,
+            false,
             false,
             null,
             DateTime.Parse("2022/05/17 00:00:00"));
@@ -155,6 +155,21 @@ public class PlayerTests
                  playerInfo.BrandId,
                  playerInfo.PlayerCode,
                  Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 3));
+    }
+
+    [Test]
+    public async Task Get_Player_Status()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerStatusQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerStatusQuery("player1");
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerStatusAsync(Arg.Is(query.PlayerCode));
     }
 
     [Test]

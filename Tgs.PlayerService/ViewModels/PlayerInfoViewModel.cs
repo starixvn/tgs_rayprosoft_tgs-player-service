@@ -14,8 +14,6 @@ public class PlayerInfoViewModel
 
     public string PlayerCode { get; init; } = default!;
 
-    public PlayerStatus Status { get; init; }
-
     [JsonPropertyName("username")]
     public string UserName { get; init; } = default!;
 

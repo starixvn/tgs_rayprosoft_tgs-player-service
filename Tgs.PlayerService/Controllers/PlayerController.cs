@@ -43,7 +43,6 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
-                Status = playerInfo.Status,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
@@ -71,7 +70,6 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
-                Status = playerInfo.Status,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
@@ -103,7 +101,6 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
-                Status = playerInfo.Status,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
@@ -132,7 +129,6 @@ public class PlayerController : ControllerBase
                 UserName = playerInfo.UserName,
                 IdentityAuthentication = playerInfo.IdentityAuthentication,
                 PhoneAuthentication = playerInfo.PhoneAuthentication,
-                Status = playerInfo.Status,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
@@ -153,6 +149,17 @@ public class PlayerController : ControllerBase
             .ConfigureAwait(false);
 
         return JsonSerializer.SerializeToDocument(properties, jsonSerializerOptions);
+    }
+
+    [HttpGet("status/{playerCode}", Name = "GetPlayerStatus")]
+    [SuccessStatusCode(200, "Player Status")]
+    public ValueTask<PlayerStatus> GetPlayerStatusAsync(
+        [FromServices] IGetService<GetPlayerStatusQuery, PlayerStatus> getService,
+        string playerCode)
+    {
+        var query = new GetPlayerStatusQuery(playerCode);
+
+        return getService.GetAsync(query, HttpContext.RequestAborted);
     }
 
     [HttpPost("prop/{playerCode}", Name = "SetPlayerProperties")]

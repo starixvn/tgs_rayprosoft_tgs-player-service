@@ -37,7 +37,7 @@ internal class PlayerRepository : IPlayerRepository
                 player.Username,
                 player.IdentityAuthentication,
                 player.PhoneAuthentication,
-                (PlayerStatus)player.Status,
+                !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
                 player.RegisteredOn);
@@ -54,15 +54,15 @@ internal class PlayerRepository : IPlayerRepository
         return player is null
             ? null
             : new PlayerInfo(
-            player.PlayerCode,
-            player.BrandId,
-            player.Username,
-            player.IdentityAuthentication,
-            player.PhoneAuthentication,
-            (PlayerStatus)player.Status,
-            player.WithdrawPassword.Length > 0,
-            player.VipId,
-            player.RegisteredOn);
+                player.PlayerCode,
+                player.BrandId,
+                player.Username,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                !string.IsNullOrEmpty(player.Email),
+                player.WithdrawPassword.Length > 0,
+                player.VipId,
+                player.RegisteredOn);
     }
 
     public async ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default)
@@ -77,15 +77,15 @@ internal class PlayerRepository : IPlayerRepository
         return player is null
             ? null
             : new PlayerInfo(
-            player.PlayerCode,
-            player.BrandId,
-            player.Username,
-            player.IdentityAuthentication,
-            player.PhoneAuthentication,
-            (PlayerStatus)player.Status,
-            player.WithdrawPassword.Length > 0,
-            player.VipId,
-            player.RegisteredOn);
+                player.PlayerCode,
+                player.BrandId,
+                player.Username,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                !string.IsNullOrEmpty(player.Email),
+                player.WithdrawPassword.Length > 0,
+                player.VipId,
+                player.RegisteredOn);
     }
 
     public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName, CancellationToken cancellationToken = default)
@@ -99,15 +99,15 @@ internal class PlayerRepository : IPlayerRepository
         return player is null
             ? null
             : new PlayerInfo(
-            player.PlayerCode,
-            player.BrandId,
-            player.Username,
-            player.IdentityAuthentication,
-            player.PhoneAuthentication,
-            (PlayerStatus)player.Status,
-            player.WithdrawPassword.Length > 0,
-            player.VipId,
-            player.RegisteredOn);
+                player.PlayerCode,
+                player.BrandId,
+                player.Username,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                !string.IsNullOrEmpty(player.Email),
+                player.WithdrawPassword.Length > 0,
+                player.VipId,
+                player.RegisteredOn);
     }
 
     public async ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
@@ -153,8 +153,16 @@ internal class PlayerRepository : IPlayerRepository
         return properties.ToImmutableDictionary();
     }
 
+    public async ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default)
+        => (PlayerStatus)(await _dbContext.Players
+            .Where(player => player.PlayerCode == playerCode)
+            .Select(player => (short?)player.Status)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false)
+            ?? 1);
+
     public async ValueTask SetPlayerPropertiesAsync(
-        Guid brandId,
+            Guid brandId,
         string playerCode,
         IEnumerable<IDataCommand> modifyCommands,
         CancellationToken cancellationToken = default)

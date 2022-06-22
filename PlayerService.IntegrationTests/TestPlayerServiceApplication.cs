@@ -11,7 +11,9 @@ using Tgs.PlayerService.Repositories.Entities;
 
 namespace Tgs.PlayerService.IntegrationTests;
 
-internal class TestPlayerServiceApplication : WebApplicationFactory<Program>
+extern alias PlayerSvc;
+
+internal class TestPlayerServiceApplication : WebApplicationFactory<PlayerSvc.Program>
 {
     private readonly Action<IWebHostBuilder>? _webHostConfigure;
 

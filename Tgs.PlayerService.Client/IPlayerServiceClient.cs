@@ -18,8 +18,10 @@ public interface IPlayerServiceClient
         string playerCode,
         CancellationToken cancellationToken = default);
 
+    ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
+
     ValueTask SetPlayerPropertiesAsync(
-        string playerCode,
+            string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
         CancellationToken cancellationToken = default);
 }

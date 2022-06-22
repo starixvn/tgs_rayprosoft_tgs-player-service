@@ -23,7 +23,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Tgs.PlayerService.Client\Tgs.PlayerService.Client.csproj" />
-    <ProjectReference Include="..\Tgs.PlayerService\Tgs.PlayerService.csproj" />
+    <ProjectReference Include="..\Tgs.PlayerService\Tgs.PlayerService.csproj">
+      <Aliases>PlayerSvc</Aliases>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
