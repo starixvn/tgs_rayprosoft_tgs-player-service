@@ -250,6 +250,7 @@ public class PlayerTests
             UserName = playerCode,
             IdentityAuthentication = false,
             PhoneAuthentication = false,
+            EmailAuthentication = true,
             IsSetPayPassword = false,
             VipLevelId = null,
             RegisteredOn = DateTime.Parse("2022/05/17 00:00:00")

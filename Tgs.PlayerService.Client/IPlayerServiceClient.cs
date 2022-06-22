@@ -20,6 +20,8 @@ public interface IPlayerServiceClient
 
     ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
 
+    ValueTask RecordRegisterIpAsync(string playerCode, string Ip, string? HostName, CancellationToken cancellationToken = default);
+
     ValueTask SetPlayerPropertiesAsync(
             string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
