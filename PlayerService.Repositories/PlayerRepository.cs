@@ -170,29 +170,21 @@ internal class PlayerRepository : IPlayerRepository
         var record = await _dbContext.PlayerIpRecords
             .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
             .FirstOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false);
+            .ConfigureAwait(false)
+            ?? (await _dbContext.PlayerIpRecords
+                .AddAsync(new PlayerIpRecord
+                {
+                    PlayerCode = playerCode,
+                    IpType = 2,
+                    Ip = ip,
+                    Host = host,
+                    RecordOn = recordTime
+                }, cancellationToken)
+                .ConfigureAwait(false)).Entity;
 
-        if (record is null)
-        {
-            record = new PlayerIpRecord
-            {
-                PlayerCode = playerCode,
-                IpType = 2,
-                Ip = ip,
-                Host = host,
-                RecordOn = recordTime
-            };
-
-            _ = await _dbContext.PlayerIpRecords
-                .AddAsync(record, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        else
-        {
-            record.Ip = ip;
-            record.Host = host;
-            record.RecordOn = recordTime;
-        }
+        record.Ip = ip;
+        record.Host = host;
+        record.RecordOn = recordTime;
 
         _ = await _dbContext
             .SaveChangesAsync(cancellationToken)
@@ -217,32 +209,41 @@ internal class PlayerRepository : IPlayerRepository
         player.UpdatedByUsername = playerCode;
         player.UpdatedOn = DateTime.UtcNow;
 
+        var loginRecord = await _dbContext.PlayerIpRecords
+            .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false)
+            ?? (await _dbContext.PlayerIpRecords
+                .AddAsync(new PlayerIpRecord
+                {
+                    PlayerCode = playerCode,
+                    IpType = 2,
+                    Ip = ip,
+                    Host = host,
+                    RecordOn = recordTime
+                }, cancellationToken)
+                .ConfigureAwait(false)).Entity;
+
+        loginRecord.Ip = ip;
+        loginRecord.Host = host;
+        loginRecord.RecordOn = recordTime;
+
         await _dbContext.PlayerIpRecords
-            .AddRangeAsync(
-                new[] {
-                    new PlayerIpRecord
-                    {
-                        PlayerCode = playerCode,
-                        IpType = 1,
-                        Ip = ip,
-                        Host = host,
-                        RecordOn = recordTime
-                    },
-                    new PlayerIpRecord
-                    {
-                        PlayerCode = playerCode,
-                        IpType = 2,
-                        Ip = ip,
-                        Host = host,
-                        RecordOn = recordTime
-                    }
+            .AddAsync(
+                new PlayerIpRecord
+                {
+                    PlayerCode = playerCode,
+                    IpType = 1,
+                    Ip = ip,
+                    Host = host,
+                    RecordOn = recordTime
                 },
                 cancellationToken)
             .ConfigureAwait(false);
 
         _ = await _dbContext
-            .SaveChangesAsync(cancellationToken)
-            .ConfigureAwait(false);
+                .SaveChangesAsync(cancellationToken)
+                .ConfigureAwait(false);
     }
 
     public async ValueTask SetPlayerPropertiesAsync(
