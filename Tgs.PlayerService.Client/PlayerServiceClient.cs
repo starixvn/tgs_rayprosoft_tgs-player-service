@@ -171,8 +171,35 @@ internal class PlayerServiceClient : IPlayerServiceClient
             .ConfigureAwait(false);
     }
 
-    public async ValueTask RecordRegisterIpAsync(
+    public async ValueTask RecordLoginIpAsync(
         string playerCode,
+        string Ip,
+        string? HostName,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new
+        {
+            Ip,
+            HostName
+        };
+
+        var requestContent = new StringContent(
+            JsonSerializer.Serialize(request, _SerializerOptions),
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json);
+
+        var response = await _httpClient
+            .PutAsync(
+                $"/login-record/{playerCode}",
+                requestContent,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+    }
+
+    public async ValueTask RecordRegisterIpAsync(
+            string playerCode,
         string Ip,
         string? HostName,
         CancellationToken cancellationToken = default)

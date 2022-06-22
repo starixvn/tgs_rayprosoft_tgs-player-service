@@ -9,6 +9,20 @@ namespace Tgs.PlayerService.Controllers;
 [ApiController]
 public class LoginRecordController : ControllerBase
 {
+    [HttpPut("{playerCode}", Name = "SaveLoginIp")]
+    public ValueTask SaveLoginIpAsync(
+        [FromServices] ICommandService<RecordLoginIpCommand> saveService,
+        string playerCode,
+        [FromBody] IpRecordViewModel ipRecord)
+    {
+        var command = new RecordLoginIpCommand(
+            playerCode,
+            ipRecord.Ip,
+            ipRecord.HostName);
+
+        return saveService.ExecuteAsync(command, HttpContext.RequestAborted);
+    }
+
     [HttpPut("register/{playerCode}", Name = "SaveRegisterIp")]
     public ValueTask SaveRegisterIpAsync(
         [FromServices] ICommandService<RecordRegisterIpCommand> saveService,

@@ -12,6 +12,42 @@ namespace Tgs.PlayerService.IntegrationTests;
 public class LoginRecordTests
 {
     [Test]
+    public async Task Record_Login_Ip()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = "test1";
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "player",
+            RealName = "player1",
+            DefaultWalletId = Guid.NewGuid(),
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        await sut.RecordLoginIpAsync(playerCode, "127.0.0.1", "localhost");
+
+        var actual = await dbContext.PlayerIpRecords.ToArrayAsync();
+
+        Assert.AreEqual(1, actual.Length);
+        Assert.AreEqual(2, actual.First().IpType);
+    }
+
+    [Test]
     public async Task Record_Register_Ip()
     {
         await using var web = new TestPlayerServiceApplication();
