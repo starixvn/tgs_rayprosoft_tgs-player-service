@@ -18,6 +18,20 @@ public interface IPlayerRepository
 
     ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
 
+    ValueTask SaveLoginIpAsync(
+        string playerCode,
+        string ip,
+        string? host,
+        DateTime recordTime,
+        CancellationToken cancellationToken = default);
+
+    ValueTask SaveRegisterIpAsync(
+        string playerCode,
+        string ip,
+        string? host,
+        DateTime recordTime,
+        CancellationToken cancellationToken = default);
+
     ValueTask SetPlayerPropertiesAsync(
         Guid brandId,
         string playerCode,
