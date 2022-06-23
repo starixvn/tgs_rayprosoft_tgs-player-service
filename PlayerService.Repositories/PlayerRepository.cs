@@ -228,7 +228,7 @@ internal class PlayerRepository : IPlayerRepository
         loginRecord.Host = host;
         loginRecord.RecordOn = recordTime;
 
-        await _dbContext.PlayerIpRecords
+        _ = await _dbContext.PlayerIpRecords
             .AddAsync(
                 new PlayerIpRecord
                 {
@@ -247,7 +247,7 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     public async ValueTask SetPlayerPropertiesAsync(
-                    Guid brandId,
+        Guid brandId,
         string playerCode,
         IEnumerable<IDataCommand> modifyCommands,
         CancellationToken cancellationToken = default)

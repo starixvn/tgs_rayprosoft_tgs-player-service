@@ -15,22 +15,38 @@ internal class PlayerPutDataCommand : PutDataCommand
         if (context is not PlayerModifyCommandContext modifyContext)
             throw new PlayerModifyCommandContextTypeErrorException();
 
-        if (Name == nameof(PlayerPropertyName.Birthdate))
-            modifyContext.Player.Birthdate = DateOnly.Parse(Value);
-        else
+        switch (Name)
         {
-            if (modifyContext.PlayerProperties.ContainsKey(Name))
-                modifyContext.PlayerProperties[Name].Value = Value;
-            else
-                _ = await modifyContext.TgsContext.PlayerProperties
-                    .AddAsync(new PlayerProperty
-                    {
-                        PlayerCode = modifyContext.Player.PlayerCode,
-                        BrandId = modifyContext.Player.BrandId,
-                        Name = Name,
-                        Value = Value
-                    }, cancellationToken)
-                    .ConfigureAwait(false);
+            case nameof(PlayerPropertyName.Birthdate):
+                modifyContext.Player.Birthdate = DateOnly.Parse(Value);
+                break;
+
+            case nameof(PlayerPropertyName.AreaCode):
+                modifyContext.Player.AreaCode = Value;
+                break;
+
+            case nameof(PlayerPropertyName.Phone):
+                modifyContext.Player.Phone = Value;
+                break;
+
+            case nameof(PlayerPropertyName.PhoneAuthentication):
+                modifyContext.Player.PhoneAuthentication = bool.Parse(Value);
+                break;
+
+            default:
+                if (modifyContext.PlayerProperties.ContainsKey(Name))
+                    modifyContext.PlayerProperties[Name].Value = Value;
+                else
+                    _ = await modifyContext.TgsContext.PlayerProperties
+                        .AddAsync(new PlayerProperty
+                        {
+                            PlayerCode = modifyContext.Player.PlayerCode,
+                            BrandId = modifyContext.Player.BrandId,
+                            Name = Name,
+                            Value = Value
+                        }, cancellationToken)
+                        .ConfigureAwait(false);
+                break;
         }
     }
 }
