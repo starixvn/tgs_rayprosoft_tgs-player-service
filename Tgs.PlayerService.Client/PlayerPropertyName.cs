@@ -10,5 +10,6 @@ public enum PlayerPropertyName
     WhatsApp,
     AreaCode,
     Phone,
-    PhoneAuthentication
+    PhoneAuthentication,
+    Email
 }
