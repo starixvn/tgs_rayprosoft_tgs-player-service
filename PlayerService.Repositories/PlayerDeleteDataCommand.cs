@@ -31,6 +31,10 @@ internal class PlayerDeleteDataCommand : DeleteDataCommand
                 modifyContext.Player.PhoneAuthentication = false;
                 break;
 
+            case nameof(PlayerPropertyName.Email):
+                modifyContext.Player.Email = null;
+                break;
+
             default:
                 if (modifyContext.PlayerProperties.TryGetValue(Name, out var prop))
                     _ = modifyContext.TgsContext.PlayerProperties.Remove(prop);

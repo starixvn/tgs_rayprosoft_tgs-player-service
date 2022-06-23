@@ -33,6 +33,10 @@ internal class PlayerPutDataCommand : PutDataCommand
                 modifyContext.Player.PhoneAuthentication = bool.Parse(Value);
                 break;
 
+            case nameof(PlayerPropertyName.Email):
+                modifyContext.Player.Email = Value;
+                break;
+
             default:
                 if (modifyContext.PlayerProperties.ContainsKey(Name))
                     modifyContext.PlayerProperties[Name].Value = Value;

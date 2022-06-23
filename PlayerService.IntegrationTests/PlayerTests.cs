@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using Tgs.PlayerService.Client;
 using Tgs.PlayerService.Repositories.Entities;
 
@@ -393,58 +394,6 @@ public class PlayerTests
     }
 
     [Test]
-    public async Task Unset_Player_AreaCode_And_Phone()
-    {
-        await using var web = new TestPlayerServiceApplication();
-
-        var httpClient = web.CreateClient();
-
-        var sut = new PlayerServiceClient(httpClient);
-
-        var brandId = Guid.NewGuid();
-        var playerCode = "player1";
-
-        var dbContext = web.Services.GetRequiredService<TgsContext>();
-
-        var playerRow = new Player
-        {
-            PlayerCode = playerCode,
-            BrandId = brandId,
-            DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
-            Username = playerCode,
-            RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
-            AreaCode = "123",
-            Phone = "12345678",
-            PhoneAuthentication = true
-        };
-
-        _ = await dbContext.Players.AddAsync(playerRow);
-
-        _ = await dbContext.SaveChangesAsync();
-
-        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
-        {
-            [Client.PlayerPropertyName.AreaCode] = null,
-            [Client.PlayerPropertyName.Phone] = null,
-            [Client.PlayerPropertyName.PhoneAuthentication] = null
-        };
-
-        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
-
-        var actual = await dbContext.PlayerProperties
-            .Where(x => x.PlayerCode == playerCode)
-            .ToDictionaryAsync(x => x.Name, x => x.Value);
-
-        Assert.IsNull(playerRow.AreaCode);
-        Assert.IsNull(playerRow.Phone);
-        Assert.IsFalse(playerRow.PhoneAuthentication);
-    }
-
-    [Test]
     public async Task Set_Player_AreaCode_And_Phone()
     {
         await using var web = new TestPlayerServiceApplication();
@@ -491,6 +440,51 @@ public class PlayerTests
         Assert.AreEqual("123", playerRow.AreaCode);
         Assert.AreEqual("12345678", playerRow.Phone);
         Assert.IsTrue(playerRow.PhoneAuthentication);
+    }
+
+    [Test]
+    public async Task Set_Player_Email()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.Email] = "tester@test.com"
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.AreEqual("tester@test.com", playerRow.Email);
     }
 
     [Test]
@@ -554,5 +548,103 @@ public class PlayerTests
         Assert.AreEqual(2, dbContext.PlayerProperties.Count());
         Assert.AreEqual("NewLineId", actual["Line"]);
         Assert.AreEqual("TelegramId", actual["Telegram"]);
+    }
+
+    [Test]
+    public async Task Unset_Player_AreaCode_And_Phone()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            AreaCode = "123",
+            Phone = "12345678",
+            PhoneAuthentication = true
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.AreaCode] = null,
+            [Client.PlayerPropertyName.Phone] = null,
+            [Client.PlayerPropertyName.PhoneAuthentication] = null
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.IsNull(playerRow.AreaCode);
+        Assert.IsNull(playerRow.Phone);
+        Assert.IsFalse(playerRow.PhoneAuthentication);
+    }
+
+    [Test]
+    public async Task Unset_Player_Email()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Email = "tester@test.com"
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.Email] = null
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.IsNull(playerRow.Email);
     }
 }
