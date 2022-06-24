@@ -167,6 +167,8 @@ internal class PlayerRepository : IPlayerRepository
         DateTime recordTime,
         CancellationToken cancellationToken = default)
     {
+        var recordTimeUtc = recordTime.ToUniversalTime();
+
         var record = await _dbContext.PlayerIpRecords
             .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
             .FirstOrDefaultAsync(cancellationToken)
@@ -205,7 +207,9 @@ internal class PlayerRepository : IPlayerRepository
         if (player is null)
             return;
 
-        player.RegisteredOn = recordTime;
+        var recordTimeUtc = recordTime.ToUniversalTime();
+
+        player.RegisteredOn = recordTimeUtc;
         player.UpdatedByUsername = playerCode;
         player.UpdatedOn = DateTime.UtcNow;
 
@@ -220,13 +224,13 @@ internal class PlayerRepository : IPlayerRepository
                     IpType = 2,
                     Ip = ip,
                     Host = host,
-                    RecordOn = recordTime
+                    RecordOn = recordTimeUtc
                 }, cancellationToken)
                 .ConfigureAwait(false)).Entity;
 
         loginRecord.Ip = ip;
         loginRecord.Host = host;
-        loginRecord.RecordOn = recordTime;
+        loginRecord.RecordOn = recordTimeUtc;
 
         _ = await _dbContext.PlayerIpRecords
             .AddAsync(
@@ -236,7 +240,7 @@ internal class PlayerRepository : IPlayerRepository
                     IpType = 1,
                     Ip = ip,
                     Host = host,
-                    RecordOn = recordTime
+                    RecordOn = recordTimeUtc
                 },
                 cancellationToken)
             .ConfigureAwait(false);
