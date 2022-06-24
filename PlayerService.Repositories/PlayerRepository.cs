@@ -278,4 +278,19 @@ internal class PlayerRepository : IPlayerRepository
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
     }
+
+    public async ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status, CancellationToken cancellationToken = default)
+    {
+        var player = await _dbContext.Players
+            .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        if (player == null)
+            return;
+
+        player.Status = (short)status;
+        player.UpdatedOn = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
 }

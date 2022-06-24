@@ -184,4 +184,16 @@ public class PlayerController : ControllerBase
         return commandService
             .ExecuteAsync(command, HttpContext.RequestAborted);
     }
+
+    [HttpPut("status/{playerCode}", Name = "SetPlayerStatus")]
+    [SuccessStatusCode(200, "Status set")]
+    public ValueTask SetPlayerStatusAsync(
+        [FromServices] ICommandService<SetPlayerStatusCommand> setService,
+        string playerCode,
+        [FromBody] PlayerStatus status)
+    {
+        var command = new SetPlayerStatusCommand(playerCode, status);
+
+        return setService.ExecuteAsync(command, HttpContext.RequestAborted);
+    }
 }
