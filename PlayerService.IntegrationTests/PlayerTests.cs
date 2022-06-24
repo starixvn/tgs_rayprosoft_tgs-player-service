@@ -551,6 +551,43 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task Set_Player_Status()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = "player1";
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = Guid.NewGuid(),
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "player1",
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Status = (short)PlayerStatus.RegisterUndone
+        };
+
+        _ = await dbContext.Players
+            .AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        await sut.SetPlayerStatusAsync(playerCode, Client.PlayerStatus.Enabled);
+
+        Assert.AreEqual((short)Client.PlayerStatus.Enabled, playerRow.Status);
+    }
+
+    [Test]
     public async Task Unset_Player_AreaCode_And_Phone()
     {
         await using var web = new TestPlayerServiceApplication();

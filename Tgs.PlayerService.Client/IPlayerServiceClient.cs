@@ -28,4 +28,6 @@ public interface IPlayerServiceClient
             string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
         CancellationToken cancellationToken = default);
+
+    ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus playerStatus, CancellationToken cancellationToken = default);
 }

@@ -199,7 +199,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
     }
 
     public async ValueTask RecordRegisterIpAsync(
-            string playerCode,
+        string playerCode,
         string Ip,
         string? HostName,
         CancellationToken cancellationToken = default)
@@ -226,7 +226,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
     }
 
     public async ValueTask SetPlayerPropertiesAsync(
-            string playerCode,
+        string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
         CancellationToken cancellationToken = default)
     {
@@ -237,6 +237,23 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
         var response = await _httpClient
             .PostAsync($"/player/prop/{playerCode}", requestContent, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+    }
+
+    public async ValueTask SetPlayerStatusAsync(
+        string playerCode,
+        PlayerStatus playerStatus,
+        CancellationToken cancellationToken = default)
+    {
+        var requestContent = new StringContent(
+            JsonSerializer.Serialize(playerStatus, _SerializerOptions),
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json);
+
+        var response = await _httpClient
+            .PutAsync($"/player/status/{playerCode}", requestContent, cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();

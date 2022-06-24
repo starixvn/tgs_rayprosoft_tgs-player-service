@@ -37,4 +37,6 @@ public interface IPlayerRepository
         string playerCode,
         IEnumerable<IDataCommand> modifyCommands,
         CancellationToken cancellationToken = default);
+
+    ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status, CancellationToken cancellationToken = default);
 }

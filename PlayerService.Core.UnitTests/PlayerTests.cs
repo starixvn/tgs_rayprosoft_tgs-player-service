@@ -317,4 +317,19 @@ public class PlayerTests
                  playerInfo.PlayerCode,
                  Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
     }
+
+    [Test]
+    public async Task Set_Player_Status()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new SetPlayerStatusCommandService(fakePlayerRepository);
+
+        var command = new SetPlayerStatusCommand("player1", PlayerStatus.Enabled);
+
+        await sut.ExecuteAsync(command);
+
+        _ = fakePlayerRepository.Received(1)
+            .SetPlayerStatusAsync(Arg.Is(command.PlayerCode), Arg.Is(command.Status));
+    }
 }
