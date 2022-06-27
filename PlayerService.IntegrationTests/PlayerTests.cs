@@ -588,6 +588,50 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task Set_PlayerProperties_After_Get_By_Cache_Should_Correct()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var a = await sut.GetPlayerPropertiesAsync(playerCode);
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.Line] = "NewLineId"
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await sut.GetPlayerPropertiesAsync(playerCode);
+
+        Assert.AreEqual(3, actual.Count);
+        Assert.AreEqual("NewLineId", actual[nameof(Client.PlayerPropertyName.Line)]);
+    }
+
+    [Test]
     public async Task Unset_Player_AreaCode_And_Phone()
     {
         await using var web = new TestPlayerServiceApplication();

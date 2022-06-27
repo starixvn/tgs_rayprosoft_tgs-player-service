@@ -43,7 +43,9 @@ builder.Services
     {
         var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString("Tgs");
         _ = optionsBuilder.UseNpgsql(connectionString);
-    });
+    })
+    .AddMemoryCache()
+    .AddPlayerServiceCache();
 
 builder.Services
     .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
