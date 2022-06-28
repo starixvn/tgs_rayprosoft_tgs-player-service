@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PlayerService.Core.Cache\PlayerService.Core.Cache.csproj" />
     <ProjectReference Include="..\PlayerService.Core\PlayerService.Core.csproj" />
     <ProjectReference Include="..\PlayerService.Repositories\PlayerService.Repositories.csproj" />
   </ItemGroup>
