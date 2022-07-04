@@ -31,10 +31,9 @@ internal class GetCachedPlayerQueryService : IGetService<GetPlayerQuery, PlayerI
                 .GetAsync(query, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (result is null)
-                entry.AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(3D);
-            else
-                entry.AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(10D);
+            entry.AbsoluteExpiration = result is null 
+                ? DateTimeOffset.Now.AddSeconds(3D) 
+                : DateTimeOffset.Now.AddSeconds(10D);
 
             return result;
         }).ConfigureAwait(false);
