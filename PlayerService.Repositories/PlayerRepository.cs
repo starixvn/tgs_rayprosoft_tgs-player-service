@@ -295,6 +295,8 @@ internal class PlayerRepository : IPlayerRepository
         player.Status = (short)status;
         player.UpdatedOn = DateTime.UtcNow;
 
-        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _ = await _dbContext
+            .SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 }
