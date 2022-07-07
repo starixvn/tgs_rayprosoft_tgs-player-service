@@ -6,7 +6,7 @@ public record PlayerInfo(
     string UserName,
     bool IdentityAuthentication,
     bool PhoneAuthentication,
-    PlayerStatus Status,
+    bool EmailAuthentication,
     bool IsSetPayPassword,
     Guid? VipLevelId,
     DateTime? RegisteredOn);

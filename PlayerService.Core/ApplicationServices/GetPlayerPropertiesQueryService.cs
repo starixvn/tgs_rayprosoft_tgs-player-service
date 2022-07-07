@@ -1,8 +1,9 @@
-﻿using Tgs.ServiceUtility;
+﻿using System.Collections.Immutable;
+using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class GetPlayerPropertiesQueryService : IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>>
+internal class GetPlayerPropertiesQueryService : IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>>
 {
     private readonly IPlayerRepository _playerRepository;
 
@@ -12,7 +13,7 @@ internal class GetPlayerPropertiesQueryService : IGetService<GetPlayerProperties
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
     }
 
-    public ValueTask<IReadOnlyDictionary<string, string>> GetAsync(
+    public ValueTask<IImmutableDictionary<string, string>> GetAsync(
         GetPlayerPropertiesQuery query,
         CancellationToken cancellationToken = default)
         => _playerRepository
