@@ -7,5 +7,9 @@ public enum PlayerPropertyName
     Viber,
     Telegram,
     FacebookMessenger,
-    WhatsApp
+    WhatsApp,
+    AreaCode,
+    Phone,
+    PhoneAuthentication,
+    Email
 }

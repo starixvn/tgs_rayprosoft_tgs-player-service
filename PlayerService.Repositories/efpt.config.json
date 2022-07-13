@@ -22,11 +22,15 @@
          "ObjectType": 0
       },
       {
+         "Name": "dbo.player_ip_records",
+         "ObjectType": 0
+      },
+      {
          "Name": "dbo.player_properties",
          "ObjectType": 0
       }
    ],
-   "UiHint": "tgs-local",
+   "UiHint": "tgs",
    "UseBoolPropertiesWithoutDefaultSql": true,
    "UseDatabaseNames": false,
    "UseDbContextSplitting": true,

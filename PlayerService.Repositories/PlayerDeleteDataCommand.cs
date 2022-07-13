@@ -13,10 +13,33 @@ internal class PlayerDeleteDataCommand : DeleteDataCommand
         if (context is not PlayerModifyCommandContext modifyContext)
             throw new PlayerModifyCommandContextTypeErrorException();
 
-        if (Name == nameof(PlayerPropertyName.Birthdate))
-            modifyContext.Player.Birthday = null;
-        else if (modifyContext.PlayerProperties.TryGetValue(Name, out var prop))
-            _ = modifyContext.TgsContext.PlayerProperties.Remove(prop);
+        switch (Name)
+        {
+            case nameof(PlayerPropertyName.Birthdate):
+                modifyContext.Player.Birthday = null;
+                break;
+
+            case nameof(PlayerPropertyName.AreaCode):
+                modifyContext.Player.AreaCode = null;
+                break;
+
+            case nameof(PlayerPropertyName.Phone):
+                modifyContext.Player.Phone = null;
+                break;
+
+            case nameof(PlayerPropertyName.PhoneAuthentication):
+                modifyContext.Player.PhoneAuthentication = false;
+                break;
+
+            case nameof(PlayerPropertyName.Email):
+                modifyContext.Player.Email = null;
+                break;
+
+            default:
+                if (modifyContext.PlayerProperties.TryGetValue(Name, out var prop))
+                    _ = modifyContext.TgsContext.PlayerProperties.Remove(prop);
+                break;
+        }
 
         return ValueTask.CompletedTask;
     }

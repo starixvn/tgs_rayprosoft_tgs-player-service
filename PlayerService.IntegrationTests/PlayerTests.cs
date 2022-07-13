@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using Tgs.PlayerService.Client;
+using Tgs.PlayerService.Repositories.Entities;
 
 namespace Tgs.PlayerService.IntegrationTests;
 
@@ -25,22 +28,28 @@ public class PlayerTests
             ["DefaultWalletId"] = walletId.ToString()
         };
 
-        await using var web = new TestPlayerServiceApplication(
-            hostBuilder => hostBuilder
-                .ConfigureServices(services =>
-                {
-                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-
-                    _ = fakePlayerRepository
-                        .GetPlayerPropertiesAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
-                        .Returns(playerProperties);
-
-                    _ = services.AddSingleton(fakePlayerRepository);
-                }));
+        await using var web = new TestPlayerServiceApplication();
 
         var httpClient = web.CreateClient();
 
         var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "player",
+            RealName = "player1",
+            DefaultWalletId = walletId,
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        });
+
+        _ = await dbContext.SaveChangesAsync();
 
         var actual = await sut.GetPlayerPropertiesAsync("player1");
 
@@ -50,22 +59,28 @@ public class PlayerTests
     [Test]
     public async Task Get_Deposited_Amount()
     {
-        await using var web = new TestPlayerServiceApplication(
-            hostBuilder => hostBuilder
-                .ConfigureServices(services =>
-                {
-                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-                    _ = fakePlayerRepository.GetPlayerDepositedAmountAsync(
-                        Arg.Is("player1"),
-                        Arg.Any<CancellationToken>())
-                        .Returns(1000m);
-
-                    _ = services.AddSingleton(fakePlayerRepository);
-                }));
+        await using var web = new TestPlayerServiceApplication();
 
         var httpClient = web.CreateClient();
 
         var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = "player1",
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "player",
+            RealName = "player1",
+            AccumulatedDeposit = 1000M,
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        });
+
+        _ = await dbContext.SaveChangesAsync();
 
         var actual = await sut.GetPlayerDepositedAmountAsync("player1");
 
@@ -87,32 +102,32 @@ public class PlayerTests
             PhoneAuthentication = false,
             IsSetPayPassword = false,
             VipLevelId = null,
-            Status = Client.PlayerStatus.Enabled,
             RegisteredOn = DateTime.Parse("2022/05/17 00:00:00")
         };
 
-        await using var web = new TestPlayerServiceApplication(
-            hostBuilder => hostBuilder
-                .ConfigureServices(services =>
-                {
-                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-                    _ = fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
-                            .Returns(new PlayerInfo(
-                                playerCode,
-                                brandId,
-                                playerCode,
-                                false,
-                                false,
-                                PlayerStatus.Enabled,
-                                false, null,
-                                DateTime.Parse("2022/05/17 00:00:00")));
-
-                    _ = services.AddSingleton(fakePlayerRepository);
-                }));
+        await using var web = new TestPlayerServiceApplication();
 
         var httpClient = web.CreateClient();
 
         var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            RegisteredOn = expected.RegisteredOn
+        });
+
+        _ = await dbContext.SaveChangesAsync();
 
         var actual = await sut.GetPlayerInfoAsync(playerCode)
             .ConfigureAwait(false);
@@ -125,16 +140,7 @@ public class PlayerTests
     {
         var playerCode = "player1";
 
-        await using var web = new TestPlayerServiceApplication(
-            hostBuilder => hostBuilder
-                .ConfigureServices(services =>
-                {
-                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-                    _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
-                        .Returns((Tgs.PlayerService.PlayerInfo?)null);
-
-                    _ = services.AddSingleton(fakePlayerRepository);
-                }));
+        await using var web = new TestPlayerServiceApplication();
 
         var httpClient = web.CreateClient();
 
@@ -149,36 +155,48 @@ public class PlayerTests
     [Test]
     public async Task Get_Player_Properties()
     {
-        var expected = new Dictionary<string, string>
-        {
-            ["RealName"] = "player1",
-            ["Viber"] = "ViberId"
-        };
-
-        var playerCode = "player1";
-
-        var playerProperties = new Dictionary<string, string>
-        {
-            ["RealName"] = "player1",
-            ["Viber"] = "ViberId"
-        };
-
-        await using var web = new TestPlayerServiceApplication(
-            hostBuilder => hostBuilder
-                .ConfigureServices(services =>
-                {
-                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-
-                    _ = fakePlayerRepository
-                        .GetPlayerPropertiesAsync(Arg.Is(playerCode), Arg.Any<CancellationToken>())
-                        .Returns(playerProperties);
-
-                    _ = services.AddSingleton(fakePlayerRepository);
-                }));
+        await using var web = new TestPlayerServiceApplication();
 
         var httpClient = web.CreateClient();
 
         var sut = new PlayerServiceClient(httpClient);
+
+        var playerCode = "player1";
+        var brandId = Guid.NewGuid();
+        var defaultWalletId = Guid.NewGuid();
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = "player1",
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            DefaultWalletId = defaultWalletId
+        });
+
+        _ = await dbContext.PlayerProperties.AddAsync(new PlayerProperty
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            Name = "Viber",
+            Value = "ViberId"
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var expected = new Dictionary<string, string>
+        {
+            ["RealName"] = "player1",
+            ["Viber"] = "ViberId",
+            ["DefaultWalletId"] = defaultWalletId.ToString()
+        };
 
         var actual = await sut.GetPlayerPropertiesAsync("player1");
 
@@ -186,27 +204,333 @@ public class PlayerTests
     }
 
     [Test]
-    public async Task Set_Player_Properties()
+    public async Task Get_Player_Status()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = Guid.NewGuid(),
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Status = (short)PlayerStatus.RegisterUndone
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerStatusAsync(playerCode);
+
+        Assert.AreEqual(Client.PlayerStatus.RegisterUndone, actual);
+    }
+
+    [Test]
+    public async Task Get_PlayerInfo_By_Email()
     {
         var brandId = Guid.NewGuid();
         var playerCode = "player1";
+        var mail = "tester@test.com";
 
-        var playerInfo = new PlayerInfo(
-            playerCode,
-            brandId,
-            playerCode,
-            false,
-            false,
-            PlayerStatus.Enabled,
-            false,
-            null,
-            DateTime.Parse("2022/05/17 00:00:00"));
-
-        var oldProperties = new Dictionary<string, string>
+        var expected = new Client.PlayerInfo
         {
-            ["Viber"] = "ViberId",
-            ["Line"] = "LineId"
+            BrandId = brandId,
+            PlayerCode = playerCode,
+            UserName = playerCode,
+            IdentityAuthentication = false,
+            PhoneAuthentication = false,
+            EmailAuthentication = true,
+            IsSetPayPassword = false,
+            VipLevelId = null,
+            RegisteredOn = DateTime.Parse("2022/05/17 00:00:00")
         };
+
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Email = mail,
+            RegisteredOn = expected.RegisteredOn
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerInfoByEmailAsync(brandId, mail)
+            .ConfigureAwait(false);
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public async Task Get_PlayerInfo_By_Phone()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+        var phone = "13800138000";
+        var areaCode = "123";
+
+        var expected = new Client.PlayerInfo
+        {
+            BrandId = brandId,
+            PlayerCode = playerCode,
+            UserName = playerCode,
+            IdentityAuthentication = false,
+            PhoneAuthentication = false,
+            IsSetPayPassword = false,
+            VipLevelId = null,
+            RegisteredOn = DateTime.Parse("2022/05/17 00:00:00")
+        };
+
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Phone = phone,
+            AreaCode = areaCode,
+            RegisteredOn = expected.RegisteredOn
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerInfoByPhoneAsync(brandId, areaCode, phone)
+            .ConfigureAwait(false);
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public async Task Get_PlayerInfo_By_UserName()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+        var userName = "Tester";
+        var phone = "13800138000";
+        var areaCode = "123";
+
+        var expected = new Client.PlayerInfo
+        {
+            BrandId = brandId,
+            PlayerCode = playerCode,
+            UserName = userName,
+            IdentityAuthentication = false,
+            PhoneAuthentication = false,
+            IsSetPayPassword = false,
+            VipLevelId = null,
+            RegisteredOn = DateTime.Parse("2022/05/17 00:00:00")
+        };
+
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = userName,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Phone = phone,
+            AreaCode = areaCode,
+            RegisteredOn = expected.RegisteredOn
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerInfoByUserNameAsync(brandId, userName)
+            .ConfigureAwait(false);
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public async Task Set_Player_AreaCode_And_Phone()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.AreaCode] = "123",
+            [Client.PlayerPropertyName.Phone] = "12345678",
+            [Client.PlayerPropertyName.PhoneAuthentication] = true.ToString()
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.AreEqual("123", playerRow.AreaCode);
+        Assert.AreEqual("12345678", playerRow.Phone);
+        Assert.IsTrue(playerRow.PhoneAuthentication);
+    }
+
+    [Test]
+    public async Task Set_Player_Email()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.Email] = "tester@test.com"
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.AreEqual("tester@test.com", playerRow.Email);
+    }
+
+    [Test]
+    public async Task Set_Player_Properties()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        });
+
+        await dbContext.PlayerProperties.AddRangeAsync(
+            new PlayerProperty
+            {
+                PlayerCode = playerCode,
+                BrandId = brandId,
+                Name = "Viber",
+                Value = "ViberId"
+            },
+            new PlayerProperty
+            {
+                PlayerCode = playerCode,
+                BrandId = brandId,
+                Name = "Line",
+                Value = "LineId"
+            });
+
+        _ = await dbContext.SaveChangesAsync();
 
         var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
         {
@@ -215,25 +539,193 @@ public class PlayerTests
             [Client.PlayerPropertyName.Telegram] = "TelegramId"
         };
 
-        await using var web = new TestPlayerServiceApplication(
-            hostBuilder => hostBuilder
-                .ConfigureServices(services =>
-                {
-                    var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-                    _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
-                        .Returns(playerInfo);
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
 
-                    _ = fakePlayerRepository.GetPlayerPropertiesAsync(playerCode)
-                        .Returns(oldProperties);
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-                    _ = services.AddSingleton(fakePlayerRepository);
-                }));
+        Assert.AreEqual(2, dbContext.PlayerProperties.Count());
+        Assert.AreEqual("NewLineId", actual["Line"]);
+        Assert.AreEqual("TelegramId", actual["Telegram"]);
+    }
+
+    [Test]
+    public async Task Set_Player_Status()
+    {
+        await using var web = new TestPlayerServiceApplication();
 
         var httpClient = web.CreateClient();
 
         var sut = new PlayerServiceClient(httpClient);
 
-        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties)
-            .ConfigureAwait(false);
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = "player1";
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = Guid.NewGuid(),
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "player1",
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Status = (short)PlayerStatus.RegisterUndone
+        };
+
+        _ = await dbContext.Players
+            .AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        await sut.SetPlayerStatusAsync(playerCode, Client.PlayerStatus.Enabled);
+
+        Assert.AreEqual((short)Client.PlayerStatus.Enabled, playerRow.Status);
+    }
+
+    [Test]
+    public async Task Set_PlayerProperties_After_Get_By_Cache_Should_Correct()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var a = await sut.GetPlayerPropertiesAsync(playerCode);
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.Line] = "NewLineId"
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await sut.GetPlayerPropertiesAsync(playerCode);
+
+        Assert.AreEqual(3, actual.Count);
+        Assert.AreEqual("NewLineId", actual[nameof(Client.PlayerPropertyName.Line)]);
+    }
+
+    [Test]
+    public async Task Unset_Player_AreaCode_And_Phone()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            AreaCode = "123",
+            Phone = "12345678",
+            PhoneAuthentication = true
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.AreaCode] = null,
+            [Client.PlayerPropertyName.Phone] = null,
+            [Client.PlayerPropertyName.PhoneAuthentication] = null
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.IsNull(playerRow.AreaCode);
+        Assert.IsNull(playerRow.Phone);
+        Assert.IsFalse(playerRow.PhoneAuthentication);
+    }
+
+    [Test]
+    public async Task Unset_Player_Email()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Email = "tester@test.com"
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.Email] = null
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.IsNull(playerRow.Email);
     }
 }
