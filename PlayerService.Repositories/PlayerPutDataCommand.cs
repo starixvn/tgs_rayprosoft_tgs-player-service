@@ -37,6 +37,10 @@ internal class PlayerPutDataCommand : PutDataCommand
                 modifyContext.Player.Email = Value;
                 break;
 
+            case nameof(PlayerPropertyName.RealName):
+                modifyContext.Player.RealName = Value;
+                break;
+
             default:
                 if (modifyContext.PlayerProperties.ContainsKey(Name))
                     modifyContext.PlayerProperties[Name].Value = Value;
