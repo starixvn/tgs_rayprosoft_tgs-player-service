@@ -2,6 +2,7 @@
 
 public enum PlayerPropertyName
 {
+    RealName,
     Birthdate,
     Line,
     Viber,
