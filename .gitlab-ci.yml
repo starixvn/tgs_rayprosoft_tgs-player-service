@@ -108,7 +108,6 @@ deploy-dev:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
-        --name-template RELEASE-NAME
         -f - 
       {
         "nodeSelector": $node_selector,
@@ -119,7 +118,6 @@ deploy-dev:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
-        --name-template RELEASE-NAME
         -f - \
         | kubectl -n dev apply -f -
       {
@@ -150,7 +148,6 @@ deploy-staging:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
-        --name-template RELEASE-NAME
         -f - 
       {
         "nodeSelector": $node_selector,
@@ -161,7 +158,6 @@ deploy-staging:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
-        --name-template RELEASE-NAME
         -f - \
         | kubectl -n dev apply -f -
       {
@@ -192,7 +188,6 @@ deploy-prod:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
-        --name-template RELEASE-NAME
         -f - 
       {
         "nodeSelector": $node_selector,
@@ -203,7 +198,6 @@ deploy-prod:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
-        --name-template RELEASE-NAME
         -f - \
         | kubectl -n dev apply -f -
       {
