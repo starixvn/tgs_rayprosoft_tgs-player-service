@@ -47,7 +47,7 @@ Selector labels
 */}}
 {{- define "player-api.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "player-api.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/instance: RELEASE-NAME
 {{- end }}
 
 {{/*
