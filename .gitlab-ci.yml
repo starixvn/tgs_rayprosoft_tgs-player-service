@@ -32,7 +32,7 @@ unit-test:
   artifacts:
     when: always
     reports:
-      junit: ./src/Tests/TestReports/*-TestReport.xml
+      junit: ./TestReports/*-TestReport.xml
 
 push-nuget:
   stage: publish
@@ -61,7 +61,7 @@ push-docker-image:
   only:
     - main
   script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID"
+    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
     - dotnet build "Tgs.PlayerService/Tgs.PlayerService.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
     - docker push $ImageName:$Tag
 
@@ -102,13 +102,13 @@ deploy-dev:
   before_script:
     - export KUBECONFIG=$KubeConfig_Raypro_dev
   script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-$namespace.$CI_PIPELINE_IID"
     - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
+        --name-template RELEASE-NAME
         -f - 
       {
         "nodeSelector": $node_selector,
@@ -119,6 +119,7 @@ deploy-dev:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
+        --name-template RELEASE-NAME
         -f - \
         | kubectl -n dev apply -f -
       {
@@ -143,14 +144,13 @@ deploy-staging:
   before_script:
     - export KUBECONFIG=$KubeConfig_Raypro_staging
   script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-$namespace.$CI_PIPELINE_IID"
     - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
-        --set image.tag=$Tag \
+        --name-template RELEASE-NAME
         -f - 
       {
         "nodeSelector": $node_selector,
@@ -161,7 +161,7 @@ deploy-staging:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
-        --set image.tag=$Tag \
+        --name-template RELEASE-NAME
         -f - \
         | kubectl -n dev apply -f -
       {
@@ -186,14 +186,13 @@ deploy-prod:
   before_script:
     - export KUBECONFIG=$KubeConfig_Raypro_prod
   script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-$namespace.$CI_PIPELINE_IID"
     - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
-        --set image.tag=$Tag \
+        --name-template RELEASE-NAME
         -f - 
       {
         "nodeSelector": $node_selector,
@@ -204,7 +203,7 @@ deploy-prod:
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/player-api \
         -n $namespace \
-        --set image.tag=$Tag \
+        --name-template RELEASE-NAME
         -f - \
         | kubectl -n dev apply -f -
       {
