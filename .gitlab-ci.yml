@@ -72,7 +72,7 @@ push-k8s-template:
   only:
     - main
   script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID"
+    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
     - mkdir -p artifacts/k8s
     - cp -R deployment/k8s/player-api artifacts/k8s/
     - |
