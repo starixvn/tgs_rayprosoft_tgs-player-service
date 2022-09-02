@@ -17,6 +17,7 @@ namespace Tgs.PlayerService.Repositories.Entities
 
         public virtual DbSet<Player> Players { get; set; } = null!;
         public virtual DbSet<PlayerIpRecord> PlayerIpRecords { get; set; } = null!;
+        public virtual DbSet<PlayerParent> PlayerParents { get; set; } = null!;
         public virtual DbSet<PlayerProperty> PlayerProperties { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,6 +27,7 @@ namespace Tgs.PlayerService.Repositories.Entities
 
             modelBuilder.ApplyConfiguration(new Configurations.PlayerConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerIpRecordConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PlayerParentConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerPropertyConfiguration());
             OnModelCreatingPartial(modelBuilder);
         }
