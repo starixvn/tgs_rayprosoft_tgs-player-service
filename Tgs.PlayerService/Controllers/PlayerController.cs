@@ -166,6 +166,28 @@ public class PlayerController : ControllerBase
         return getService.GetAsync(query, HttpContext.RequestAborted);
     }
 
+    [HttpGet("{brandId:Guid}")]
+    public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
+        [FromServices] IQueryService<PlayerListQuery, PlayerListItem> queryService,
+        Guid brandId,
+        [FromQuery] PlayerListQueryViewModel queryViewModel)
+    {
+        var query = new PlayerListQuery(
+            brandId,
+            queryViewModel.Status,
+            queryViewModel.VipId,
+            queryViewModel.UserName,
+            queryViewModel.AgentId,
+            queryViewModel.ParentPlayerCode,
+            queryViewModel.Phone,
+            queryViewModel.RealName,
+            queryViewModel.RegisteredDomainName,
+            queryViewModel.BeginRegisteredTime,
+            queryViewModel.EndRegisteredTime);
+
+        return queryService.QueryAsync(query, HttpContext.RequestAborted);
+    }
+
     [HttpPost("prop/{playerCode}", Name = "SetPlayerProperties")]
     [SuccessStatusCode(200, "Set player properties success")]
     [FailStatusCode(400, "Input properties is empty")]

@@ -4,7 +4,7 @@
 		"Tgs.PlayerService": {
 			"commandName": "Project",
 			"launchBrowser": true,
-			"launchUrl": "healthz",
+			"launchUrl": "swagger",
 			"environmentVariables": {
 				"ASPNETCORE_ENVIRONMENT": "Development"
 			},
@@ -14,7 +14,7 @@
 		"Docker": {
 			"commandName": "Docker",
 			"launchBrowser": true,
-			"launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/healthz",
+			"launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
 			"publishAllPorts": true
 		}
 	}

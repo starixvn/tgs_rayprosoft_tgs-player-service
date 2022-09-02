@@ -26,11 +26,15 @@
          "ObjectType": 0
       },
       {
+         "Name": "dbo.player_parents",
+         "ObjectType": 0
+      },
+      {
          "Name": "dbo.player_properties",
          "ObjectType": 0
       }
    ],
-   "UiHint": "tgs",
+   "UiHint": "tgs-local",
    "UseBoolPropertiesWithoutDefaultSql": true,
    "UseDatabaseNames": false,
    "UseDbContextSplitting": true,
