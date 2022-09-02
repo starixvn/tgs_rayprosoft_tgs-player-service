@@ -2,9 +2,11 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Net.Mime;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Tgs.PlayerService.Client;
 
@@ -171,8 +173,59 @@ internal class PlayerServiceClient : IPlayerServiceClient
             .ConfigureAwait(false);
     }
 
+    public async IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
+        Guid brandId,
+        PlayerListQuery query,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var queryStrings = new Dictionary<string, string>();
+
+        if (query.Status is not null)
+            queryStrings.Add("status", query.Status.Value.ToString());
+
+        if (query.ParentPlayerCode is not null)
+            queryStrings.Add("parentPlayerCode", query.ParentPlayerCode);
+
+        if (query.RegisteredDomainName is not null)
+            queryStrings.Add("registeredDomainName", query.RegisteredDomainName.Trim());
+
+        if (query.AgentId is not null)
+            queryStrings.Add("agentId", query.AgentId.Value.ToString());
+
+        if (query.BeginRegisteredTime is not null)
+            queryStrings.Add("beginRegisteredTime", query.BeginRegisteredTime.Value.ToString("o"));
+
+        if (query.EndRegisteredTime is not null)
+            queryStrings.Add("endRegisteredTime", query.EndRegisteredTime.Value.ToString("o"));
+
+        if (query.Phone is not null)
+            queryStrings.Add("phone", query.Phone);
+
+        if (query.RealName is not null)
+            queryStrings.Add("realName", query.RealName);
+
+        if (query.UserName is not null)
+            queryStrings.Add("userName", query.UserName);
+
+        if (query.VipId is not null)
+            queryStrings.Add("vipId", query.VipId.Value.ToString());
+
+        var requestUri = QueryHelpers.AddQueryString($"/player/{brandId}", queryStrings);
+
+        var response = await _httpClient
+            .GetAsync(requestUri, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        foreach (var item in await response.Content
+            .ReadFromJsonAsync<IEnumerable<PlayerListItem>>(_SerializerOptions, cancellationToken)
+            .ConfigureAwait(false) ?? Array.Empty<PlayerListItem>())
+            yield return item;
+    }
+
     public async ValueTask RecordLoginIpAsync(
-        string playerCode,
+            string playerCode,
         string Ip,
         string? HostName,
         CancellationToken cancellationToken = default)
