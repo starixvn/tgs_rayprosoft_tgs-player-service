@@ -1,4 +1,4 @@
-variables: 
+variables:
   ImageName: pgtgs/player-api
   TgsSettingKey: player-api
 
@@ -90,9 +90,11 @@ push-k8s-template:
       - artifacts/**/*
 
 deploy-dev:
-  variables: 
+  variables:
     GIT_STRATEGY: none
     namespace: dev
+  environment:
+    name: dev
   stage: deploy-dev
   needs:
     - push-nuget
@@ -130,9 +132,11 @@ deploy-dev:
       EOF
 
 deploy-staging:
-  variables: 
+  variables:
     GIT_STRATEGY: none
     namespace: staging
+  environment:
+    name: staging
   stage: deploy-staging
   needs:
     - deploy-dev
@@ -170,9 +174,11 @@ deploy-staging:
       EOF
 
 deploy-prod:
-  variables: 
+  variables:
     GIT_STRATEGY: none
     namespace: prod
+  environment:
+    name: prod
   stage: deploy-prod
   needs:
     - deploy-staging
