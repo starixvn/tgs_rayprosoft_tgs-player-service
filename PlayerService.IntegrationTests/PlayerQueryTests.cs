@@ -60,7 +60,7 @@ public class PlayerQueryTests
                 WithdrawSalt = Array.Empty<byte>()
             });
 
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.SaveChangesAsync();
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
@@ -115,7 +115,7 @@ public class PlayerQueryTests
                 WithdrawSalt = Array.Empty<byte>()
             });
 
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.SaveChangesAsync();
 
         var query = new PlayerListQuery
         {
@@ -177,7 +177,7 @@ public class PlayerQueryTests
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.SaveChangesAsync();
 
         var query = new PlayerListQuery
         {
@@ -239,7 +239,7 @@ public class PlayerQueryTests
                 WithdrawSalt = Array.Empty<byte>()
             });
 
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.SaveChangesAsync();
 
         var query = new PlayerListQuery
         {
@@ -302,13 +302,13 @@ public class PlayerQueryTests
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
-        await dbContext.PlayerParents.AddAsync(new PlayerParent
+        _ = await dbContext.PlayerParents.AddAsync(new PlayerParent
         {
             PlayerCode = "player3",
             ParentPlayerCode = parentPlayerCode
         });
 
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.SaveChangesAsync();
 
         var query = new PlayerListQuery
         {
@@ -370,7 +370,7 @@ public class PlayerQueryTests
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.SaveChangesAsync();
 
         var query = new PlayerListQuery
         {
@@ -433,7 +433,7 @@ public class PlayerQueryTests
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.SaveChangesAsync();
 
         var query = new PlayerListQuery
         {
@@ -495,7 +495,7 @@ public class PlayerQueryTests
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
-        await dbContext.PlayerIpRecords.AddAsync(new PlayerIpRecord
+        _ = await dbContext.PlayerIpRecords.AddAsync(new PlayerIpRecord
         {
             PlayerCode = "player3",
             Host = "test.com",
@@ -503,7 +503,7 @@ public class PlayerQueryTests
             IpType = 1
         });
 
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.SaveChangesAsync();
 
         var query = new PlayerListQuery
         {
@@ -589,7 +589,7 @@ public class PlayerQueryTests
                 WithdrawSalt = Array.Empty<byte>()
             });
 
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.SaveChangesAsync();
 
         var query = new PlayerListQuery
         {
@@ -654,7 +654,7 @@ public class PlayerQueryTests
                 VipId = vipId
             });
 
-        await dbContext.SaveChangesAsync();
+        _ = await dbContext.SaveChangesAsync();
 
         var query = new PlayerListQuery
         {
