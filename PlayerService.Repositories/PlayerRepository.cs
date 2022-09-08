@@ -452,7 +452,7 @@ internal class PlayerRepository : IPlayerRepository
             players = players.Where(p => p.VipId == vipId);
 
         if (userName is not null)
-            players = players.Where(p => p.Username == userName);
+            players = players.Where(p => EF.Functions.ILike(p.Username, $"{userName}%"));
 
         if (agentId is not null)
             players = players.Where(p => p.AgentId == agentId);
@@ -461,7 +461,7 @@ internal class PlayerRepository : IPlayerRepository
             players = players.Where(p => p.Phone == phone);
 
         if (realName is not null)
-            players = players.Where(p => p.RealName == realName);
+            players = players.Where(p => EF.Functions.ILike(p.RealName!, $"{realName}%"));
 
         if (beginRegisterTime is not null)
             players = players.Where(p => p.RegisteredOn >= beginRegisterTime.Value.ToUniversalTime());
