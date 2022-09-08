@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Tgs.PlayerService.Client;
 
@@ -178,7 +178,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
         PlayerListQuery query,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var queryStrings = new Dictionary<string, string>();
+        var queryStrings = new QueryBuilder();
 
         if (query.Status is not null)
             queryStrings.Add("status", query.Status.Value.ToString());
@@ -210,10 +210,11 @@ internal class PlayerServiceClient : IPlayerServiceClient
         if (query.VipId is not null)
             queryStrings.Add("vipId", query.VipId.Value.ToString());
 
-        var requestUri = QueryHelpers.AddQueryString($"/player/{brandId}", queryStrings);
+        foreach (var playerCode in query.PlayerCodes)
+            queryStrings.Add("playerCode", playerCode);
 
         var response = await _httpClient
-            .GetAsync(requestUri, cancellationToken)
+            .GetAsync($"/player/{brandId}{queryStrings.ToQueryString().Value}", cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();

@@ -1,6 +1,7 @@
 ﻿namespace Tgs.PlayerService.ApplicationServices;
 public record PlayerListQuery(
     Guid BrandId,
+    IEnumerable<string> PlayerCodes,
     PlayerStatus? Status = null,
     Guid? VipId = null,
     string? UserName = null,
