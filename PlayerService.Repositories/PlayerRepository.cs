@@ -174,32 +174,82 @@ internal class PlayerRepository : IPlayerRepository
         DateTime? endRegisterTime = null,
         CancellationToken cancellationToken = default)
     {
-        var players = _dbContext.Players.AsQueryable()
-            .Where(p => p.BrandId == brandId);
+        var players = InternalQueryPlayerList(
+            brandId,
+            status,
+            vipId,
+            userName,
+            agentId,
+            phone,
+            realName,
+            beginRegisterTime,
+            endRegisterTime);
 
-        if (status is not null)
-            players = players.Where(p => p.Status == (short)status);
+        var query = (from player in players
+                        .Select(p => new
+                        {
+                            p.PlayerCode,
+                            p.Username,
+                            p.RealName,
+                            p.RegisteredOn,
+                            p.AgentId,
+                            p.VipId,
+                            p.Status
+                        })
+                     join parent in _dbContext.PlayerParents
+                         on player.PlayerCode equals parent.PlayerCode into pg
+                     from parent in pg.DefaultIfEmpty()
+                     join ipRecord in _dbContext.PlayerIpRecords
+                         on new { player.PlayerCode, IpType = (short)PlayerIpType.Register } equals new { ipRecord.PlayerCode, ipRecord.IpType } into pirg
+                     from ipRecord in pirg.DefaultIfEmpty()
+                     select new PlayerListItem(
+                         player.PlayerCode,
+                         player.Username,
+                         player.RealName,
+                         player.RegisteredOn,
+                         ipRecord.Host,
+                         player.AgentId,
+                         player.VipId,
+                         (PlayerStatus)player.Status,
+                         parent.ParentPlayerCode)).ToAsyncEnumerable();
 
-        if (vipId is not null)
-            players = players.Where(p => p.VipId == vipId);
+        if (registeredDomainName is not null)
+            query = query.Where(item => string.Equals(
+                item.RegisteredDomainName,
+                registeredDomainName,
+                StringComparison.OrdinalIgnoreCase));
 
-        if (userName is not null)
-            players = players.Where(p => p.Username == userName);
+        if (parentPlayerCode is not null)
+            query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
 
-        if (agentId is not null)
-            players = players.Where(p => p.AgentId == agentId);
+        return query;
+    }
 
-        if (phone is not null)
-            players = players.Where(p => p.Phone == phone);
-
-        if (realName is not null)
-            players = players.Where(p => p.RealName == realName);
-
-        if (beginRegisterTime is not null)
-            players = players.Where(p => p.RegisteredOn >= beginRegisterTime.Value.ToUniversalTime());
-
-        if (endRegisterTime is not null)
-            players = players.Where(p => p.RegisteredOn < endRegisterTime.Value.ToUniversalTime());
+    public IAsyncEnumerable<PlayerListItem> QueryPlayerListByPlayersAsync(
+        Guid brandId,
+        IEnumerable<string> playerCodes,
+        PlayerStatus? status = null,
+        Guid? vipId = null,
+        string? userName = null,
+        Guid? agentId = null,
+        string? parentPlayerCode = null,
+        string? phone = null,
+        string? realName = null,
+        string? registeredDomainName = null,
+        DateTime? beginRegisterTime = null,
+        DateTime? endRegisterTime = null,
+        CancellationToken cancellationToken = default)
+    {
+        var players = InternalQueryPlayerList(
+            brandId,
+            status,
+            vipId,
+            userName,
+            agentId,
+            phone,
+            realName,
+            beginRegisterTime,
+            endRegisterTime).Where(player => playerCodes.Contains(player.PlayerCode));
 
         var query = (from player in players
                         .Select(p => new
@@ -242,7 +292,7 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     public async ValueTask SaveLoginIpAsync(
-            string playerCode,
+        string playerCode,
         string ip,
         string? host,
         DateTime recordTime,
@@ -379,5 +429,46 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    private IQueryable<Player> InternalQueryPlayerList(
+                            Guid brandId,
+        PlayerStatus? status = null,
+        Guid? vipId = null,
+        string? userName = null,
+        Guid? agentId = null,
+        string? phone = null,
+        string? realName = null,
+        DateTime? beginRegisterTime = null,
+        DateTime? endRegisterTime = null)
+    {
+        var players = _dbContext.Players.AsQueryable()
+            .Where(p => p.BrandId == brandId);
+
+        if (status is not null)
+            players = players.Where(p => p.Status == (short)status);
+
+        if (vipId is not null)
+            players = players.Where(p => p.VipId == vipId);
+
+        if (userName is not null)
+            players = players.Where(p => p.Username == userName);
+
+        if (agentId is not null)
+            players = players.Where(p => p.AgentId == agentId);
+
+        if (phone is not null)
+            players = players.Where(p => p.Phone == phone);
+
+        if (realName is not null)
+            players = players.Where(p => p.RealName == realName);
+
+        if (beginRegisterTime is not null)
+            players = players.Where(p => p.RegisteredOn >= beginRegisterTime.Value.ToUniversalTime());
+
+        if (endRegisterTime is not null)
+            players = players.Where(p => p.RegisteredOn < endRegisterTime.Value.ToUniversalTime());
+
+        return players;
     }
 }

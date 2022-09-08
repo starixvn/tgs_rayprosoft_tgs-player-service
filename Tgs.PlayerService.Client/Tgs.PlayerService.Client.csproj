@@ -4,7 +4,7 @@
     <TargetFrameworks>net6.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.0.17</Version>
+    <Version>0.0.18</Version>
     <LangVersion>10</LangVersion>
     <Authors>Raypro</Authors>
     <PackageId>Tgs.PlayerService.Client</PackageId>
@@ -16,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" Condition="'$(TargetFramework)' == 'net5.0'" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" Condition="'$(TargetFramework)' == 'net6.0'" />

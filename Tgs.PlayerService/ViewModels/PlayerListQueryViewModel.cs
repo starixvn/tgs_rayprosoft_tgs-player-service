@@ -4,6 +4,9 @@ namespace Tgs.PlayerService.ViewModels;
 
 public class PlayerListQueryViewModel
 {
+    [FromQuery(Name = "PlayerCode")]
+    public string[] PlayerCodes { get; set; } = Array.Empty<string>();
+
     [FromQuery]
     public Guid? AgentId { get; set; }
 

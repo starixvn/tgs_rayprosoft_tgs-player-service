@@ -174,6 +174,7 @@ public class PlayerController : ControllerBase
     {
         var query = new PlayerListQuery(
             brandId,
+            queryViewModel.PlayerCodes,
             queryViewModel.Status,
             queryViewModel.VipId,
             queryViewModel.UserName,

@@ -12,6 +12,8 @@ public class PlayerListQuery
 
     public string? Phone { get; init; }
 
+    public IEnumerable<string> PlayerCodes { get; init; } = Array.Empty<string>();
+
     public string? RealName { get; init; }
 
     public string? RegisteredDomainName { get; init; }
