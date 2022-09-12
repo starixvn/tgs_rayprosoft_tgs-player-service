@@ -1,7 +1,9 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Tgs.Paging;
 using Tgs.PlayerService.ApplicationServices;
 using Tgs.PlayerService.ViewModels;
 using Tgs.ServiceUtility;
@@ -167,10 +169,12 @@ public class PlayerController : ControllerBase
     }
 
     [HttpGet("{brandId:Guid}")]
-    public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
+    [SuccessStatusCode(200, "Players")]
+    public IAsyncEnumerable<PlayerListItemViewModel> QueryPlayerListAsync(
         [FromServices] IQueryService<PlayerListQuery, PlayerListItem> queryService,
         Guid brandId,
-        [FromQuery] PlayerListQueryViewModel queryViewModel)
+        [FromQuery] PlayerListQueryViewModel queryViewModel,
+        [FromQuery] PagingViewModel pagingModel)
     {
         var query = new PlayerListQuery(
             brandId,
@@ -186,7 +190,37 @@ public class PlayerController : ControllerBase
             queryViewModel.BeginRegisteredTime,
             queryViewModel.EndRegisteredTime);
 
-        return queryService.QueryAsync(query, HttpContext.RequestAborted);
+        var paging = new Paging<PlayerListItem>();
+
+        if (!string.IsNullOrEmpty(pagingModel.SortBy))
+            paging.SortByPropertyName(pagingModel.SortBy, pagingModel.IsDesc ?? false);
+
+        paging.RowCount = pagingModel.Rows ?? 1000;
+        paging.Page = pagingModel.Page ?? 1;
+
+        var result = queryService.QueryAsync(query, HttpContext.RequestAborted);
+
+        var totalCount = result.CountAsync(HttpContext.RequestAborted);
+
+        var responseFeature = HttpContext.Features.Get<IHttpResponseFeature>();
+        if (responseFeature is not null)
+            _ = responseFeature.Headers.TryAdd("TotalCount", totalCount.ToString());
+
+        return result
+            .ApplyOrderBy(paging)
+            .ApplyPaging(paging)
+            .Select(item => new PlayerListItemViewModel
+            {
+                PlayerCode = item.PlayerCode,
+                AgentId = item.AgentId,
+                ParentPlayerCode = item.ParentPlayerCode,
+                RealName = item.RealName,
+                RegisteredDomainName = item.RegisteredDomainName,
+                RegisteredOn = item.RegisteredOn,
+                Status = item.Status,
+                UserName = item.UserName,
+                VipId = item.VipId
+            });
     }
 
     [HttpPost("prop/{playerCode}", Name = "SetPlayerProperties")]

@@ -185,7 +185,7 @@ internal class PlayerRepository : IPlayerRepository
             beginRegisterTime,
             endRegisterTime);
 
-        var query = (from player in players
+        var query = from player in players
                         .Select(p => new
                         {
                             p.PlayerCode,
@@ -196,22 +196,22 @@ internal class PlayerRepository : IPlayerRepository
                             p.VipId,
                             p.Status
                         })
-                     join parent in _dbContext.PlayerParents
-                         on player.PlayerCode equals parent.PlayerCode into pg
-                     from parent in pg.DefaultIfEmpty()
-                     join ipRecord in _dbContext.PlayerIpRecords
-                         on new { player.PlayerCode, IpType = (short)PlayerIpType.Register } equals new { ipRecord.PlayerCode, ipRecord.IpType } into pirg
-                     from ipRecord in pirg.DefaultIfEmpty()
-                     select new PlayerListItem(
-                         player.PlayerCode,
-                         player.Username,
-                         player.RealName,
-                         player.RegisteredOn,
-                         ipRecord.Host,
-                         player.AgentId,
-                         player.VipId,
-                         (PlayerStatus)player.Status,
-                         parent.ParentPlayerCode)).ToAsyncEnumerable();
+                    join parent in _dbContext.PlayerParents
+                        on player.PlayerCode equals parent.PlayerCode into pg
+                    from parent in pg.DefaultIfEmpty()
+                    join ipRecord in _dbContext.PlayerIpRecords
+                        on new { player.PlayerCode, IpType = (short)PlayerIpType.Register } equals new { ipRecord.PlayerCode, ipRecord.IpType } into pirg
+                    from ipRecord in pirg.DefaultIfEmpty()
+                    select new PlayerListItem(
+                        player.PlayerCode,
+                        player.Username,
+                        player.RealName,
+                        player.RegisteredOn,
+                        ipRecord.Host,
+                        player.AgentId,
+                        player.VipId,
+                        (PlayerStatus)player.Status,
+                        parent.ParentPlayerCode);
 
         if (registeredDomainName is not null)
             query = query.Where(item => string.Equals(
@@ -222,7 +222,7 @@ internal class PlayerRepository : IPlayerRepository
         if (parentPlayerCode is not null)
             query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
 
-        return query;
+        return query.Take(1000).ToAsyncEnumerable();
     }
 
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListByPlayersAsync(
@@ -251,7 +251,7 @@ internal class PlayerRepository : IPlayerRepository
             beginRegisterTime,
             endRegisterTime).Where(player => playerCodes.Contains(player.PlayerCode));
 
-        var query = (from player in players
+        var query = from player in players
                         .Select(p => new
                         {
                             p.PlayerCode,
@@ -262,22 +262,22 @@ internal class PlayerRepository : IPlayerRepository
                             p.VipId,
                             p.Status
                         })
-                     join parent in _dbContext.PlayerParents
-                         on player.PlayerCode equals parent.PlayerCode into pg
-                     from parent in pg.DefaultIfEmpty()
-                     join ipRecord in _dbContext.PlayerIpRecords
-                         on new { player.PlayerCode, IpType = (short)PlayerIpType.Register } equals new { ipRecord.PlayerCode, ipRecord.IpType } into pirg
-                     from ipRecord in pirg.DefaultIfEmpty()
-                     select new PlayerListItem(
-                         player.PlayerCode,
-                         player.Username,
-                         player.RealName,
-                         player.RegisteredOn,
-                         ipRecord.Host,
-                         player.AgentId,
-                         player.VipId,
-                         (PlayerStatus)player.Status,
-                         parent.ParentPlayerCode)).ToAsyncEnumerable();
+                    join parent in _dbContext.PlayerParents
+                        on player.PlayerCode equals parent.PlayerCode into pg
+                    from parent in pg.DefaultIfEmpty()
+                    join ipRecord in _dbContext.PlayerIpRecords
+                        on new { player.PlayerCode, IpType = (short)PlayerIpType.Register } equals new { ipRecord.PlayerCode, ipRecord.IpType } into pirg
+                    from ipRecord in pirg.DefaultIfEmpty()
+                    select new PlayerListItem(
+                        player.PlayerCode,
+                        player.Username,
+                        player.RealName,
+                        player.RegisteredOn,
+                        ipRecord.Host,
+                        player.AgentId,
+                        player.VipId,
+                        (PlayerStatus)player.Status,
+                        parent.ParentPlayerCode);
 
         if (registeredDomainName is not null)
             query = query.Where(item => string.Equals(
@@ -288,7 +288,7 @@ internal class PlayerRepository : IPlayerRepository
         if (parentPlayerCode is not null)
             query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
 
-        return query;
+        return query.Take(1000).ToAsyncEnumerable();
     }
 
     public async ValueTask SaveLoginIpAsync(
