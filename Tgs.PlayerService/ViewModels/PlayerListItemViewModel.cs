@@ -17,4 +17,6 @@ public class PlayerListItemViewModel
     public PlayerStatus Status { get; set; }
 
     public string UserName { get; set; } = default!;
+
+    public Guid? VipId { get; set; }
 }
