@@ -204,7 +204,7 @@ public class PlayerController : ControllerBase
 
         var responseFeature = HttpContext.Features.Get<IHttpResponseFeature>();
         if (responseFeature is not null)
-            responseFeature.Headers.TryAdd("TotalCount", totalCount.ToString());
+            _ = responseFeature.Headers.TryAdd("TotalCount", totalCount.ToString());
 
         return result
             .ApplyOrderBy(paging)
