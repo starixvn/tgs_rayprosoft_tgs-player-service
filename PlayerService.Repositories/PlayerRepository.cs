@@ -311,13 +311,13 @@ internal class PlayerRepository : IPlayerRepository
                     IpType = 2,
                     Ip = ip,
                     Host = host,
-                    RecordOn = recordTime
+                    RecordOn = recordTimeUtc
                 }, cancellationToken)
                 .ConfigureAwait(false)).Entity;
 
         record.Ip = ip;
         record.Host = host;
-        record.RecordOn = recordTime;
+        record.RecordOn = recordTimeUtc;
 
         _ = await _dbContext
             .SaveChangesAsync(cancellationToken)
