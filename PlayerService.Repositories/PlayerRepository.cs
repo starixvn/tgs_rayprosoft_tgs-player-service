@@ -142,6 +142,8 @@ internal class PlayerRepository : IPlayerRepository
             properties["Birthdate"] = player.Birthdate.ToString()!;
 
         properties["DefaultWalletId"] = player.DefaultWalletId.ToString();
+        if (player.AgentId is not null)
+            properties["AgentId"] = player.AgentId.Value.ToString();
 
         foreach (var prop in await _dbContext.PlayerProperties.AsQueryable()
             .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)

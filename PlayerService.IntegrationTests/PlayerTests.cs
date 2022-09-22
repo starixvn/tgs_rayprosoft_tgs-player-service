@@ -88,6 +88,43 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task Get_Player_AgentId()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            AgentId = Guid.NewGuid(),
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerPropertiesAsync(playerCode);
+
+        Assert.AreEqual(playerRow.AgentId.ToString(), actual["AgentId"]);
+    }
+
+    [Test]
     public async Task Get_Player_Info()
     {
         var brandId = Guid.NewGuid();
