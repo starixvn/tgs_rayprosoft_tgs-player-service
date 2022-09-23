@@ -228,7 +228,8 @@ internal class PlayerRepository : IPlayerRepository
             query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
 
         return query
-            .OrderByDescending(item => item.RegisteredOn)
+            .OrderByDescending(item => item.RegisteredOn != null)
+            .ThenByDescending(item => item.RegisteredOn)
             .Take(1000)
             .ToArray()
             .Select(item => new PlayerListItem(
@@ -310,7 +311,8 @@ internal class PlayerRepository : IPlayerRepository
             query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
 
         return query
-            .OrderByDescending(item => item.RegisteredOn)
+            .OrderByDescending(item => item.RegisteredOn != null)
+            .ThenByDescending(item => item.RegisteredOn)
             .Take(1000)
             .ToArray()
             .Select(item => new PlayerListItem(
