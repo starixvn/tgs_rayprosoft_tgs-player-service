@@ -224,7 +224,10 @@ internal class PlayerRepository : IPlayerRepository
         if (parentPlayerCode is not null)
             query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
 
-        return query.Take(1000).ToAsyncEnumerable();
+        return query
+            .OrderByDescending(item => item.RegisteredOn)
+            .Take(1000)
+            .ToAsyncEnumerable();
     }
 
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListByPlayersAsync(
@@ -290,7 +293,10 @@ internal class PlayerRepository : IPlayerRepository
         if (parentPlayerCode is not null)
             query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
 
-        return query.Take(1000).ToAsyncEnumerable();
+        return query
+            .OrderByDescending(item => item.RegisteredOn)
+            .Take(1000)
+            .ToAsyncEnumerable();
     }
 
     public async ValueTask SaveLoginIpAsync(
