@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Tgs.PlayerService.Repositories.Entities;
 
@@ -204,7 +205,8 @@ internal class PlayerRepository : IPlayerRepository
                     join ipRecord in _dbContext.PlayerIpRecords
                         on new { player.PlayerCode, IpType = (short)PlayerIpType.Register } equals new { ipRecord.PlayerCode, ipRecord.IpType } into pirg
                     from ipRecord in pirg.DefaultIfEmpty()
-                    select new PlayerListItem(
+                    select new
+                    {
                         player.PlayerCode,
                         player.Username,
                         player.RealName,
@@ -212,12 +214,13 @@ internal class PlayerRepository : IPlayerRepository
                         ipRecord.Host,
                         player.AgentId,
                         player.VipId,
-                        (PlayerStatus)player.Status,
-                        parent.ParentPlayerCode);
+                        player.Status,
+                        parent.ParentPlayerCode
+                    };
 
         if (registeredDomainName is not null)
             query = query.Where(item => string.Equals(
-                item.RegisteredDomainName,
+                item.Host,
                 registeredDomainName,
                 StringComparison.OrdinalIgnoreCase));
 
@@ -227,6 +230,17 @@ internal class PlayerRepository : IPlayerRepository
         return query
             .OrderByDescending(item => item.RegisteredOn)
             .Take(1000)
+            .ToArray()
+            .Select(item => new PlayerListItem(
+                item.PlayerCode,
+                item.Username,
+                item.RealName,
+                item.RegisteredOn,
+                item.Host,
+                item.AgentId,
+                item.VipId,
+                (PlayerStatus)item.Status,
+                item.ParentPlayerCode))
             .ToAsyncEnumerable();
     }
 
@@ -273,7 +287,8 @@ internal class PlayerRepository : IPlayerRepository
                     join ipRecord in _dbContext.PlayerIpRecords
                         on new { player.PlayerCode, IpType = (short)PlayerIpType.Register } equals new { ipRecord.PlayerCode, ipRecord.IpType } into pirg
                     from ipRecord in pirg.DefaultIfEmpty()
-                    select new PlayerListItem(
+                    select new
+                    {
                         player.PlayerCode,
                         player.Username,
                         player.RealName,
@@ -281,12 +296,13 @@ internal class PlayerRepository : IPlayerRepository
                         ipRecord.Host,
                         player.AgentId,
                         player.VipId,
-                        (PlayerStatus)player.Status,
-                        parent.ParentPlayerCode);
+                        player.Status,
+                        parent.ParentPlayerCode
+                    };
 
         if (registeredDomainName is not null)
             query = query.Where(item => string.Equals(
-                item.RegisteredDomainName,
+                item.Host,
                 registeredDomainName,
                 StringComparison.OrdinalIgnoreCase));
 
@@ -296,6 +312,17 @@ internal class PlayerRepository : IPlayerRepository
         return query
             .OrderByDescending(item => item.RegisteredOn)
             .Take(1000)
+            .ToArray()
+            .Select(item => new PlayerListItem(
+                item.PlayerCode,
+                item.Username,
+                item.RealName,
+                item.RegisteredOn,
+                item.Host,
+                item.AgentId,
+                item.VipId,
+                (PlayerStatus)item.Status,
+                item.ParentPlayerCode))
             .ToAsyncEnumerable();
     }
 
