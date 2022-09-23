@@ -11,6 +11,44 @@ namespace Tgs.PlayerService.IntegrationTests;
 public class PlayerQueryTests
 {
     [Test]
+    public async Task PlayerListQuery_AgentId_Can_Parse()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+
+        var query = new PlayerListQuery();
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var agentId = Guid.NewGuid();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = agentId,
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
+
+        Assert.AreEqual(agentId, actual.First().AgentId);
+    }
+
+    [Test]
     public async Task PlayerListQuery_By_BrandId()
     {
         await using var web = new TestPlayerServiceApplication();
