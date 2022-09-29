@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Tgs.PlayerService.Repositories.Entities;
 
@@ -219,10 +218,7 @@ internal class PlayerRepository : IPlayerRepository
                     };
 
         if (registeredDomainName is not null)
-            query = query.Where(item => string.Equals(
-                item.Host,
-                registeredDomainName,
-                StringComparison.OrdinalIgnoreCase));
+            query = query.Where(item => item.Host == registeredDomainName);
 
         if (parentPlayerCode is not null)
             query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
