@@ -218,7 +218,7 @@ internal class PlayerRepository : IPlayerRepository
                     };
 
         if (registeredDomainName is not null)
-            query = query.Where(item => item.Host == registeredDomainName);
+            query = query.Where(item => item.Host.ToLower() == registeredDomainName.ToLower());
 
         if (parentPlayerCode is not null)
             query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
@@ -298,10 +298,7 @@ internal class PlayerRepository : IPlayerRepository
                     };
 
         if (registeredDomainName is not null)
-            query = query.Where(item => string.Equals(
-                item.Host,
-                registeredDomainName,
-                StringComparison.OrdinalIgnoreCase));
+            query = query.Where(item => item.Host.ToLower() == registeredDomainName.ToLower());
 
         if (parentPlayerCode is not null)
             query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
