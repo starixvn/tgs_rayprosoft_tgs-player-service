@@ -93,7 +93,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
     public async ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient
-            .GetAsync($"/player/{brandId}/{areaCode}/{phone}", cancellationToken)
+            .GetAsync($"/player/{brandId}/{Uri.EscapeDataString(areaCode)}/{phone}", cancellationToken)
             .ConfigureAwait(false);
 
         switch (response.StatusCode)
