@@ -80,7 +80,7 @@ public class PlayerController : ControllerBase
             };
     }
 
-    [HttpGet("{brandId}/{areaCode:regex(\\d+)}/{phone}", Name = "GetPlayerInfoByPhone")]
+    [HttpGet("{brandId}/{areaCode:regex(\\+?\\d+)}/{phone}", Name = "GetPlayerInfoByPhone")]
     [SuccessStatusCode(200, "Player info found")]
     [FailStatusCode(404, "Player info not found")]
     public async Task<PlayerInfoViewModel> GetPlayerInfoByPhoneAsync(
