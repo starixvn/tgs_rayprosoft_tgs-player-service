@@ -109,8 +109,28 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
+    public async ValueTask<PlayerLoginInfo?> GetPlayerLoginInfoAsync(string playerCode, CancellationToken cancellationToken = default)
+    {
+        var records = await _dbContext.PlayerIpRecords
+            .Where(record => record.PlayerCode == playerCode)
+            .ToArrayAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return records.Length == 0
+            ? null
+            : new PlayerLoginInfo(
+                records
+                    .Where(record => record.IpType == 1)
+                    .Select(record => record.Ip)
+                    .FirstOrDefault(),
+                records
+                    .Where(record => record.IpType == 2)
+                    .Select(record => record.Ip)
+                    .FirstOrDefault());
+    }
+
     public async ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
-                    string playerCode,
+                     string playerCode,
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
@@ -322,7 +342,7 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     public async ValueTask SaveLoginIpAsync(
-        string playerCode,
+           string playerCode,
         string ip,
         string? host,
         DateTime recordTime,
@@ -355,7 +375,7 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     public async ValueTask SaveRegisterIpAsync(
-        string playerCode,
+           string playerCode,
         string ip,
         string? host,
         DateTime recordTime,
@@ -412,7 +432,7 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     public async ValueTask SetPlayerPropertiesAsync(
-        Guid brandId,
+                 Guid brandId,
         string playerCode,
         IEnumerable<IDataCommand> modifyCommands,
         CancellationToken cancellationToken = default)
@@ -462,7 +482,7 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     private IQueryable<Player> InternalQueryPlayerList(
-                            Guid brandId,
+                               Guid brandId,
         PlayerStatus? status = null,
         Guid? vipId = null,
         string? userName = null,

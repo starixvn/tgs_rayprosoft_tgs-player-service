@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.PlayerService.ApplicationServices;
@@ -98,10 +98,10 @@ public class PlayerTests
             .CreatePutCommand(Arg.Is(nameof(PlayerPropertyName.Birthdate)), Arg.Is("2022/04/26"));
 
         _ = fakePlayerRepository.Received(1)
-             .SetPlayerPropertiesAsync(
-                 playerInfo.BrandId,
-                 playerInfo.PlayerCode,
-                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+            .SetPlayerPropertiesAsync(
+                playerInfo.BrandId,
+                playerInfo.PlayerCode,
+                Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
     }
 
     [Test]
@@ -151,10 +151,10 @@ public class PlayerTests
             .CreatePutCommand(Arg.Is("Line"), Arg.Is("line123"));
 
         _ = fakePlayerRepository.Received(1)
-             .SetPlayerPropertiesAsync(
-                 playerInfo.BrandId,
-                 playerInfo.PlayerCode,
-                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 3));
+            .SetPlayerPropertiesAsync(
+                playerInfo.BrandId,
+                playerInfo.PlayerCode,
+                Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 3));
     }
 
     [Test]
@@ -268,10 +268,10 @@ public class PlayerTests
             .CreatePutCommand(Arg.Is("PhoneAuthentication"), Arg.Is(true.ToString()));
 
         _ = fakePlayerRepository.Received(1)
-             .SetPlayerPropertiesAsync(
-                 playerInfo.BrandId,
-                 playerInfo.PlayerCode,
-                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 3));
+            .SetPlayerPropertiesAsync(
+                playerInfo.BrandId,
+                playerInfo.PlayerCode,
+                Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 3));
     }
 
     [Test]
@@ -312,10 +312,10 @@ public class PlayerTests
             .CreatePutCommand(Arg.Is("Email"), Arg.Is("tester@test.com"));
 
         _ = fakePlayerRepository.Received(1)
-             .SetPlayerPropertiesAsync(
-                 playerInfo.BrandId,
-                 playerInfo.PlayerCode,
-                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+            .SetPlayerPropertiesAsync(
+                playerInfo.BrandId,
+                playerInfo.PlayerCode,
+                Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
     }
 
     [Test]

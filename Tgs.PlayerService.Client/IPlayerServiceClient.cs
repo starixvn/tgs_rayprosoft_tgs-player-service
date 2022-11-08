@@ -14,6 +14,8 @@ public interface IPlayerServiceClient
 
     ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName, CancellationToken cancellationToken = default);
 
+    ValueTask<PlayerLoginInfo?> GetPlayerLoginInfoAsync(string playerCode, CancellationToken cancellationToken = default);
+
     ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
         string playerCode,
         CancellationToken cancellationToken = default);
@@ -27,7 +29,7 @@ public interface IPlayerServiceClient
     ValueTask RecordRegisterIpAsync(string playerCode, string Ip, string? HostName, CancellationToken cancellationToken = default);
 
     ValueTask SetPlayerPropertiesAsync(
-            string playerCode,
+              string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
         CancellationToken cancellationToken = default);
 

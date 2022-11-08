@@ -53,4 +53,19 @@ public class PlayerRecordTests
                 Arg.Is(command.HostName),
                 Arg.Is<DateTime>(time => time >= currentTime));
     }
+
+    [Test]
+    public async Task 取得玩家的登入記錄資訊()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerLoginInfoQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerLoginInfoQuery("test1");
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerLoginInfoAsync(Arg.Is(query.PlayerCode));
+    }
 }

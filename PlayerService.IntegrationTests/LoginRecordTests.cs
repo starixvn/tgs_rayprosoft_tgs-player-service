@@ -129,4 +129,44 @@ public class LoginRecordTests
         Assert.IsTrue(actual.Any(r => r.IpType == 1));
         Assert.IsTrue(actual.Any(r => r.IpType == 2));
     }
+
+    [Test]
+    public async Task 取得玩家登入Ip及註冊Ip()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = "test1";
+
+        await dbContext.PlayerIpRecords.AddRangeAsync(
+            new PlayerIpRecord
+            {
+                IpType = 1,
+                Host = "localhost",
+                Ip = "127.0.0.1",
+                PlayerCode = playerCode,
+                RecordOn = DateTime.UtcNow
+            },
+            new PlayerIpRecord
+            {
+                IpType = 2,
+                Host = "localhost",
+                Ip = "127.0.0.2",
+                PlayerCode = playerCode,
+                RecordOn = DateTime.UtcNow
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerLoginInfoAsync(playerCode);
+
+        Assert.IsNotNull(actual);
+        Assert.AreEqual("127.0.0.1", actual!.RegisterIp);
+        Assert.AreEqual("127.0.0.2", actual!.LoginIp);
+    }
 }

@@ -143,8 +143,18 @@ internal class PlayerServiceClient : IPlayerServiceClient
         }
     }
 
+    public ValueTask<PlayerLoginInfo?> GetPlayerLoginInfoAsync(string playerCode, CancellationToken cancellationToken = default)
+        => _httpClient.GetAsync($"/login-record/{playerCode}", cancellationToken)
+            .ToAsyncEnumerable()
+            .Do(response => response.EnsureSuccessStatusCode())
+            .Select(response => response.Content
+                .ReadFromJsonAsync<PlayerLoginInfo>(_SerializerOptions, cancellationToken)
+                .ToAsyncEnumerable())
+            .Concat()
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
     public async ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
-        string playerCode,
+           string playerCode,
         CancellationToken cancellationToken = default)
     {
         var response = await _httpClient
@@ -226,7 +236,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
     }
 
     public async ValueTask RecordLoginIpAsync(
-            string playerCode,
+           string playerCode,
         string Ip,
         string? HostName,
         CancellationToken cancellationToken = default)
