@@ -13,6 +13,12 @@ internal class PlayerRepository : IPlayerRepository
         _dbContext = context ?? throw new ArgumentNullException(nameof(context));
     }
 
+    public async ValueTask<string?> GetParentPlayerCodeAsync(string playerCode, CancellationToken cancellationToken = default)
+        => await _dbContext.PlayerParents
+            .Where(pp => pp.PlayerCode == playerCode)
+            .Select(pp => pp.ParentPlayerCode)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
     public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players

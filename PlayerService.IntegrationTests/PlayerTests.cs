@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -855,5 +855,74 @@ public class PlayerTests
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
         Assert.IsNull(playerRow.RealName);
+    }
+
+    [Test]
+    public async Task 取得ParentPlayerInfo()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+        var parentCode = "parent1";
+
+        var expected = new Client.PlayerInfo
+        {
+            BrandId = brandId,
+            PlayerCode = parentCode,
+            UserName = "parent1",
+            IdentityAuthentication = false,
+            PhoneAuthentication = false,
+            IsSetPayPassword = false,
+            VipLevelId = null,
+            RegisteredOn = DateTime.Parse("2022/05/17 00:00:00")
+        };
+
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = playerCode,
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = playerCode,
+                RealName = "player1",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                RegisteredOn = expected.RegisteredOn
+            },
+            new Player
+            {
+                PlayerCode = parentCode,
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "parent1",
+                RealName = "parent1",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                RegisteredOn = expected.RegisteredOn
+            });
+
+        _ = await dbContext.PlayerParents.AddAsync(new PlayerParent
+        {
+            PlayerCode = playerCode,
+            ParentPlayerCode = parentCode
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetParentPlayerInfoAsync(playerCode)
+            .ConfigureAwait(false);
+
+        Assert.AreEqual(expected, actual);
     }
 }

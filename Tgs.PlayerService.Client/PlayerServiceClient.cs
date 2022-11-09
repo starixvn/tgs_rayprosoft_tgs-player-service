@@ -26,6 +26,19 @@ internal class PlayerServiceClient : IPlayerServiceClient
         _httpClient = http ?? throw new ArgumentNullException(nameof(http));
     }
 
+    public ValueTask<PlayerInfo?> GetParentPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default)
+        => _httpClient
+            .GetAsync($"/player/parent/{playerCode}", cancellationToken)
+            .ToAsyncEnumerable()
+            .Select(response => response.StatusCode switch
+            {
+                HttpStatusCode.OK => response.Content.ReadFromJsonAsync<PlayerInfo>(_SerializerOptions).ToAsyncEnumerable(),
+                HttpStatusCode.NotFound => Task.FromResult<PlayerInfo?>(null).ToAsyncEnumerable(),
+                _ => throw new PlayerServiceApiException("Unknown error")
+            })
+            .Concat()
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
     public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient
@@ -64,7 +77,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
     }
 
     public async ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(
-        Guid brandId,
+            Guid brandId,
         string email,
         CancellationToken cancellationToken = default)
     {

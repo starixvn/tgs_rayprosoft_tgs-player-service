@@ -4,6 +4,8 @@ namespace Tgs.PlayerService.Client;
 
 public interface IPlayerServiceClient
 {
+    ValueTask<PlayerInfo?> GetParentPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
+
     ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
 
     ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
