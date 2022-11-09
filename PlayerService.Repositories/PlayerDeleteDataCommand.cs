@@ -39,6 +39,10 @@ internal class PlayerDeleteDataCommand : DeleteDataCommand
                 modifyContext.Player.RealName = null;
                 break;
 
+            case nameof(PlayerPropertyName.Remark):
+                modifyContext.Player.Remark = null;
+                break;
+
             default:
                 if (modifyContext.PlayerProperties.TryGetValue(Name, out var prop))
                     _ = modifyContext.TgsContext.PlayerProperties.Remove(prop);

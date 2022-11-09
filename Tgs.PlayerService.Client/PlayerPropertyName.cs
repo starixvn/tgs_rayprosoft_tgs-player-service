@@ -12,5 +12,6 @@ public enum PlayerPropertyName
     AreaCode,
     Phone,
     PhoneAuthentication,
-    Email
+    Email,
+    Remark
 }
