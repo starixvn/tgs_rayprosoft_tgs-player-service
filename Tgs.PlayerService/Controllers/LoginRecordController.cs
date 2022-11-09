@@ -10,13 +10,24 @@ namespace Tgs.PlayerService.Controllers;
 public class LoginRecordController : ControllerBase
 {
     [HttpGet("{playerCode}", Name = "GetLoginInfo")]
-    public ValueTask<PlayerLoginInfo> GetLoginInfoAsync(
-        [FromServices] IGetService<GetPlayerLoginInfoQuery, PlayerLoginInfo> getService,
+    public ValueTask<PlayerLoginInfoViewModel?> GetLoginInfoAsync(
+        [FromServices] IGetService<GetPlayerLoginInfoQuery, PlayerLoginInfo?> getService,
         string playerCode)
     {
         var query = new GetPlayerLoginInfoQuery(playerCode);
 
-        return getService.GetAsync(query, HttpContext.RequestAborted);
+        return getService.GetAsync(query, HttpContext.RequestAborted)
+            .AsTask()
+            .ToAsyncEnumerable()
+            .Where(info => info is not null)
+            .Select(info => new PlayerLoginInfoViewModel
+            {
+                RegisterIp = info!.RegisterIp,
+                RegisterHost = info!.RegisterHost,
+                LoginIp = info!.LoginIp,
+                LoginOn = info!.LoginOn
+            })
+            .FirstOrDefaultAsync(HttpContext.RequestAborted);
     }
 
     [HttpPut("{playerCode}", Name = "SaveLoginIp")]

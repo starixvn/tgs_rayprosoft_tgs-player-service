@@ -122,17 +122,21 @@ internal class PlayerRepository : IPlayerRepository
             .ToArrayAsync(cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
+        var registerRecord = records
+            .Where(record => record.IpType == 1)
+            .FirstOrDefault();
+
+        var loginRecord = records
+            .Where(record => record.IpType == 2)
+            .FirstOrDefault();
+
         return records.Length == 0
             ? null
             : new PlayerLoginInfo(
-                records
-                    .Where(record => record.IpType == 1)
-                    .Select(record => record.Ip)
-                    .FirstOrDefault(),
-                records
-                    .Where(record => record.IpType == 2)
-                    .Select(record => record.Ip)
-                    .FirstOrDefault());
+                registerRecord?.Ip,
+                registerRecord?.Host,
+                loginRecord?.Ip,
+                loginRecord?.RecordOn);
     }
 
     public async ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
