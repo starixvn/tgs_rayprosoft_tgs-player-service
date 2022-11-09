@@ -149,7 +149,7 @@ internal class PlayerRepository : IPlayerRepository
 
         var properties = new Dictionary<string, string>();
 
-        if (player == null)
+        if (player is null)
             return properties.ToImmutableDictionary();
 
         var brandId = player.BrandId;
@@ -168,8 +168,10 @@ internal class PlayerRepository : IPlayerRepository
             properties["Phone"] = player.Phone;
         if (!string.IsNullOrEmpty(player.Email))
             properties["Email"] = player.Email;
-        if (player.Birthdate != null)
+        if (player.Birthdate is not null)
             properties["Birthdate"] = player.Birthdate.ToString()!;
+        if (!string.IsNullOrEmpty(player.Remark))
+            properties["Remark"] = player.Remark;
 
         properties["DefaultWalletId"] = player.DefaultWalletId.ToString();
         if (player.AgentId is not null)
