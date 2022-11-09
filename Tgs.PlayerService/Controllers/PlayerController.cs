@@ -52,6 +52,37 @@ public class PlayerController : ControllerBase
             };
     }
 
+    [HttpGet("parent/{playerCode}", Name = "GetParentPlayerInfo")]
+    [SuccessStatusCode(200, "parent player info found")]
+    [FailStatusCode(404, "parent player info not found")]
+    public async Task<PlayerInfoViewModel> GetParentPlayerInfoAsync(
+        [FromServices] IGetService<GetParentPlayerInfoQuery, PlayerInfo?> getService,
+        string playerCode)
+    {
+        var query = new GetParentPlayerInfoQuery(playerCode);
+
+        var parentPlayer = await getService.GetAsync(
+            query,
+            HttpContext.RequestAborted).ConfigureAwait(false);
+
+        return parentPlayer is null
+            ? await this.FailAsync<PlayerInfoViewModel, string>(
+                404,
+                "Not found").ConfigureAwait(false)
+            : new PlayerInfoViewModel
+            {
+                PlayerCode = parentPlayer.PlayerCode,
+                BrandId = parentPlayer.BrandId,
+                UserName = parentPlayer.UserName,
+                IdentityAuthentication = parentPlayer.IdentityAuthentication,
+                PhoneAuthentication = parentPlayer.PhoneAuthentication,
+                EmailAuthentication = parentPlayer.EmailAuthentication,
+                IsSetPayPassword = parentPlayer.IsSetPayPassword,
+                VipLevelId = parentPlayer.VipLevelId,
+                RegisteredOn = parentPlayer.RegisteredOn
+            };
+    }
+
     [HttpGet("{brandId}/{email:regex(^[[\\w-\\.]]+@([[\\w-]]+\\.)+[[\\w-]]{{2,4}}$)}", Name = "GetPlayerInfoByEmail")]
     [SuccessStatusCode(200, "Player info found")]
     [FailStatusCode(404, "Player info not found")]

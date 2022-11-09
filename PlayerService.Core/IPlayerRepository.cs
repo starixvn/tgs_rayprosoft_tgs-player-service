@@ -4,6 +4,8 @@ namespace Tgs.PlayerService;
 
 public interface IPlayerRepository
 {
+    ValueTask<string?> GetParentPlayerCodeAsync(string playerCode, CancellationToken cancellationToken = default);
+
     ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
 
     ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);

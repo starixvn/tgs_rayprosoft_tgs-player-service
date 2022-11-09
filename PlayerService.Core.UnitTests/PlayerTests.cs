@@ -332,4 +332,22 @@ public class PlayerTests
         _ = fakePlayerRepository.Received(1)
             .SetPlayerStatusAsync(Arg.Is(command.PlayerCode), Arg.Is(command.Status));
     }
+
+    [Test]
+    public async Task 查詢ParentPlayer()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetParentPlayerInfoQueryService(fakePlayerRepository);
+
+        var query = new GetParentPlayerInfoQuery("test1");
+
+        _ = fakePlayerRepository.GetParentPlayerCodeAsync(Arg.Is(query.PlayerCode))
+            .Returns("parent1");
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerInfoAsync(Arg.Is("parent1"));
+    }
 }
