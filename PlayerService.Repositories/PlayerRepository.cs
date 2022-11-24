@@ -2,16 +2,18 @@
 using Microsoft.EntityFrameworkCore;
 using Tgs.PlayerService.Repositories.Entities;
 using Tgs.Core.Infrastructures.Utility;
+using Tgs.SerialNumberGenerator;
 
 namespace Tgs.PlayerService.Repositories;
 
 internal class PlayerRepository : IPlayerRepository
 {
     private readonly TgsContext _dbContext;
-
-    public PlayerRepository(TgsContext context)
+    private readonly ISerialNumberGenerator _serialNumberGenerator;
+    public PlayerRepository(TgsContext context, ISerialNumberGenerator serialNumberGenerator)
     {
         _dbContext = context ?? throw new ArgumentNullException(nameof(context));
+        _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
     }
 
     public async ValueTask<string?> GetParentPlayerCodeAsync(string playerCode, CancellationToken cancellationToken = default)
@@ -497,7 +499,7 @@ internal class PlayerRepository : IPlayerRepository
     public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default)
     {
         var username = data.UserName;
-        var walletId = Guid.NewGuid();
+        var walletId = await _serialNumberGenerator.GenerateAsync(cancellationToken);
         var createdOn = DateTime.UtcNow;
         var playerCode = PlayerCodeGenerator.NewId();
 

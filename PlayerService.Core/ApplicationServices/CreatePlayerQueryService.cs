@@ -27,6 +27,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
                 {
                     BrandId = query.BrandId,
                     AgentId= query.AgentId,
+                    VipId = query.VipId,
                     UserName = query.Username,
                     Salt = salt,
                     Password = password,

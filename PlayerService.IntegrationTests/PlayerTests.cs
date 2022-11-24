@@ -1093,5 +1093,4 @@ public class PlayerTests
         Assert.IsNotNull(player.AgentId == agentId);
         Assert.IsNotNull(playerCode);
     }
-
 }

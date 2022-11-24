@@ -39,6 +39,7 @@ builder.Services
 
 builder.Services
     .AddSecurity()
+    .AddSerialNumberGenerator()
     .AddPlayerServiceCore()
     .AddPlayerServiceRepositories((sp, optionsBuilder) =>
     {

@@ -15,6 +15,7 @@
     </PackageReference>
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.1" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
+    <PackageReference Include="Tgs.SerialNumberGenerator" Version="0.0.5" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
   </ItemGroup>
 
