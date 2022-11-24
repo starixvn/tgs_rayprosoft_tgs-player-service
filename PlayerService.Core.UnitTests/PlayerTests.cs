@@ -367,8 +367,18 @@ public class PlayerTests
         var currencyCode = "currencyCode";
         var username = "username";
         var password = "password";
+        var agentName = "agentName";
 
-        var query = new CreatePlayerQuery(brandId, agentId, vipId, currencyCode, username, password, betLimitId, "");
+        var query = new CreatePlayerQuery(
+            brandId,
+            agentId,
+            vipId,
+            currencyCode,
+            username,
+            password,
+            betLimitId,
+            PlayerType.RealPlayer,
+            agentName);
 
         await sut.GetAsync(query);
 
