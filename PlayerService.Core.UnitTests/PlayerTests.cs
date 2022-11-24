@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.Core.Infrastructures.Security;
 using Tgs.PlayerService.ApplicationServices;
 
 namespace Tgs.PlayerService.Core.UnitTests;
@@ -350,4 +351,29 @@ public class PlayerTests
         _ = fakePlayerRepository.Received(1)
             .GetPlayerInfoAsync(Arg.Is("parent1"));
     }
+
+    [Test]
+    public async Task Create_Player()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+
+        var sut = new CreatePlayerQueryService(fakePlayerRepository, fakePasswordHandler);
+
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var vipId = Guid.NewGuid();
+        var betLimitId = 1;
+        var currencyCode = "currencyCode";
+        var username = "username";
+        var password = "password";
+
+        var query = new CreatePlayerQuery(brandId, agentId, vipId, currencyCode, username, password, betLimitId, "");
+
+        await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .CreatePlayerAsync(Arg.Any<CreatePlayerData>());
+    }
+
 }

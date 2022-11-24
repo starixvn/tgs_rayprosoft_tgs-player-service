@@ -38,6 +38,7 @@ builder.Services
     });
 
 builder.Services
+    .AddSecurity()
     .AddPlayerServiceCore()
     .AddPlayerServiceRepositories((sp, optionsBuilder) =>
     {

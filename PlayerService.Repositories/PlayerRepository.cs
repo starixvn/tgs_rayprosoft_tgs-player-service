@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.EntityFrameworkCore;
 using Tgs.PlayerService.Repositories.Entities;
+using Tgs.Core.Infrastructures.Utility;
 
 namespace Tgs.PlayerService.Repositories;
 
@@ -491,6 +492,53 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default)
+    {
+        var username = data.UserName;
+        var walletId = Guid.NewGuid();
+        var createdOn = DateTime.UtcNow;
+        var playerCode = PlayerCodeGenerator.NewId();
+
+        var player = new Player
+        {
+            PlayerCode = playerCode,
+            Username = username,
+            Password = data.Password,
+            Salt = data.Salt,
+            WithdrawPassword = data.WithdrawPassword,
+            WithdrawSalt = data.WithdrawSalt,
+            BrandId = data.BrandId,
+            DefaultWalletId = walletId,
+            DefaultWalletCurrencyCode = data.CurrencyCode,
+            LastActiveOn = createdOn,
+            Status = (short)data.PlayerStatus,
+            Type = (short)data.Type,
+            BetLimitId = data.BetLimitId,
+            AgentId = data.AgentId,
+            UpdatedByUsername = username,
+            UpdatedOn = createdOn,
+            VipId = data.VipId
+        };
+
+        var wallet = new Wallet
+        {
+            Id = walletId,
+            PlayerCode = playerCode,
+            CurrencyCode = data.CurrencyCode,
+            ExternalCurrencyCode = data.CurrencyCode,
+            Balance = 0,
+            CreatedOn = createdOn,
+            UpdatedOn = createdOn
+        };
+
+        _ = await _dbContext.Players.AddAsync(player, cancellationToken);
+        _ = await _dbContext.Wallets.AddAsync(wallet, cancellationToken);
+
+        _ = await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return playerCode;
     }
 
     private IQueryable<Player> InternalQueryPlayerList(

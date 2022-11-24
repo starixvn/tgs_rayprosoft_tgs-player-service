@@ -319,6 +319,22 @@ internal class PlayerServiceClient : IPlayerServiceClient
         _ = response.EnsureSuccessStatusCode();
     }
 
+    public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default)
+    {
+        var requestContent = new StringContent(
+            JsonSerializer.Serialize(data, _SerializerOptions),
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json);
+
+        var response = await _httpClient
+            .PostAsync("/player/create", requestContent, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadAsStringAsync(cancellationToken);
+    }
+
     public async ValueTask SetPlayerStatusAsync(
         string playerCode,
         PlayerStatus playerStatus,

@@ -1055,4 +1055,43 @@ public class PlayerTests
 
         Assert.AreEqual("test", playerRow.Remark);
     }
+
+    [Test]
+    public async Task Create_Player()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var vipId = Guid.NewGuid();
+        var betLimitId = 1;
+        var currencyCode = "currencyCode";
+        var username = "username";
+        var password = "password";
+        var agentName = "agentName";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = await sut.CreatePlayerAsync(new Client.CreatePlayerData(
+            brandId,
+            agentId,
+            vipId,
+            currencyCode,
+            username,
+            password,
+            betLimitId, 
+            Client.PlayerType.RealPlayer,
+            agentName));
+
+        var player = dbContext.Players.First(x => x.Username== username);
+
+        Assert.IsNotNull(player);
+        Assert.IsNotNull(player.AgentId == agentId);
+        Assert.IsNotNull(playerCode);
+    }
+
 }

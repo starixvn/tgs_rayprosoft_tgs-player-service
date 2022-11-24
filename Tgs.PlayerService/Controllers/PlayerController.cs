@@ -284,4 +284,24 @@ public class PlayerController : ControllerBase
 
         return setService.ExecuteAsync(command, HttpContext.RequestAborted);
     }
+
+    [HttpPost("create", Name = "CreatePlayer")]
+    [SuccessStatusCode(200, "Create player")]
+    public ValueTask<string> SetPlayerStatusAsync(
+        [FromServices] IGetService<CreatePlayerQuery,string> queryService,
+        [FromBody] CreatePlayerViewModel player)
+    {
+        var query = new CreatePlayerQuery(
+            player.BrandId, 
+            player.AgentId, 
+            player.VipId, 
+            player.CurrencyCode,
+            player.Username, 
+            player.Password,
+            player.BetLimitId,
+            player.PlayerType,
+            player.CreateByUsername);
+
+        return queryService.GetAsync(query, HttpContext.RequestAborted);
+    }
 }
