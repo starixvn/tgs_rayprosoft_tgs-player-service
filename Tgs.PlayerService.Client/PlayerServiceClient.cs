@@ -160,10 +160,10 @@ internal class PlayerServiceClient : IPlayerServiceClient
         => _httpClient.GetAsync($"/login-record/{playerCode}", cancellationToken)
             .ToAsyncEnumerable()
             .Do(response => response.EnsureSuccessStatusCode())
-            .Select(response => response.Content
+            .Where(response => response.StatusCode != HttpStatusCode.NoContent)
+            .SelectMany(response => response.Content
                 .ReadFromJsonAsync<PlayerLoginInfo>(_SerializerOptions, cancellationToken)
                 .ToAsyncEnumerable())
-            .Concat()
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
     public async ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
