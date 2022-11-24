@@ -36,4 +36,6 @@ public interface IPlayerServiceClient
         CancellationToken cancellationToken = default);
 
     ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus playerStatus, CancellationToken cancellationToken = default);
+
+    ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default);
 }
