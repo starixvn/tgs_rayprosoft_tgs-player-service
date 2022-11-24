@@ -287,7 +287,7 @@ public class PlayerController : ControllerBase
 
     [HttpPost("create", Name = "CreatePlayer")]
     [SuccessStatusCode(200, "Create player")]
-    public ValueTask<string> SetPlayerStatusAsync(
+    public ValueTask<string> CreatePlayerAsync(
         [FromServices] IGetService<CreatePlayerQuery,string> queryService,
         [FromBody] CreatePlayerViewModel player)
     {
