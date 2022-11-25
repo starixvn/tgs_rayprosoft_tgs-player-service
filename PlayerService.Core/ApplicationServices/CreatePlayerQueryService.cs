@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.VariantTypes;
-using Tgs.Core.Infrastructures.Security;
+﻿using Tgs.Core.Infrastructures.Security;
 using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
@@ -26,7 +25,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
                 new CreatePlayerData
                 {
                     BrandId = query.BrandId,
-                    AgentId= query.AgentId,
+                    AgentId = query.AgentId,
                     VipId = query.VipId,
                     UserName = query.Username,
                     Salt = salt,
@@ -34,7 +33,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
                     CurrencyCode = query.CurrencyCode,
                     BetLimitId = query.BetLimitId,
                     Type = query.PlayerType,
-                    PlayerStatus = PlayerStatus.Enabled
+                    PlayerStatus = PlayerStatus.RegisterUndone
                 }, cancellationToken)
             .ConfigureAwait(false);
     }
