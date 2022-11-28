@@ -292,14 +292,15 @@ public class PlayerController : ControllerBase
         [FromBody] CreatePlayerViewModel player)
     {
         var query = new CreatePlayerQuery(
-            player.BrandId, 
-            player.AgentId, 
-            player.VipId, 
+            player.BrandId,
+            player.AgentId,
+            player.VipId,
             player.CurrencyCode,
-            player.Username, 
+            player.Username,
             player.Password,
             player.BetLimitId,
             player.PlayerType,
+            player.RegisterPlatformType,
             player.CreateByUsername);
 
         return queryService.GetAsync(query, HttpContext.RequestAborted);

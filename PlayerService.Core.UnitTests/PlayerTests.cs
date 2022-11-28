@@ -378,6 +378,7 @@ public class PlayerTests
             password,
             betLimitId,
             PlayerType.RealPlayer,
+            RegisterPlatformType.Agent,
             agentName);
 
         await sut.GetAsync(query);

@@ -4,8 +4,9 @@ public record CreatePlayerQuery(
     Guid? AgentId,
     Guid VipId,
     string CurrencyCode,
-    string Username, 
+    string Username,
     string Password,
     int BetLimitId,
     PlayerType PlayerType,
+    RegisterPlatformType RegisterPlatformType,
     string CreateByUsername);

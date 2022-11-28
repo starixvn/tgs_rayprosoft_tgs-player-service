@@ -9,4 +9,5 @@ public record CreatePlayerViewModel(
     string Password,
     int BetLimitId,
     PlayerType PlayerType,
+    RegisterPlatformType RegisterPlatformType,
     string CreateByUsername);

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using Tgs.PlayerService.Client;
 using Tgs.PlayerService.Repositories.Entities;
 
@@ -1083,8 +1082,9 @@ public class PlayerTests
             currencyCode,
             username,
             password,
-            betLimitId, 
+            betLimitId,
             Client.PlayerType.RealPlayer,
+            Client.RegisterPlatformType.Agent,
             agentName));
 
         var player = dbContext.Players.First(x => x.Username== username);

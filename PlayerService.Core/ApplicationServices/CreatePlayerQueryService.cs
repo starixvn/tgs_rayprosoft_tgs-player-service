@@ -20,7 +20,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
     {
         var (salt, password) = _passwordHandler.GenerateCredential(query.Password);
 
-        return await _playerRepository
+        var playerCode = await _playerRepository
             .CreatePlayerAsync(
                 new CreatePlayerData
                 {
@@ -36,5 +36,14 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
                     PlayerStatus = PlayerStatus.RegisterUndone
                 }, cancellationToken)
             .ConfigureAwait(false);
+
+        await _playerRepository.CreatePlayerRegisterPlatformAsync(new CreatePlayerRegisterPlatform
+        {
+            PlayerCode = playerCode,
+            RegisterPlatformType = query.RegisterPlatformType,
+            CreatedByUsername = query.CreateByUsername
+        }, cancellationToken).ConfigureAwait(false);
+
+        return playerCode;
     }
 }
