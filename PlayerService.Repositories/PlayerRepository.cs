@@ -584,6 +584,13 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.Players.AddAsync(player, cancellationToken);
         _ = await _dbContext.Wallets.AddAsync(wallet, cancellationToken);
 
+        if (!string.IsNullOrWhiteSpace(data.UpperPlayerCode))
+            _ = await _dbContext.PlayerParents.AddAsync(new PlayerParent
+            {
+                PlayerCode = playerCode,
+                ParentPlayerCode = data.UpperPlayerCode
+            }, cancellationToken).ConfigureAwait(false);
+
         _ = await _dbContext.SaveChangesAsync(cancellationToken);
 
         return playerCode;
@@ -601,6 +608,8 @@ internal class PlayerRepository : IPlayerRepository
         };
 
         _ = await _dbContext.PlayerRegisterPlatforms.AddAsync(registerPlatform, cancellationToken);
+
+        _ = await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private IQueryable<Player> InternalQueryPlayerList(

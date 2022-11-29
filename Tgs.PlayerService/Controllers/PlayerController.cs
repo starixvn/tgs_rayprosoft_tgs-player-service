@@ -298,6 +298,7 @@ public class PlayerController : ControllerBase
             player.CurrencyCode,
             player.Username,
             player.Password,
+            player.UpperPlayerCode,
             player.BetLimitId,
             player.PlayerType,
             player.RegisterPlatformType,

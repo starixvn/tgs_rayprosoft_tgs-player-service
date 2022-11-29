@@ -33,7 +33,8 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
                     CurrencyCode = query.CurrencyCode,
                     BetLimitId = query.BetLimitId,
                     Type = query.PlayerType,
-                    PlayerStatus = PlayerStatus.RegisterUndone
+                    PlayerStatus = PlayerStatus.RegisterUndone,
+                    UpperPlayerCode = query.UpperPlayerCode
                 }, cancellationToken)
             .ConfigureAwait(false);
 

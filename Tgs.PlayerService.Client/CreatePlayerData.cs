@@ -7,6 +7,7 @@ public record CreatePlayerData(
     string CurrencyCode,
     string Username,
     string Password,
+    string? UpperPlayerCode,
     int BetLimitId,
     PlayerType PlayerType,
     RegisterPlatformType RegisterPlatformType,

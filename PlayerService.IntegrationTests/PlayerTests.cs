@@ -1082,6 +1082,7 @@ public class PlayerTests
             currencyCode,
             username,
             password,
+            null,
             betLimitId,
             Client.PlayerType.RealPlayer,
             Client.RegisterPlatformType.Agent,
