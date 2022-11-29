@@ -20,6 +20,8 @@ public record CreatePlayerData
 
     public PlayerType Type { get; init; }
 
+    public string? UpperPlayerCode { get; init; }
+
     public string UserName { get; init; } = default!;
 
     public byte[] WithdrawPassword { get; init; } = Array.Empty<byte>();

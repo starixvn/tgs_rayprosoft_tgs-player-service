@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.EntityFrameworkCore;
-using Tgs.PlayerService.Repositories.Entities;
 using Tgs.Core.Infrastructures.Utility;
+using Tgs.PlayerService.Repositories.Entities;
 using Tgs.SerialNumberGenerator;
 
 namespace Tgs.PlayerService.Repositories;
@@ -10,31 +10,42 @@ internal class PlayerRepository : IPlayerRepository
 {
     private readonly TgsContext _dbContext;
     private readonly ISerialNumberGenerator _serialNumberGenerator;
+
     public PlayerRepository(TgsContext context, ISerialNumberGenerator serialNumberGenerator)
     {
         _dbContext = context ?? throw new ArgumentNullException(nameof(context));
-        _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+        _serialNumberGenerator =
+            serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
     }
 
-    public async ValueTask<string?> GetParentPlayerCodeAsync(string playerCode, CancellationToken cancellationToken = default)
+    public async ValueTask<string?> GetParentPlayerCodeAsync(string playerCode,
+        CancellationToken cancellationToken = default)
         => await _dbContext.PlayerParents
             .Where(pp => pp.PlayerCode == playerCode)
             .Select(pp => pp.ParentPlayerCode)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
-    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default)
+    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode,
+        CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)
+            .FindAsync(new object?[]
+            {
+                playerCode
+            }, cancellationToken)
             .ConfigureAwait(false);
 
         return player?.AccumulatedDeposit ?? 0;
     }
 
-    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default)
+    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode,
+        CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)
+            .FindAsync(new object?[]
+            {
+                playerCode
+            }, cancellationToken)
             .ConfigureAwait(false);
 
         return player == null
@@ -51,12 +62,13 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
-    public async ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(Guid brandId, string email, CancellationToken cancellationToken = default)
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(Guid brandId, string email,
+        CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players.AsQueryable()
             .Where(player => player.BrandId == brandId
                 && player.Email!.ToLower() == email.ToLower())
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+            .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 
         return player is null
@@ -73,13 +85,14 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
-    public async ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default)
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone,
+        CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players.AsQueryable()
             .Where(player => player.BrandId == brandId
                 && player.AreaCode == areaCode
                 && player.Phone == phone)
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+            .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 
         return player is null
@@ -96,12 +109,13 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
-    public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName, CancellationToken cancellationToken = default)
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName,
+        CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players.AsQueryable()
             .Where(player => player.BrandId == brandId
                 && player.Username!.ToLower() == userName.ToLower())
-            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+            .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 
         return player is null
@@ -118,11 +132,12 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
-    public async ValueTask<PlayerLoginInfo?> GetPlayerLoginInfoAsync(string playerCode, CancellationToken cancellationToken = default)
+    public async ValueTask<PlayerLoginInfo?> GetPlayerLoginInfoAsync(string playerCode,
+        CancellationToken cancellationToken = default)
     {
         var records = await _dbContext.PlayerIpRecords
             .Where(record => record.PlayerCode == playerCode)
-            .ToArrayAsync(cancellationToken: cancellationToken)
+            .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
 
         var registerRecord = records
@@ -143,11 +158,14 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     public async ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
-                     string playerCode,
+        string playerCode,
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)
+            .FindAsync(new object?[]
+            {
+                playerCode
+            }, cancellationToken)
             .ConfigureAwait(false);
 
         var properties = new Dictionary<string, string>();
@@ -181,20 +199,21 @@ internal class PlayerRepository : IPlayerRepository
             properties["AgentId"] = player.AgentId.Value.ToString();
 
         foreach (var prop in await _dbContext.PlayerProperties.AsQueryable()
-            .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)
-            .ToArrayAsync(cancellationToken: cancellationToken)
-            .ConfigureAwait(false))
+                     .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)
+                     .ToArrayAsync(cancellationToken)
+                     .ConfigureAwait(false))
             properties[prop.Name] = prop.Value;
 
         return properties.ToImmutableDictionary();
     }
 
-    public async ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default)
+    public async ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode,
+        CancellationToken cancellationToken = default)
         => (PlayerStatus)(await _dbContext.Players
-            .Where(player => player.PlayerCode == playerCode)
-            .Select(player => (short?)player.Status)
-            .FirstOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false)
+                .Where(player => player.PlayerCode == playerCode)
+                .Select(player => (short?)player.Status)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false)
             ?? 1);
 
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
@@ -237,7 +256,15 @@ internal class PlayerRepository : IPlayerRepository
                         on player.PlayerCode equals parent.PlayerCode into pg
                     from parent in pg.DefaultIfEmpty()
                     join ipRecord in _dbContext.PlayerIpRecords
-                        on new { player.PlayerCode, IpType = (short)PlayerIpType.Register } equals new { ipRecord.PlayerCode, ipRecord.IpType } into pirg
+                        on new
+                        {
+                            player.PlayerCode,
+                            IpType = (short)PlayerIpType.Register
+                        } equals new
+                        {
+                            ipRecord.PlayerCode,
+                            ipRecord.IpType
+                        } into pirg
                     from ipRecord in pirg.DefaultIfEmpty()
                     select new
                     {
@@ -317,7 +344,15 @@ internal class PlayerRepository : IPlayerRepository
                         on player.PlayerCode equals parent.PlayerCode into pg
                     from parent in pg.DefaultIfEmpty()
                     join ipRecord in _dbContext.PlayerIpRecords
-                        on new { player.PlayerCode, IpType = (short)PlayerIpType.Register } equals new { ipRecord.PlayerCode, ipRecord.IpType } into pirg
+                        on new
+                        {
+                            player.PlayerCode,
+                            IpType = (short)PlayerIpType.Register
+                        } equals new
+                        {
+                            ipRecord.PlayerCode,
+                            ipRecord.IpType
+                        } into pirg
                     from ipRecord in pirg.DefaultIfEmpty()
                     select new
                     {
@@ -357,7 +392,7 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     public async ValueTask SaveLoginIpAsync(
-           string playerCode,
+        string playerCode,
         string ip,
         string? host,
         DateTime recordTime,
@@ -366,9 +401,9 @@ internal class PlayerRepository : IPlayerRepository
         var recordTimeUtc = recordTime.ToUniversalTime();
 
         var record = await _dbContext.PlayerIpRecords
-            .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
-            .FirstOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false)
+                .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false)
             ?? (await _dbContext.PlayerIpRecords
                 .AddAsync(new PlayerIpRecord
                 {
@@ -390,14 +425,17 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     public async ValueTask SaveRegisterIpAsync(
-           string playerCode,
+        string playerCode,
         string ip,
         string? host,
         DateTime recordTime,
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)
+            .FindAsync(new object?[]
+            {
+                playerCode
+            }, cancellationToken)
             .ConfigureAwait(false);
 
         if (player is null)
@@ -410,9 +448,9 @@ internal class PlayerRepository : IPlayerRepository
         player.UpdatedOn = DateTime.UtcNow;
 
         var loginRecord = await _dbContext.PlayerIpRecords
-            .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
-            .FirstOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false)
+                .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false)
             ?? (await _dbContext.PlayerIpRecords
                 .AddAsync(new PlayerIpRecord
                 {
@@ -442,18 +480,21 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
 
         _ = await _dbContext
-                .SaveChangesAsync(cancellationToken)
-                .ConfigureAwait(false);
+            .SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async ValueTask SetPlayerPropertiesAsync(
-                 Guid brandId,
+        Guid brandId,
         string playerCode,
         IEnumerable<IDataCommand> modifyCommands,
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)
+            .FindAsync(new object?[]
+            {
+                playerCode
+            }, cancellationToken)
             .ConfigureAwait(false);
 
         if (player == null)
@@ -479,10 +520,14 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
     }
 
-    public async ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status, CancellationToken cancellationToken = default)
+    public async ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status,
+        CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)
+            .FindAsync(new object?[]
+            {
+                playerCode
+            }, cancellationToken)
             .ConfigureAwait(false);
 
         if (player == null)
@@ -496,7 +541,8 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
     }
 
-    public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default)
+    public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data,
+        CancellationToken cancellationToken = default)
     {
         var username = data.UserName;
         var walletId = await _serialNumberGenerator.GenerateAsync(cancellationToken);
@@ -538,13 +584,36 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.Players.AddAsync(player, cancellationToken);
         _ = await _dbContext.Wallets.AddAsync(wallet, cancellationToken);
 
+        if (!string.IsNullOrWhiteSpace(data.UpperPlayerCode))
+            _ = await _dbContext.PlayerParents.AddAsync(new PlayerParent
+            {
+                PlayerCode = playerCode,
+                ParentPlayerCode = data.UpperPlayerCode
+            }, cancellationToken).ConfigureAwait(false);
+
         _ = await _dbContext.SaveChangesAsync(cancellationToken);
 
         return playerCode;
     }
 
+    public async ValueTask CreatePlayerRegisterPlatformAsync(CreatePlayerRegisterPlatform data,
+        CancellationToken cancellationToken = default)
+    {
+        var registerPlatform = new PlayerRegisterPlatform
+        {
+            PlayerCode = data.PlayerCode,
+            CreatedByUsername = data.CreatedByUsername,
+            Type = (short)data.RegisterPlatformType,
+            CreatedOn = DateTime.UtcNow
+        };
+
+        _ = await _dbContext.PlayerRegisterPlatforms.AddAsync(registerPlatform, cancellationToken);
+
+        _ = await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     private IQueryable<Player> InternalQueryPlayerList(
-                               Guid brandId,
+        Guid brandId,
         PlayerStatus? status = null,
         Guid? vipId = null,
         string? userName = null,

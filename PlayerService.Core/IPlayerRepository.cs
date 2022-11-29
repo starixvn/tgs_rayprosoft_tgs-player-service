@@ -74,4 +74,7 @@ public interface IPlayerRepository
     ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status, CancellationToken cancellationToken = default);
 
     ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default);
+
+    ValueTask CreatePlayerRegisterPlatformAsync(CreatePlayerRegisterPlatform data,
+        CancellationToken cancellationToken = default);
 }
