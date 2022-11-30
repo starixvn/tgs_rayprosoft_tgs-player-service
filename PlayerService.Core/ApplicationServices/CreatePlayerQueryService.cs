@@ -38,11 +38,9 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
                 }, cancellationToken)
             .ConfigureAwait(false);
 
-        await _playerRepository.CreatePlayerRegisterPlatformTagAsync(new CreatePlayerRegisterPlatformTag
-        {
-            PlayerCode = playerCode,
-            RegisterPlatformType = query.RegisterPlatformType
-        }, cancellationToken).ConfigureAwait(false);
+        await _playerRepository
+            .CreatePlayerTagAsync(playerCode, ((PlayerTagType)query.RegisterPlatformType).ToString(), cancellationToken)
+            .ConfigureAwait(false);
 
         return playerCode;
     }
