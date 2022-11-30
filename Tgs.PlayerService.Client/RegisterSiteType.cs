@@ -1,6 +1,6 @@
 ﻿namespace Tgs.PlayerService.Client;
 
-public enum RegisterPlatformType
+public enum RegisterSiteType
 {
     Player = 0,
     Agent = 1,

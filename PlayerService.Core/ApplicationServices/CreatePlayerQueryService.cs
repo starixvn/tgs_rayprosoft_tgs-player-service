@@ -9,12 +9,12 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
     private readonly IPlayerRepository _playerRepository;
     private readonly IPasswordHandler _passwordHandler;
 
-    private readonly IImmutableDictionary<RegisterPlatformType, PlayerTagType> _platformTags =
-        new Dictionary<RegisterPlatformType, PlayerTagType>
+    private readonly IImmutableDictionary<RegisterSiteType, PlayerTagType> _tagMapper =
+        new Dictionary<RegisterSiteType, PlayerTagType>
         {
-            [RegisterPlatformType.Player] = PlayerTagType.PlayerCreated,
-            [RegisterPlatformType.Agent] = PlayerTagType.AgentCreated,
-            [RegisterPlatformType.BackendOffice] = PlayerTagType.BackendOfficeCreated
+            [RegisterSiteType.Player] = PlayerTagType.PlayerCreated,
+            [RegisterSiteType.Agent] = PlayerTagType.AgentCreated,
+            [RegisterSiteType.BackendOffice] = PlayerTagType.BackendOfficeCreated
         }.ToImmutableDictionary();
 
     public CreatePlayerQueryService(
@@ -48,7 +48,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             .ConfigureAwait(false);
 
         await _playerRepository
-            .CreatePlayerTagAsync(playerCode, _platformTags[query.RegisterPlatformType].ToString(), cancellationToken)
+            .CreatePlayerTagAsync(playerCode, _tagMapper[query.RegisterPlatformType].ToString(), cancellationToken)
             .ConfigureAwait(false);
 
         return playerCode;

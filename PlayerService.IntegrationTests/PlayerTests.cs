@@ -1085,7 +1085,7 @@ public class PlayerTests
             null,
             betLimitId,
             Client.PlayerType.RealPlayer,
-            Client.RegisterPlatformType.Agent,
+            Client.RegisterSiteType.Agent,
             agentName));
 
         var player = dbContext.Players.First(x => x.Username== username);

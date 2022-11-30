@@ -10,5 +10,5 @@ public record CreatePlayerData(
     string? UpperPlayerCode,
     int BetLimitId,
     PlayerType PlayerType,
-    RegisterPlatformType RegisterPlatformType,
+    RegisterSiteType RegisterPlatformType,
     string CreateByUsername);
