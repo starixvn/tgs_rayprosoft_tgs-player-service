@@ -1,4 +1,5 @@
-﻿using Tgs.Core.Infrastructures.Security;
+﻿using System.Collections.Immutable;
+using Tgs.Core.Infrastructures.Security;
 using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
@@ -7,6 +8,14 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
 {
     private readonly IPlayerRepository _playerRepository;
     private readonly IPasswordHandler _passwordHandler;
+
+    private readonly IImmutableDictionary<RegisterPlatformType, PlayerTagType> _platformTags =
+        new Dictionary<RegisterPlatformType, PlayerTagType>
+        {
+            [RegisterPlatformType.Player] = PlayerTagType.PlayerCreated,
+            [RegisterPlatformType.Agent] = PlayerTagType.AgentCreated,
+            [RegisterPlatformType.BackendOffice] = PlayerTagType.BackendOfficeCreated
+        }.ToImmutableDictionary();
 
     public CreatePlayerQueryService(
         IPlayerRepository playerRepository, 
@@ -39,7 +48,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             .ConfigureAwait(false);
 
         await _playerRepository
-            .CreatePlayerTagAsync(playerCode, ((PlayerTagType)query.RegisterPlatformType).ToString(), cancellationToken)
+            .CreatePlayerTagAsync(playerCode, _platformTags[query.RegisterPlatformType].ToString(), cancellationToken)
             .ConfigureAwait(false);
 
         return playerCode;

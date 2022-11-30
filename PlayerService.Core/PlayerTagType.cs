@@ -2,7 +2,7 @@
 
 public enum PlayerTagType
 {
-    PlayerCreated = 0,
-    AgentCreated = 1,
-    BackendOfficeCreated = 2
+    PlayerCreated,
+    AgentCreated,
+    BackendOfficeCreated
 }
