@@ -48,7 +48,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             .ConfigureAwait(false);
 
         await _playerRepository
-            .CreatePlayerTagAsync(playerCode, _tagMapper[query.RegisterPlatformType].ToString(), cancellationToken)
+            .CreatePlayerTagAsync(playerCode, _tagMapper[query.RegisterSiteType].ToString(), cancellationToken)
             .ConfigureAwait(false);
 
         return playerCode;

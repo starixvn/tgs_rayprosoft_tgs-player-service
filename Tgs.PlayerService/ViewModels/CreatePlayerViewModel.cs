@@ -10,5 +10,5 @@ public record CreatePlayerViewModel(
     string? UpperPlayerCode,
     int BetLimitId,
     PlayerType PlayerType,
-    RegisterSiteType RegisterPlatformType,
+    RegisterSiteType RegisterSiteType,
     string CreateByUsername);
