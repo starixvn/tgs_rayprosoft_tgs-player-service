@@ -1085,13 +1085,15 @@ public class PlayerTests
             null,
             betLimitId,
             Client.PlayerType.RealPlayer,
-            Client.RegisterPlatformType.Agent,
+            Client.RegisterSiteType.Agent,
             agentName));
 
         var player = dbContext.Players.First(x => x.Username== username);
+        var tag = dbContext.PlayerTags.First(x => x.PlayerCode == playerCode);
 
         Assert.IsNotNull(player);
         Assert.IsNotNull(player.AgentId == agentId);
         Assert.IsNotNull(playerCode);
+        Assert.IsNotNull(tag);
     }
 }

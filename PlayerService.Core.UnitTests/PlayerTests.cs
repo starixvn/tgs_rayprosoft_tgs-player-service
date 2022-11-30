@@ -379,7 +379,7 @@ public class PlayerTests
             null,
             betLimitId,
             PlayerType.RealPlayer,
-            RegisterPlatformType.Agent,
+            RegisterSiteType.Agent,
             agentName);
 
         await sut.GetAsync(query);

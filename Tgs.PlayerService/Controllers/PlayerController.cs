@@ -301,7 +301,7 @@ public class PlayerController : ControllerBase
             player.UpperPlayerCode,
             player.BetLimitId,
             player.PlayerType,
-            player.RegisterPlatformType,
+            player.RegisterSiteType,
             player.CreateByUsername);
 
         return queryService.GetAsync(query, HttpContext.RequestAborted);

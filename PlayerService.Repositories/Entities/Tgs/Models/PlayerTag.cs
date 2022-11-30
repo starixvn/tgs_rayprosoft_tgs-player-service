@@ -5,11 +5,9 @@ using System.Collections.Generic;
 
 namespace Tgs.PlayerService.Repositories.Entities
 {
-    public partial class PlayerRegisterPlatform
+    public partial class PlayerTag
     {
         public string PlayerCode { get; set; } = null!;
-        public short Type { get; set; }
-        public DateTime CreatedOn { get; set; }
-        public string CreatedByUsername { get; set; } = null!;
+        public string Tag { get; set; } = null!;
     }
 }

@@ -9,5 +9,5 @@ public record CreatePlayerQuery(
     string? UpperPlayerCode,
     int BetLimitId,
     PlayerType PlayerType,
-    RegisterPlatformType RegisterPlatformType,
+    RegisterSiteType RegisterSiteType,
     string CreateByUsername);

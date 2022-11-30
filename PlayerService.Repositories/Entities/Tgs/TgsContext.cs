@@ -19,7 +19,7 @@ namespace Tgs.PlayerService.Repositories.Entities
         public virtual DbSet<PlayerIpRecord> PlayerIpRecords { get; set; } = null!;
         public virtual DbSet<PlayerParent> PlayerParents { get; set; } = null!;
         public virtual DbSet<PlayerProperty> PlayerProperties { get; set; } = null!;
-        public virtual DbSet<PlayerRegisterPlatform> PlayerRegisterPlatforms { get; set; } = null!;
+        public virtual DbSet<PlayerTag> PlayerTags { get; set; } = null!;
         public virtual DbSet<Wallet> Wallets { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -31,7 +31,7 @@ namespace Tgs.PlayerService.Repositories.Entities
             modelBuilder.ApplyConfiguration(new Configurations.PlayerIpRecordConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerParentConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerPropertyConfiguration());
-            modelBuilder.ApplyConfiguration(new Configurations.PlayerRegisterPlatformConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PlayerTagConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.WalletConfiguration());
             OnModelCreatingPartial(modelBuilder);
         }
