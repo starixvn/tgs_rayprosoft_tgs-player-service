@@ -31,7 +31,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "dbo.player_register_platforms",
+         "Name": "dbo.player_tags",
          "ObjectType": 0
       },
       {

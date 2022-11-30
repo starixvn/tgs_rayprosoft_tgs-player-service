@@ -1089,9 +1089,11 @@ public class PlayerTests
             agentName));
 
         var player = dbContext.Players.First(x => x.Username== username);
+        var tag = dbContext.PlayerTags.First(x => x.PlayerCode == playerCode);
 
         Assert.IsNotNull(player);
         Assert.IsNotNull(player.AgentId == agentId);
         Assert.IsNotNull(playerCode);
+        Assert.IsNotNull(tag);
     }
 }

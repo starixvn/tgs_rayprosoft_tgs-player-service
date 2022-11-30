@@ -596,18 +596,16 @@ internal class PlayerRepository : IPlayerRepository
         return playerCode;
     }
 
-    public async ValueTask CreatePlayerRegisterPlatformAsync(CreatePlayerRegisterPlatform data,
+    public async ValueTask CreatePlayerRegisterPlatformTagAsync(CreatePlayerRegisterPlatformTag data,
         CancellationToken cancellationToken = default)
     {
-        var registerPlatform = new PlayerRegisterPlatform
+        var tag = new PlayerTag
         {
             PlayerCode = data.PlayerCode,
-            CreatedByUsername = data.CreatedByUsername,
-            Type = (short)data.RegisterPlatformType,
-            CreatedOn = DateTime.UtcNow
+            Tag = ((PlayerTagType)data.RegisterPlatformType).ToString()
         };
 
-        _ = await _dbContext.PlayerRegisterPlatforms.AddAsync(registerPlatform, cancellationToken);
+        _ = await _dbContext.PlayerTags.AddAsync(tag, cancellationToken);
 
         _ = await _dbContext.SaveChangesAsync(cancellationToken);
     }
