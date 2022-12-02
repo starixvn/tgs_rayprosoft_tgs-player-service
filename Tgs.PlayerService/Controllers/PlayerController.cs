@@ -211,6 +211,7 @@ public class PlayerController : ControllerBase
             brandId,
             queryViewModel.PlayerCodes,
             queryViewModel.Status,
+            queryViewModel.TagType,
             queryViewModel.VipId,
             queryViewModel.UserName,
             queryViewModel.AgentId,

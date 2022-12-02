@@ -3,6 +3,7 @@ public record PlayerListQuery(
     Guid BrandId,
     IEnumerable<string> PlayerCodes,
     PlayerStatus? Status = null,
+    PlayerTagType? TagType = null,
     Guid? VipId = null,
     string? UserName = null,
     Guid? AgentId = null,

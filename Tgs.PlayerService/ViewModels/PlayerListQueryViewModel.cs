@@ -36,4 +36,7 @@ public class PlayerListQueryViewModel
 
     [FromQuery]
     public Guid? VipId { get; set; }
+
+    [FromQuery]
+    public PlayerTagType? TagType { get; set; }
 }

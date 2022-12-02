@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
@@ -219,6 +220,7 @@ internal class PlayerRepository : IPlayerRepository
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,
         PlayerStatus? status = null,
+        PlayerTagType? tagType = null,
         Guid? vipId = null,
         string? userName = null,
         Guid? agentId = null,
@@ -266,6 +268,10 @@ internal class PlayerRepository : IPlayerRepository
                             ipRecord.IpType
                         } into pirg
                     from ipRecord in pirg.DefaultIfEmpty()
+                    join tag in _dbContext.PlayerTags
+                        on player.PlayerCode equals tag.PlayerCode into pgt
+                    from tag in pgt.DefaultIfEmpty()
+                    where tag.Tag == tagType.ToString()
                     select new
                     {
                         player.PlayerCode,
@@ -278,6 +284,19 @@ internal class PlayerRepository : IPlayerRepository
                         player.Status,
                         parent.ParentPlayerCode
                     };
+
+        query = query.GroupBy(x => x, (group, list) => new
+        {
+            group.PlayerCode,
+            group.Username,
+            group.RealName,
+            group.RegisteredOn,
+            group.Host,
+            group.AgentId,
+            group.VipId,
+            group.Status,
+            group.ParentPlayerCode
+        });
 
         if (registeredDomainName is not null)
             query = query.Where(item => item.Host.ToLower() == registeredDomainName.ToLower());
@@ -307,6 +326,7 @@ internal class PlayerRepository : IPlayerRepository
         Guid brandId,
         IEnumerable<string> playerCodes,
         PlayerStatus? status = null,
+        PlayerTagType? tagType = null,
         Guid? vipId = null,
         string? userName = null,
         Guid? agentId = null,
@@ -354,6 +374,10 @@ internal class PlayerRepository : IPlayerRepository
                             ipRecord.IpType
                         } into pirg
                     from ipRecord in pirg.DefaultIfEmpty()
+                    join tag in _dbContext.PlayerTags
+                        on player.PlayerCode equals tag.PlayerCode into pgt
+                    from tag in pgt.DefaultIfEmpty()
+                    where tag.Tag == tagType.ToString()
                     select new
                     {
                         player.PlayerCode,
@@ -364,8 +388,22 @@ internal class PlayerRepository : IPlayerRepository
                         player.AgentId,
                         player.VipId,
                         player.Status,
-                        parent.ParentPlayerCode
+                        parent.ParentPlayerCode,
+
                     };
+
+        query = query.GroupBy(x => x, (group, list) => new
+        {
+            group.PlayerCode,
+            group.Username,
+            group.RealName,
+            group.RegisteredOn,
+            group.Host,
+            group.AgentId,
+            group.VipId,
+            group.Status,
+            group.ParentPlayerCode
+        });
 
         if (registeredDomainName is not null)
             query = query.Where(item => item.Host.ToLower() == registeredDomainName.ToLower());

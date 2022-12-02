@@ -17,6 +17,7 @@ internal class PlayerListQueryService : IQueryService<PlayerListQuery, PlayerLis
                 query.BrandId,
                 query.PlayerCodes,
                 query.Status,
+                query.TagType,
                 query.VipId,
                 query.UserName,
                 query.AgentId,
@@ -30,6 +31,7 @@ internal class PlayerListQueryService : IQueryService<PlayerListQuery, PlayerLis
             : _playerRepository.QueryPlayerListAsync(
                 query.BrandId,
                 query.Status,
+                query.TagType,
                 query.VipId,
                 query.UserName,
                 query.AgentId,

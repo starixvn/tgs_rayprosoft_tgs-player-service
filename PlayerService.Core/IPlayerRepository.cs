@@ -25,6 +25,7 @@ public interface IPlayerRepository
     IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,
         PlayerStatus? status = null,
+        PlayerTagType? tagType = null,
         Guid? vipId = null,
         string? userName = null,
         Guid? agentId = null,
@@ -40,6 +41,7 @@ public interface IPlayerRepository
         Guid brandId,
         IEnumerable<string> playerCodes,
         PlayerStatus? status = null,
+        PlayerTagType? tagType = null,
         Guid? vipId = null,
         string? userName = null,
         Guid? agentId = null,

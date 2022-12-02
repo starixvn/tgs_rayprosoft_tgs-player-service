@@ -23,4 +23,6 @@ public class PlayerListQuery
     public string? UserName { get; init; }
 
     public Guid? VipId { get; init; }
+
+    public PlayerTagType? TagType { get; set; }
 }

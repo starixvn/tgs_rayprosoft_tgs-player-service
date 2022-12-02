@@ -233,6 +233,9 @@ internal class PlayerServiceClient : IPlayerServiceClient
         if (query.VipId is not null)
             queryStrings.Add("vipId", query.VipId.Value.ToString());
 
+        if (query.TagType is not null)
+            queryStrings.Add("tagType", query.TagType.Value.ToString());
+
         foreach (var playerCode in query.PlayerCodes)
             queryStrings.Add("playerCode", playerCode);
 
