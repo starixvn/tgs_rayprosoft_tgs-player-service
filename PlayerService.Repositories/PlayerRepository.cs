@@ -271,7 +271,6 @@ internal class PlayerRepository : IPlayerRepository
                     join tag in _dbContext.PlayerTags
                         on player.PlayerCode equals tag.PlayerCode into pgt
                     from tag in pgt.DefaultIfEmpty()
-                    where tag.Tag == tagType.ToString()
                     select new
                     {
                         player.PlayerCode,
@@ -282,29 +281,32 @@ internal class PlayerRepository : IPlayerRepository
                         player.AgentId,
                         player.VipId,
                         player.Status,
-                        parent.ParentPlayerCode
+                        parent.ParentPlayerCode,
+                        tag.Tag
                     };
 
-        query = query.GroupBy(x => x, (group, list) => new
-        {
-            group.PlayerCode,
-            group.Username,
-            group.RealName,
-            group.RegisteredOn,
-            group.Host,
-            group.AgentId,
-            group.VipId,
-            group.Status,
-            group.ParentPlayerCode
-        });
+        var groupQuery = query
+            .Where(tagType, x => x.Tag == tagType.ToString())
+            .GroupBy(x => x, (group, list) => new
+            {
+                group.PlayerCode,
+                group.Username,
+                group.RealName,
+                group.RegisteredOn,
+                group.Host,
+                group.AgentId,
+                group.VipId,
+                group.Status,
+                group.ParentPlayerCode
+            });
 
         if (registeredDomainName is not null)
-            query = query.Where(item => item.Host.ToLower() == registeredDomainName.ToLower());
+            groupQuery = groupQuery.Where(item => item.Host.ToLower() == registeredDomainName.ToLower());
 
         if (parentPlayerCode is not null)
-            query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
+            groupQuery = groupQuery.Where(item => item.ParentPlayerCode == parentPlayerCode);
 
-        return query
+        return groupQuery
             .OrderByDescending(item => item.RegisteredOn != null)
             .ThenByDescending(item => item.RegisteredOn)
             .Take(1000)
@@ -377,7 +379,6 @@ internal class PlayerRepository : IPlayerRepository
                     join tag in _dbContext.PlayerTags
                         on player.PlayerCode equals tag.PlayerCode into pgt
                     from tag in pgt.DefaultIfEmpty()
-                    where tag.Tag == tagType.ToString()
                     select new
                     {
                         player.PlayerCode,
@@ -389,29 +390,31 @@ internal class PlayerRepository : IPlayerRepository
                         player.VipId,
                         player.Status,
                         parent.ParentPlayerCode,
-
+                        tag.Tag
                     };
 
-        query = query.GroupBy(x => x, (group, list) => new
-        {
-            group.PlayerCode,
-            group.Username,
-            group.RealName,
-            group.RegisteredOn,
-            group.Host,
-            group.AgentId,
-            group.VipId,
-            group.Status,
-            group.ParentPlayerCode
-        });
+        var groupQuery = query
+            .Where(tagType, x => x.Tag == tagType.ToString())
+            .GroupBy(x => x, (group, list) => new
+            {
+                group.PlayerCode,
+                group.Username,
+                group.RealName,
+                group.RegisteredOn,
+                group.Host,
+                group.AgentId,
+                group.VipId,
+                group.Status,
+                group.ParentPlayerCode
+            });
 
         if (registeredDomainName is not null)
-            query = query.Where(item => item.Host.ToLower() == registeredDomainName.ToLower());
+            groupQuery = groupQuery.Where(item => item.Host.ToLower() == registeredDomainName.ToLower());
 
         if (parentPlayerCode is not null)
-            query = query.Where(item => item.ParentPlayerCode == parentPlayerCode);
+            groupQuery = groupQuery.Where(item => item.ParentPlayerCode == parentPlayerCode);
 
-        return query
+        return groupQuery
             .OrderByDescending(item => item.RegisteredOn != null)
             .ThenByDescending(item => item.RegisteredOn)
             .Take(1000)

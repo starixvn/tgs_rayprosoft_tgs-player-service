@@ -763,4 +763,81 @@ public class PlayerQueryTests
 
         Assert.AreEqual(1, actual.Length);
     }
+
+    [Test]
+    public async Task PlayerListQuery_By_Player_Tag()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+
+        var query = new PlayerListQuery
+        {
+            TagType = Client.PlayerTagType.PlayerCreated
+        };
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player2",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            },
+            new Player
+            {
+                PlayerCode = "player3",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player3",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            });
+
+        await dbContext.PlayerTags.AddRangeAsync(
+            new PlayerTag
+            {
+                PlayerCode = "player1",
+                Tag = PlayerTagType.PlayerCreated.ToString()
+            },
+            new PlayerTag
+            {
+                PlayerCode = "player2",
+                Tag = PlayerTagType.AgentCreated.ToString()
+            }, new PlayerTag
+            {
+                PlayerCode = "player3",
+                Tag = PlayerTagType.AgentCreated.ToString()
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
+
+        Assert.AreEqual(1, actual.Length);
+    }
+
 }
