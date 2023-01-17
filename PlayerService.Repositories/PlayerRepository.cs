@@ -631,7 +631,7 @@ internal class PlayerRepository : IPlayerRepository
             players = players.Where(p => p.VipId == vipId);
 
         if (userName is not null)
-            players = players.Where(p => p.Username.StartsWith(userName));
+            players = players.Where(p => p.Username.ToLower().StartsWith(userName.ToLower()));
 
         if (agentId is not null)
             players = players.Where(p => p.AgentId == agentId);
@@ -640,7 +640,7 @@ internal class PlayerRepository : IPlayerRepository
             players = players.Where(p => p.Phone == phone);
 
         if (realName is not null)
-            players = players.Where(p => p.RealName!.StartsWith(realName));
+            players = players.Where(p => p.RealName!.ToLower().StartsWith(realName.ToLower()));
 
         if (beginRegisterTime is not null)
             players = players.Where(p => p.RegisteredOn >= beginRegisterTime.Value.ToUniversalTime());
