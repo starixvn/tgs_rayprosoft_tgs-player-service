@@ -382,7 +382,7 @@ public class PlayerTests
             RegisterSiteType.Agent,
             agentName);
 
-        await sut.GetAsync(query);
+        _ = await sut.GetAsync(query);
 
         _ = fakePlayerRepository.Received(1)
             .CreatePlayerAsync(Arg.Any<CreatePlayerData>());

@@ -17,10 +17,9 @@ internal class GetParentPlayerInfoQueryService : IGetService<GetParentPlayerInfo
             query.PlayerCode,
             cancellationToken).ConfigureAwait(false);
 
-        if (string.IsNullOrEmpty(parentPlayerCode))
-            return null;
-
-        return await _playerRepository.GetPlayerInfoAsync(
+        return string.IsNullOrEmpty(parentPlayerCode)
+            ? null
+            : await _playerRepository.GetPlayerInfoAsync(
             parentPlayerCode,
             cancellationToken).ConfigureAwait(false);
     }
