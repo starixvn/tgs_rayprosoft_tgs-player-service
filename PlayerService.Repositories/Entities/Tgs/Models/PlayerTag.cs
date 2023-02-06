@@ -3,11 +3,11 @@
 using System;
 using System.Collections.Generic;
 
-namespace Tgs.PlayerService.Repositories.Entities
+namespace Tgs.PlayerService.Repositories.Entities;
+
+public partial class PlayerTag
 {
-    public partial class PlayerTag
-    {
-        public string PlayerCode { get; set; } = null!;
-        public string Tag { get; set; } = null!;
-    }
+    public string PlayerCode { get; set; } = null!;
+
+    public string Tag { get; set; } = null!;
 }

@@ -3,17 +3,25 @@
 using System;
 using System.Collections.Generic;
 
-namespace Tgs.PlayerService.Repositories.Entities
+namespace Tgs.PlayerService.Repositories.Entities;
+
+public partial class Wallet
 {
-    public partial class Wallet
-    {
-        public Guid Id { get; set; }
-        public string PlayerCode { get; set; } = null!;
-        public string CurrencyCode { get; set; } = null!;
-        public string ExternalCurrencyCode { get; set; } = null!;
-        public decimal Balance { get; set; }
-        public DateTime CreatedOn { get; set; }
-        public DateTime UpdatedOn { get; set; }
-        public decimal LockedBalance { get; set; }
-    }
+    public Guid Id { get; set; }
+
+    public string PlayerCode { get; set; } = null!;
+
+    public string CurrencyCode { get; set; } = null!;
+
+    public string ExternalCurrencyCode { get; set; } = null!;
+
+    public decimal Balance { get; set; }
+
+    public DateTime CreatedOn { get; set; }
+
+    public DateTime UpdatedOn { get; set; }
+
+    public decimal LockedBalance { get; set; }
+
+    public virtual Player PlayerCodeNavigation { get; set; } = null!;
 }

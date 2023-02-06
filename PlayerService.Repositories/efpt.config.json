@@ -1,5 +1,5 @@
 ﻿{
-   "CodeGenerationMode": 2,
+   "CodeGenerationMode": 3,
    "ContextClassName": "TgsContext",
    "ContextNamespace": "Entities",
    "DefaultDacpacSchema": null,
@@ -18,6 +18,10 @@
    "SelectedHandlebarsLanguage": 0,
    "SelectedToBeGenerated": 0,
    "Tables": [
+      {
+         "Name": "dbo.player_audit_logs",
+         "ObjectType": 0
+      },
       {
          "Name": "dbo.player_ip_records",
          "ObjectType": 0
@@ -43,19 +47,19 @@
          "ObjectType": 0
       }
    ],
-   "UiHint": "tgs",
-   "UseBoolPropertiesWithoutDefaultSql": true,
+   "UiHint": "tgs-local",
+   "UncountableWords": null,
+   "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,
+   "UseDateOnlyTimeOnly": false,
    "UseDbContextSplitting": true,
    "UseFluentApiOnly": true,
    "UseHandleBars": false,
    "UseHierarchyId": false,
    "UseInflector": true,
    "UseLegacyPluralizer": false,
-   "UseManyToManyEntity": false,
-   "UseNoConstructor": true,
-   "UseNoDefaultConstructor": true,
-   "UseNoNavigations": true,
+   "UseManyToManyEntity": true,
+   "UseNoDefaultConstructor": false,
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
    "UseNullableReferences": true,

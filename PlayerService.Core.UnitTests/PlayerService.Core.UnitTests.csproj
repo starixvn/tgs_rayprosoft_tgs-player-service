@@ -29,4 +29,8 @@
     <ProjectReference Include="..\PlayerService.Core\PlayerService.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
 </Project>

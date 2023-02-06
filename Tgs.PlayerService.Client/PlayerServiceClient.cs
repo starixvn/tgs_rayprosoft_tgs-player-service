@@ -26,8 +26,24 @@ internal class PlayerServiceClient : IPlayerServiceClient
         _httpClient = http ?? throw new ArgumentNullException(nameof(http));
     }
 
+    public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default)
+    {
+        var requestContent = new StringContent(
+            JsonSerializer.Serialize(data, _SerializerOptions),
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json);
+
+        var response = await _httpClient
+            .PostAsync("/player/create", requestContent, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadAsStringAsync(cancellationToken);
+    }
+
     public ValueTask<PlayerInfo?> GetParentPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default)
-        => _httpClient
+            => _httpClient
             .GetAsync($"/player/parent/{playerCode}", cancellationToken)
             .ToAsyncEnumerable()
             .Select(response => response.StatusCode switch
@@ -319,22 +335,6 @@ internal class PlayerServiceClient : IPlayerServiceClient
         _ = response.EnsureSuccessStatusCode();
     }
 
-    public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default)
-    {
-        var requestContent = new StringContent(
-            JsonSerializer.Serialize(data, _SerializerOptions),
-            Encoding.UTF8,
-            MediaTypeNames.Application.Json);
-
-        var response = await _httpClient
-            .PostAsync("/player/create", requestContent, cancellationToken)
-            .ConfigureAwait(false);
-
-        _ = response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadAsStringAsync(cancellationToken);
-    }
-
     public async ValueTask SetPlayerStatusAsync(
         string playerCode,
         PlayerStatus playerStatus,
@@ -348,6 +348,16 @@ internal class PlayerServiceClient : IPlayerServiceClient
         var response = await _httpClient
             .PutAsync($"/player/status/{playerCode}", requestContent, cancellationToken)
             .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+    }
+
+    public async ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.PutAsJsonAsync(
+            $"/player/deposit/{playerCode}",
+            amount,
+            cancellationToken).ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();
     }
