@@ -37,6 +37,11 @@ namespace Tgs.PlayerService.Repositories.Entities.Configurations
                 .HasColumnName("record_on")
                 .HasDefaultValueSql("now()");
 
+            entity.HasOne(d => d.PlayerCodeNavigation)
+                .WithMany(p => p.PlayerIpRecords)
+                .HasForeignKey(d => d.PlayerCode)
+                .HasConstraintName("fk_player_ip_records_players_player_code");
+
             OnConfigurePartial(entity);
         }
 

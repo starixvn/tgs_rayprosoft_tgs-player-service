@@ -15,5 +15,7 @@ namespace Tgs.PlayerService.Repositories.Entities
         public DateTime CreatedOn { get; set; }
         public DateTime UpdatedOn { get; set; }
         public decimal LockedBalance { get; set; }
+
+        public virtual Player PlayerCodeNavigation { get; set; } = null!;
     }
 }

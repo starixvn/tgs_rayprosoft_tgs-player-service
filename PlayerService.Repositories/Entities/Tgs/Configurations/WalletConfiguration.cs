@@ -48,6 +48,12 @@ namespace Tgs.PlayerService.Repositories.Entities.Configurations
 
             entity.Property(e => e.UpdatedOn).HasColumnName("updated_on");
 
+            entity.HasOne(d => d.PlayerCodeNavigation)
+                .WithMany(p => p.Wallets)
+                .HasForeignKey(d => d.PlayerCode)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("fk_wallets_players_player_code");
+
             OnConfigurePartial(entity);
         }
 

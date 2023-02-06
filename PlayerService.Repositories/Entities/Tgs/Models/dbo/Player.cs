@@ -7,6 +7,13 @@ namespace Tgs.PlayerService.Repositories.Entities
 {
     public partial class Player
     {
+        public Player()
+        {
+            PlayerIpRecords = new HashSet<PlayerIpRecord>();
+            PlayerProperties = new HashSet<PlayerProperty>();
+            Wallets = new HashSet<Wallet>();
+        }
+
         public string PlayerCode { get; set; } = null!;
         public string? IdNumber { get; set; }
         public string Username { get; set; } = null!;
@@ -40,5 +47,9 @@ namespace Tgs.PlayerService.Repositories.Entities
         public string? Remark { get; set; }
         public DateOnly? Birthdate { get; set; }
         public string? Birthday { get; set; }
+
+        public virtual ICollection<PlayerIpRecord> PlayerIpRecords { get; set; }
+        public virtual ICollection<PlayerProperty> PlayerProperties { get; set; }
+        public virtual ICollection<Wallet> Wallets { get; set; }
     }
 }

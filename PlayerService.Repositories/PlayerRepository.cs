@@ -1,4 +1,8 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
@@ -18,8 +22,102 @@ internal class PlayerRepository : IPlayerRepository
             serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
     }
 
-    public async ValueTask<string?> GetParentPlayerCodeAsync(string playerCode,
+    public async ValueTask AddPlayerAuditLogAsync(
+        Guid createId,
+        string userName,
+        string moduleName,
+        string operation,
+        string modifier,
         CancellationToken cancellationToken = default)
+    {
+        var auditLog = new PlayerAuditLog
+        {
+            Id = createId,
+            ModuleName = "Player",
+            CreatedByUsername = modifier,
+            CreatedOn = DateTime.UtcNow,
+            Operation = operation,
+            Username = userName
+        };
+
+        _ = await _dbContext.PlayerAuditLogs
+            .AddAsync(auditLog, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data,
+            CancellationToken cancellationToken = default)
+    {
+        var username = data.UserName;
+        var walletId = await _serialNumberGenerator.GenerateAsync(cancellationToken);
+        var createdOn = DateTime.UtcNow;
+        var playerCode = PlayerCodeGenerator.NewId();
+
+        var player = new Player
+        {
+            PlayerCode = playerCode,
+            Username = username,
+            Password = data.Password,
+            Salt = data.Salt,
+            WithdrawPassword = data.WithdrawPassword,
+            WithdrawSalt = data.WithdrawSalt,
+            BrandId = data.BrandId,
+            DefaultWalletId = walletId,
+            DefaultWalletCurrencyCode = data.CurrencyCode,
+            LastActiveOn = createdOn,
+            Status = (short)data.PlayerStatus,
+            Type = (short)data.Type,
+            BetLimitId = data.BetLimitId,
+            AgentId = data.AgentId,
+            UpdatedByUsername = username,
+            UpdatedOn = createdOn,
+            VipId = data.VipId
+        };
+
+        var wallet = new Wallet
+        {
+            Id = walletId,
+            PlayerCode = playerCode,
+            CurrencyCode = data.CurrencyCode,
+            ExternalCurrencyCode = data.CurrencyCode,
+            Balance = 0,
+            CreatedOn = createdOn,
+            UpdatedOn = createdOn
+        };
+
+        _ = await _dbContext.Players.AddAsync(player, cancellationToken);
+        _ = await _dbContext.Wallets.AddAsync(wallet, cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(data.UpperPlayerCode))
+            _ = await _dbContext.PlayerParents.AddAsync(new PlayerParent
+            {
+                PlayerCode = playerCode,
+                ParentPlayerCode = data.UpperPlayerCode
+            }, cancellationToken).ConfigureAwait(false);
+
+        _ = await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return playerCode;
+    }
+
+    public async ValueTask CreatePlayerTagAsync(string playerCode, string tag,
+        CancellationToken cancellationToken = default)
+    {
+        var playerTag = new PlayerTag
+        {
+            PlayerCode = playerCode,
+            Tag = tag
+        };
+
+        _ = await _dbContext.PlayerTags.AddAsync(playerTag, cancellationToken);
+
+        _ = await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async ValueTask<string?> GetParentPlayerCodeAsync(string playerCode,
+                CancellationToken cancellationToken = default)
         => await _dbContext.PlayerParents
             .Where(pp => pp.PlayerCode == playerCode)
             .Select(pp => pp.ParentPlayerCode)
@@ -62,7 +160,9 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
-    public async ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(Guid brandId, string email,
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(
+        Guid brandId,
+        string email,
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players.AsQueryable()
@@ -541,77 +641,25 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
     }
 
-    public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data,
-        CancellationToken cancellationToken = default)
+    public async ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default)
     {
-        var username = data.UserName;
-        var walletId = await _serialNumberGenerator.GenerateAsync(cancellationToken);
-        var createdOn = DateTime.UtcNow;
-        var playerCode = PlayerCodeGenerator.NewId();
+        var player = await _dbContext.Players.FindAsync(
+            new object?[] { playerCode },
+            cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        var player = new Player
-        {
-            PlayerCode = playerCode,
-            Username = username,
-            Password = data.Password,
-            Salt = data.Salt,
-            WithdrawPassword = data.WithdrawPassword,
-            WithdrawSalt = data.WithdrawSalt,
-            BrandId = data.BrandId,
-            DefaultWalletId = walletId,
-            DefaultWalletCurrencyCode = data.CurrencyCode,
-            LastActiveOn = createdOn,
-            Status = (short)data.PlayerStatus,
-            Type = (short)data.Type,
-            BetLimitId = data.BetLimitId,
-            AgentId = data.AgentId,
-            UpdatedByUsername = username,
-            UpdatedOn = createdOn,
-            VipId = data.VipId
-        };
+        if (player is null)
+            return;
 
-        var wallet = new Wallet
-        {
-            Id = walletId,
-            PlayerCode = playerCode,
-            CurrencyCode = data.CurrencyCode,
-            ExternalCurrencyCode = data.CurrencyCode,
-            Balance = 0,
-            CreatedOn = createdOn,
-            UpdatedOn = createdOn
-        };
+        player.AccumulatedDeposit += amount;
 
-        _ = await _dbContext.Players.AddAsync(player, cancellationToken);
-        _ = await _dbContext.Wallets.AddAsync(wallet, cancellationToken);
+        player.UpdatedByUsername = playerCode;
+        player.UpdatedOn = DateTime.UtcNow;
 
-        if (!string.IsNullOrWhiteSpace(data.UpperPlayerCode))
-            _ = await _dbContext.PlayerParents.AddAsync(new PlayerParent
-            {
-                PlayerCode = playerCode,
-                ParentPlayerCode = data.UpperPlayerCode
-            }, cancellationToken).ConfigureAwait(false);
-
-        _ = await _dbContext.SaveChangesAsync(cancellationToken);
-
-        return playerCode;
-    }
-
-    public async ValueTask CreatePlayerTagAsync(string playerCode, string tag,
-        CancellationToken cancellationToken = default)
-    {
-        var playerTag = new PlayerTag
-        {
-            PlayerCode = playerCode,
-            Tag = tag
-        };
-
-        _ = await _dbContext.PlayerTags.AddAsync(playerTag, cancellationToken);
-
-        _ = await _dbContext.SaveChangesAsync(cancellationToken);
+        _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private IQueryable<Player> InternalQueryPlayerList(
-        Guid brandId,
+            Guid brandId,
         PlayerStatus? status = null,
         Guid? vipId = null,
         string? userName = null,

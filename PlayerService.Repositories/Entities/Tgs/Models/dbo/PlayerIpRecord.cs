@@ -12,5 +12,7 @@ namespace Tgs.PlayerService.Repositories.Entities
         public string Ip { get; set; } = null!;
         public DateTime RecordOn { get; set; }
         public string? Host { get; set; }
+
+        public virtual Player PlayerCodeNavigation { get; set; } = null!;
     }
 }

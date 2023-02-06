@@ -35,6 +35,11 @@ namespace Tgs.PlayerService.Repositories.Entities.Configurations
                 .HasMaxLength(512)
                 .HasColumnName("value");
 
+            entity.HasOne(d => d.PlayerCodeNavigation)
+                .WithMany(p => p.PlayerProperties)
+                .HasForeignKey(d => d.PlayerCode)
+                .HasConstraintName("fk_player_player_property_player_code");
+
             OnConfigurePartial(entity);
         }
 

@@ -11,5 +11,7 @@ namespace Tgs.PlayerService.Repositories.Entities
         public string Name { get; set; } = null!;
         public string PlayerCode { get; set; } = null!;
         public string Value { get; set; } = null!;
+
+        public virtual Player PlayerCodeNavigation { get; set; } = null!;
     }
 }

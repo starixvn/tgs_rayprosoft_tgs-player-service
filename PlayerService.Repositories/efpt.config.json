@@ -19,6 +19,10 @@
    "SelectedToBeGenerated": 0,
    "Tables": [
       {
+         "Name": "dbo.player_audit_logs",
+         "ObjectType": 0
+      },
+      {
          "Name": "dbo.player_ip_records",
          "ObjectType": 0
       },
@@ -43,23 +47,23 @@
          "ObjectType": 0
       }
    ],
-   "UiHint": "tgs",
+   "UiHint": "tgs-local",
+   "UncountableWords": null,
    "UseBoolPropertiesWithoutDefaultSql": true,
    "UseDatabaseNames": false,
+   "UseDateOnlyTimeOnly": false,
    "UseDbContextSplitting": true,
    "UseFluentApiOnly": true,
    "UseHandleBars": false,
    "UseHierarchyId": false,
    "UseInflector": true,
    "UseLegacyPluralizer": false,
-   "UseManyToManyEntity": false,
-   "UseNoConstructor": true,
+   "UseManyToManyEntity": true,
    "UseNoDefaultConstructor": true,
-   "UseNoNavigations": true,
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
    "UseNullableReferences": true,
-   "UseSchemaFolders": false,
+   "UseSchemaFolders": true,
    "UseSpatial": false,
    "UseT4": false
 }

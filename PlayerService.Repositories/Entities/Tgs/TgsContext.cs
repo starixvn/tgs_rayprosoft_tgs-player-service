@@ -16,6 +16,7 @@ namespace Tgs.PlayerService.Repositories.Entities
         }
 
         public virtual DbSet<Player> Players { get; set; } = null!;
+        public virtual DbSet<PlayerAuditLog> PlayerAuditLogs { get; set; } = null!;
         public virtual DbSet<PlayerIpRecord> PlayerIpRecords { get; set; } = null!;
         public virtual DbSet<PlayerParent> PlayerParents { get; set; } = null!;
         public virtual DbSet<PlayerProperty> PlayerProperties { get; set; } = null!;
@@ -28,6 +29,7 @@ namespace Tgs.PlayerService.Repositories.Entities
                 .HasPostgresExtension("pg_trgm");
 
             modelBuilder.ApplyConfiguration(new Configurations.PlayerConfiguration());
+            modelBuilder.ApplyConfiguration(new Configurations.PlayerAuditLogConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerIpRecordConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerParentConfiguration());
             modelBuilder.ApplyConfiguration(new Configurations.PlayerPropertyConfiguration());
