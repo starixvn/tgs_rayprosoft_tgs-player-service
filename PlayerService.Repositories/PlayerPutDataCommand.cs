@@ -46,8 +46,8 @@ internal class PlayerPutDataCommand : PutDataCommand
                 break;
 
             default:
-                if (modifyContext.PlayerProperties.ContainsKey(Name))
-                    modifyContext.PlayerProperties[Name].Value = Value;
+                if (modifyContext.PlayerProperties.TryGetValue(Name, out var value))
+                    value.Value = Value;
                 else
                     _ = await modifyContext.TgsContext.PlayerProperties
                         .AddAsync(new PlayerProperty

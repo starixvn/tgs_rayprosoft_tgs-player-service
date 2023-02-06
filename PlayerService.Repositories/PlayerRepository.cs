@@ -1,4 +1,8 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
@@ -156,7 +160,9 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
-    public async ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(Guid brandId, string email,
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(
+        Guid brandId,
+        string email,
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players.AsQueryable()

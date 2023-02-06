@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -21,9 +21,9 @@ builder.Logging
         options.ParseStateValues = true;
         _ = options.AddFluentdForwardExporter(fluentOptions =>
         {
-            var nodeIp = builder.Configuration.GetValue<string>("NODE_IP");
+            var nodeIp = builder.Configuration.GetValue<string>("NODE_IP")!;
             fluentOptions.Host = nodeIp;
-            fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
+            fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME")!;
             fluentOptions.UseMessagePack();
         });
     });
@@ -41,11 +41,8 @@ builder.Services
     .AddSecurity()
     .AddSerialNumberGenerator()
     .AddPlayerServiceCore()
-    .AddPlayerServiceRepositories((sp, optionsBuilder) =>
-    {
-        var connectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString("Tgs");
-        _ = optionsBuilder.UseNpgsql(connectionString);
-    })
+    .AddPlayerServiceRepositories((sp, optionsBuilder) => optionsBuilder
+        .UseNpgsql("name=Tgs"))
     .AddMemoryCache()
     .AddPlayerServiceCache();
 

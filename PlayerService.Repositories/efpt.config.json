@@ -1,5 +1,5 @@
 ﻿{
-   "CodeGenerationMode": 3,
+   "CodeGenerationMode": 2,
    "ContextClassName": "TgsContext",
    "ContextNamespace": "Entities",
    "DefaultDacpacSchema": null,
@@ -49,7 +49,7 @@
    ],
    "UiHint": "tgs-local",
    "UncountableWords": null,
-   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseBoolPropertiesWithoutDefaultSql": true,
    "UseDatabaseNames": false,
    "UseDateOnlyTimeOnly": false,
    "UseDbContextSplitting": true,
@@ -59,11 +59,11 @@
    "UseInflector": true,
    "UseLegacyPluralizer": false,
    "UseManyToManyEntity": true,
-   "UseNoDefaultConstructor": false,
+   "UseNoDefaultConstructor": true,
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
    "UseNullableReferences": true,
-   "UseSchemaFolders": false,
+   "UseSchemaFolders": true,
    "UseSpatial": false,
    "UseT4": false
 }
