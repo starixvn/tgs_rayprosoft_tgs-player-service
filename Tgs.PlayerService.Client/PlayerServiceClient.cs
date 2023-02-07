@@ -55,6 +55,24 @@ internal class PlayerServiceClient : IPlayerServiceClient
             .Concat()
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
+    public async ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
+        Guid brandId,
+        IEnumerable<string> userNames,
+        CancellationToken cancellationToken = default)
+    {
+        _httpClient.DefaultRequestHeaders.Add("UserNames", string.Join(',', userNames));
+
+        var response = await _httpClient
+            .GetAsync($"/player/playerCodes/{brandId}", cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        return (await response.Content
+            .ReadFromJsonAsync<IImmutableDictionary<string, string>>(_SerializerOptions, cancellationToken)
+            .ConfigureAwait(false))!;
+    }
+
     public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient
@@ -198,7 +216,6 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
         return JsonSerializer.Deserialize<IImmutableDictionary<string, string>>(content, _SerializerOptions)!;
     }
-
     public async ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient
@@ -265,15 +282,15 @@ internal class PlayerServiceClient : IPlayerServiceClient
     }
 
     public async ValueTask RecordLoginIpAsync(
-           string playerCode,
-        string Ip,
-        string? HostName,
+        string playerCode,
+        string ip,
+        string? hostName,
         CancellationToken cancellationToken = default)
     {
         var request = new
         {
-            Ip,
-            HostName
+            Ip = ip,
+            HostName = hostName
         };
 
         var requestContent = new StringContent(
@@ -293,14 +310,14 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
     public async ValueTask RecordRegisterIpAsync(
         string playerCode,
-        string Ip,
-        string? HostName,
+        string ip,
+        string? hostName,
         CancellationToken cancellationToken = default)
     {
         var request = new
         {
-            Ip,
-            HostName
+            Ip = ip,
+            HostName = hostName
         };
 
         var requestContent = new StringContent(

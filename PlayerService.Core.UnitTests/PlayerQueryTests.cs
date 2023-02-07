@@ -1,5 +1,4 @@
 ﻿using NSubstitute;
-using NUnit.Framework;
 using Tgs.PlayerService.ApplicationServices;
 
 namespace Tgs.PlayerService.Core.UnitTests;

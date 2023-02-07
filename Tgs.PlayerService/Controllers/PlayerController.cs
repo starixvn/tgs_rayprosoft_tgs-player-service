@@ -15,6 +15,59 @@ namespace Tgs.PlayerService.Controllers;
 [ApiController]
 public class PlayerController : ControllerBase
 {
+    [HttpPost("create", Name = "CreatePlayer")]
+    [SuccessStatusCode(200, "Create player")]
+    public ValueTask<string> CreatePlayerAsync(
+        [FromServices] IGetService<CreatePlayerQuery, string> queryService,
+        [FromBody] CreatePlayerViewModel player)
+    {
+        var query = new CreatePlayerQuery(
+            player.BrandId,
+            player.AgentId,
+            player.VipId,
+            player.CurrencyCode,
+            player.Username,
+            player.Password,
+            player.UpperPlayerCode,
+            player.BetLimitId,
+            player.PlayerType,
+            player.RegisterSiteType,
+            player.CreateByUsername);
+
+        return queryService.GetAsync(query, HttpContext.RequestAborted);
+    }
+
+    [HttpGet("parent/{playerCode}", Name = "GetParentPlayerInfo")]
+    [SuccessStatusCode(200, "parent player info found")]
+    [FailStatusCode(404, "parent player info not found")]
+    public async Task<PlayerInfoViewModel> GetParentPlayerInfoAsync(
+        [FromServices] IGetService<GetParentPlayerInfoQuery, PlayerInfo?> getService,
+        string playerCode)
+    {
+        var query = new GetParentPlayerInfoQuery(playerCode);
+
+        var parentPlayer = await getService.GetAsync(
+            query,
+            HttpContext.RequestAborted).ConfigureAwait(false);
+
+        return parentPlayer is null
+            ? await this.FailAsync<PlayerInfoViewModel, string>(
+                404,
+                "Not found").ConfigureAwait(false)
+            : new PlayerInfoViewModel
+            {
+                PlayerCode = parentPlayer.PlayerCode,
+                BrandId = parentPlayer.BrandId,
+                UserName = parentPlayer.UserName,
+                IdentityAuthentication = parentPlayer.IdentityAuthentication,
+                PhoneAuthentication = parentPlayer.PhoneAuthentication,
+                EmailAuthentication = parentPlayer.EmailAuthentication,
+                IsSetPayPassword = parentPlayer.IsSetPayPassword,
+                VipLevelId = parentPlayer.VipLevelId,
+                RegisteredOn = parentPlayer.RegisteredOn
+            };
+    }
+
     [HttpGet("deposited/{playerCode}", Name = "GetPlayerDepositedAmount")]
     [SuccessStatusCode(200, "Player deposited amount returns")]
     public ValueTask<decimal> GetPlayerDepositedAmountAsync(
@@ -51,38 +104,6 @@ public class PlayerController : ControllerBase
                 RegisteredOn = playerInfo.RegisteredOn
             };
     }
-
-    [HttpGet("parent/{playerCode}", Name = "GetParentPlayerInfo")]
-    [SuccessStatusCode(200, "parent player info found")]
-    [FailStatusCode(404, "parent player info not found")]
-    public async Task<PlayerInfoViewModel> GetParentPlayerInfoAsync(
-        [FromServices] IGetService<GetParentPlayerInfoQuery, PlayerInfo?> getService,
-        string playerCode)
-    {
-        var query = new GetParentPlayerInfoQuery(playerCode);
-
-        var parentPlayer = await getService.GetAsync(
-            query,
-            HttpContext.RequestAborted).ConfigureAwait(false);
-
-        return parentPlayer is null
-            ? await this.FailAsync<PlayerInfoViewModel, string>(
-                404,
-                "Not found").ConfigureAwait(false)
-            : new PlayerInfoViewModel
-            {
-                PlayerCode = parentPlayer.PlayerCode,
-                BrandId = parentPlayer.BrandId,
-                UserName = parentPlayer.UserName,
-                IdentityAuthentication = parentPlayer.IdentityAuthentication,
-                PhoneAuthentication = parentPlayer.PhoneAuthentication,
-                EmailAuthentication = parentPlayer.EmailAuthentication,
-                IsSetPayPassword = parentPlayer.IsSetPayPassword,
-                VipLevelId = parentPlayer.VipLevelId,
-                RegisteredOn = parentPlayer.RegisteredOn
-            };
-    }
-
     [HttpGet("{brandId}/{email:regex(^[[\\w-\\.]]+@([[\\w-]]+\\.)+[[\\w-]]{{2,4}}$)}", Name = "GetPlayerInfoByEmail")]
     [SuccessStatusCode(200, "Player info found")]
     [FailStatusCode(404, "Player info not found")]
@@ -199,6 +220,27 @@ public class PlayerController : ControllerBase
         return getService.GetAsync(query, HttpContext.RequestAborted);
     }
 
+    [HttpGet("playerCodes/{brandId:Guid}", Name = "GetPlayerCodesByUserNames")]
+    [SuccessStatusCode(200, "PlayerCodes returns")]
+    public async ValueTask<JsonDocument> GetPlayerCodesByUserNamesAsync(
+       [FromServices] IGetService<GetPlayerCodesByUserNamesQuery, IImmutableDictionary<string, string>> getService,
+       [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+       Guid brandId,
+       [FromHeader(Name = "UserNames")] PlayerCodesQueryViewModel viewModel)
+    {
+        var jsonSerializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
+
+        var query = new GetPlayerCodesByUserNamesQuery(
+            brandId,
+            viewModel.UserNames);
+
+        var items = await getService
+            .GetAsync(query, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return JsonSerializer.SerializeToDocument(items, jsonSerializerOptions);
+    }
+
     [HttpGet("{brandId:Guid}")]
     [SuccessStatusCode(200, "Players")]
     public IAsyncEnumerable<PlayerListItemViewModel> QueryPlayerListAsync(
@@ -283,27 +325,5 @@ public class PlayerController : ControllerBase
         var command = new SetPlayerStatusCommand(playerCode, status);
 
         return setService.ExecuteAsync(command, HttpContext.RequestAborted);
-    }
-
-    [HttpPost("create", Name = "CreatePlayer")]
-    [SuccessStatusCode(200, "Create player")]
-    public ValueTask<string> CreatePlayerAsync(
-        [FromServices] IGetService<CreatePlayerQuery,string> queryService,
-        [FromBody] CreatePlayerViewModel player)
-    {
-        var query = new CreatePlayerQuery(
-            player.BrandId,
-            player.AgentId,
-            player.VipId,
-            player.CurrencyCode,
-            player.Username,
-            player.Password,
-            player.UpperPlayerCode,
-            player.BetLimitId,
-            player.PlayerType,
-            player.RegisterSiteType,
-            player.CreateByUsername);
-
-        return queryService.GetAsync(query, HttpContext.RequestAborted);
     }
 }

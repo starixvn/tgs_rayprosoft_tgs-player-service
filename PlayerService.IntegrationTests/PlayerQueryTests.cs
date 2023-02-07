@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -762,5 +763,70 @@ public class PlayerQueryTests
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
         Assert.AreEqual(1, actual.Length);
+    }
+
+    [Test]
+    public async Task 用UserNames查詢PlayerCodes()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName1",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName2",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                Phone = "123456"
+            },
+            new Player
+            {
+                PlayerCode = "player3",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName3",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                RegisteredOn = DateTime.Parse("2022-7-2")
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+        
+        var userNames = new[] { "userName1", "userName2" };
+
+        var expected = new Dictionary<string, string>
+        {
+            ["userName1"] = "player1",
+            ["userName2"] = "player2"
+        };
+
+        var actual = await sut.GetPlayerCodesByUserNamesAsync(brandId, userNames);
+
+        Assert.AreEqual(expected, actual);
     }
 }

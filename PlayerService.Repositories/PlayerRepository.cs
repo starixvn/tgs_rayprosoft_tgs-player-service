@@ -316,6 +316,23 @@ internal class PlayerRepository : IPlayerRepository
                 .ConfigureAwait(false)
             ?? 1);
 
+    public async ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
+        Guid brandId, 
+        IEnumerable<string> userNames, 
+        CancellationToken cancellationToken = default)
+    {
+        var items = await _dbContext.Players
+            .Where(p => userNames.Contains(p.Username))
+            .Take(1000)
+            .ToDictionaryAsync(
+                p => p.Username, 
+                p => p.PlayerCode, 
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return items.ToImmutableDictionary();
+    }
+
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,
         PlayerStatus? status = null,

@@ -370,6 +370,27 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task 用UserNames查詢PlayerCodes()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerCodesByUserNamesQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerCodesByUserNamesQuery(
+            Guid.NewGuid(),
+            new[] { "player1", "player2" });
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .GetPlayerCodesByUserNamesAsync(
+                Arg.Is(query.BrandId),
+                Arg.Is<IEnumerable<string>>(x => x.SequenceEqual(query.UserNames)));
+
+    }
+
+    [Test]
     public async Task 查詢ParentPlayer()
     {
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();

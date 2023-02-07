@@ -4,6 +4,14 @@ namespace Tgs.PlayerService;
 
 public interface IPlayerRepository
 {
+    ValueTask AddPlayerAuditLogAsync(
+        Guid createId,
+        string userName,
+        string moduleName,
+        string operation,
+        string modifier,
+        CancellationToken cancellationToken = default);
+
     ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default);
 
     ValueTask CreatePlayerTagAsync(string playerCode, string tag, CancellationToken cancellationToken = default);
@@ -25,6 +33,11 @@ public interface IPlayerRepository
     ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(string playerCode, CancellationToken cancellationToken = default);
 
     ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
+
+    ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
+        Guid brandId,
+        IEnumerable<string> userNames,
+        CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,
@@ -78,12 +91,4 @@ public interface IPlayerRepository
     ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status, CancellationToken cancellationToken = default);
 
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
-
-    ValueTask AddPlayerAuditLogAsync(
-        Guid createId,
-        string userName,
-        string moduleName,
-        string operation,
-        string modifier,
-        CancellationToken cancellationToken = default);
 }
