@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
@@ -123,8 +119,25 @@ internal class PlayerRepository : IPlayerRepository
             .Select(pp => pp.ParentPlayerCode)
             .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
-    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode,
+    public async ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
+        Guid brandId,
+        IEnumerable<string> userNames,
         CancellationToken cancellationToken = default)
+    {
+        var items = await _dbContext.Players
+            .Where(p => userNames.Contains(p.Username))
+            .Take(1000)
+            .ToDictionaryAsync(
+                p => p.Username,
+                p => p.PlayerCode,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return items.ToImmutableDictionary();
+    }
+
+    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode,
+            CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
             .FindAsync(new object?[]
@@ -315,23 +328,6 @@ internal class PlayerRepository : IPlayerRepository
                 .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false)
             ?? 1);
-
-    public async ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
-        Guid brandId, 
-        IEnumerable<string> userNames, 
-        CancellationToken cancellationToken = default)
-    {
-        var items = await _dbContext.Players
-            .Where(p => userNames.Contains(p.Username))
-            .Take(1000)
-            .ToDictionaryAsync(
-                p => p.Username, 
-                p => p.PlayerCode, 
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        return items.ToImmutableDictionary();
-    }
 
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,

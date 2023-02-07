@@ -6,8 +6,8 @@ public class PlayerCodesQueryViewModel : IParsable<PlayerCodesQueryViewModel>
 
     public static PlayerCodesQueryViewModel Parse(string s, IFormatProvider? provider)
     {
-        return !TryParse(s, provider, out var result) 
-            ? throw new ArgumentException("Could not parse supplied value.", nameof(s)) 
+        return !TryParse(s, provider, out var result)
+            ? throw new ArgumentException("Could not parse supplied value.", nameof(s))
             : result;
     }
 
@@ -25,7 +25,7 @@ public class PlayerCodesQueryViewModel : IParsable<PlayerCodesQueryViewModel>
 
         var userNames = s.Split(',', StringSplitOptions.RemoveEmptyEntries
                                          | StringSplitOptions.TrimEntries);
-        
+
         result = new PlayerCodesQueryViewModel
         {
             UserNames = userNames

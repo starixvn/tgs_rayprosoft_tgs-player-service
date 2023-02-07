@@ -816,7 +816,7 @@ public class PlayerQueryTests
             });
 
         _ = await dbContext.SaveChangesAsync();
-        
+
         var userNames = new[] { "userName1", "userName2" };
 
         var expected = new Dictionary<string, string>

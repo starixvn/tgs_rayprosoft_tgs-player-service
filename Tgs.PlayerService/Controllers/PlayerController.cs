@@ -68,6 +68,27 @@ public class PlayerController : ControllerBase
             };
     }
 
+    [HttpGet("playerCodes/{brandId:Guid}", Name = "GetPlayerCodesByUserNames")]
+    [SuccessStatusCode(200, "PlayerCodes returns")]
+    public async ValueTask<JsonDocument> GetPlayerCodesByUserNamesAsync(
+       [FromServices] IGetService<GetPlayerCodesByUserNamesQuery, IImmutableDictionary<string, string>> getService,
+       [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+       Guid brandId,
+       [FromHeader(Name = "UserNames")] PlayerCodesQueryViewModel viewModel)
+    {
+        var jsonSerializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
+
+        var query = new GetPlayerCodesByUserNamesQuery(
+            brandId,
+            viewModel.UserNames);
+
+        var items = await getService
+            .GetAsync(query, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return JsonSerializer.SerializeToDocument(items, jsonSerializerOptions);
+    }
+
     [HttpGet("deposited/{playerCode}", Name = "GetPlayerDepositedAmount")]
     [SuccessStatusCode(200, "Player deposited amount returns")]
     public ValueTask<decimal> GetPlayerDepositedAmountAsync(
@@ -104,6 +125,7 @@ public class PlayerController : ControllerBase
                 RegisteredOn = playerInfo.RegisteredOn
             };
     }
+
     [HttpGet("{brandId}/{email:regex(^[[\\w-\\.]]+@([[\\w-]]+\\.)+[[\\w-]]{{2,4}}$)}", Name = "GetPlayerInfoByEmail")]
     [SuccessStatusCode(200, "Player info found")]
     [FailStatusCode(404, "Player info not found")]
@@ -218,27 +240,6 @@ public class PlayerController : ControllerBase
         var query = new GetPlayerStatusQuery(playerCode);
 
         return getService.GetAsync(query, HttpContext.RequestAborted);
-    }
-
-    [HttpGet("playerCodes/{brandId:Guid}", Name = "GetPlayerCodesByUserNames")]
-    [SuccessStatusCode(200, "PlayerCodes returns")]
-    public async ValueTask<JsonDocument> GetPlayerCodesByUserNamesAsync(
-       [FromServices] IGetService<GetPlayerCodesByUserNamesQuery, IImmutableDictionary<string, string>> getService,
-       [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-       Guid brandId,
-       [FromHeader(Name = "UserNames")] PlayerCodesQueryViewModel viewModel)
-    {
-        var jsonSerializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
-
-        var query = new GetPlayerCodesByUserNamesQuery(
-            brandId,
-            viewModel.UserNames);
-
-        var items = await getService
-            .GetAsync(query, HttpContext.RequestAborted)
-            .ConfigureAwait(false);
-
-        return JsonSerializer.SerializeToDocument(items, jsonSerializerOptions);
     }
 
     [HttpGet("{brandId:Guid}")]

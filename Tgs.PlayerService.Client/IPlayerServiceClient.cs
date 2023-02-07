@@ -8,6 +8,11 @@ public interface IPlayerServiceClient
 
     ValueTask<PlayerInfo?> GetParentPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
 
+    ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
+        Guid brandId,
+        IEnumerable<string> userNames,
+        CancellationToken cancellationToken = default);
+
     ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
 
     ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
@@ -22,11 +27,6 @@ public interface IPlayerServiceClient
 
     ValueTask<IImmutableDictionary<string, string>> GetPlayerPropertiesAsync(
         string playerCode,
-        CancellationToken cancellationToken = default);
-
-    ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
-        Guid brandId,
-        IEnumerable<string> userNames,
         CancellationToken cancellationToken = default);
 
     ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);

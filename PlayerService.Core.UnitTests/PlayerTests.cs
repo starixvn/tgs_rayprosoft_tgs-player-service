@@ -387,7 +387,6 @@ public class PlayerTests
             .GetPlayerCodesByUserNamesAsync(
                 Arg.Is(query.BrandId),
                 Arg.Is<IEnumerable<string>>(x => x.SequenceEqual(query.UserNames)));
-
     }
 
     [Test]

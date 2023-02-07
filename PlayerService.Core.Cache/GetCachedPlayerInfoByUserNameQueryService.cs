@@ -28,8 +28,8 @@ internal class GetCachedPlayerInfoByUserNameQueryService : IGetService<GetPlayer
                 .GetAsync(query, cancellationToken)
                 .ConfigureAwait(false);
 
-            entry.AbsoluteExpiration = result is null 
-                ? DateTimeOffset.Now.AddSeconds(3D) 
+            entry.AbsoluteExpiration = result is null
+                ? DateTimeOffset.Now.AddSeconds(3D)
                 : DateTimeOffset.Now.AddSeconds(10D);
 
             return result;

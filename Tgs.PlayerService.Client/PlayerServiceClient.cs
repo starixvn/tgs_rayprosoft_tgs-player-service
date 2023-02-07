@@ -216,6 +216,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
         return JsonSerializer.Deserialize<IImmutableDictionary<string, string>>(content, _SerializerOptions)!;
     }
+
     public async ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient

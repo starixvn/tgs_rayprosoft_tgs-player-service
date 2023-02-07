@@ -6,8 +6,8 @@ namespace Tgs.PlayerService.ApplicationServices;
 
 internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
 {
-    private readonly IPlayerRepository _playerRepository;
     private readonly IPasswordHandler _passwordHandler;
+    private readonly IPlayerRepository _playerRepository;
 
     private readonly IImmutableDictionary<RegisterSiteType, PlayerTagType> _tagMapper =
         new Dictionary<RegisterSiteType, PlayerTagType>
@@ -18,7 +18,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
         }.ToImmutableDictionary();
 
     public CreatePlayerQueryService(
-        IPlayerRepository playerRepository, 
+        IPlayerRepository playerRepository,
         IPasswordHandler passwordHandler)
     {
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));

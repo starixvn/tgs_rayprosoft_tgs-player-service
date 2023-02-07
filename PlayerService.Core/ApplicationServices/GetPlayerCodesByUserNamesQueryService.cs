@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
 using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class GetPlayerCodesByUserNamesQueryService 
+internal class GetPlayerCodesByUserNamesQueryService
     : IGetService<GetPlayerCodesByUserNamesQuery, IImmutableDictionary<string, string>>
 {
     private readonly IPlayerRepository _playerRepository;
