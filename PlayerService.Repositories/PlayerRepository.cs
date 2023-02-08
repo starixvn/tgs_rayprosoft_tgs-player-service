@@ -331,11 +331,12 @@ internal class PlayerRepository : IPlayerRepository
             ?? 1);
 
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
-        IEnumerable<string> playerCodes, 
+        Guid brandId, 
+        IEnumerable<string> playerCodes,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var players = await _dbContext.Players
-            .Where(p => playerCodes.Contains(p.PlayerCode))
+            .Where(p => p.BrandId == brandId && playerCodes.Contains(p.PlayerCode))
             .Select(p => new
             {
                 p.PlayerCode,

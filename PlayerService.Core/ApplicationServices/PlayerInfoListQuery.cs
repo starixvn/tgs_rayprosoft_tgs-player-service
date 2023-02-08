@@ -1,4 +1,3 @@
 ﻿namespace Tgs.PlayerService.ApplicationServices;
 
-public record PlayerInfoListQuery(
-    IEnumerable<string> PlayerCodes);
+public record PlayerInfoListQuery(Guid BrandId, IEnumerable<string> PlayerCodes);

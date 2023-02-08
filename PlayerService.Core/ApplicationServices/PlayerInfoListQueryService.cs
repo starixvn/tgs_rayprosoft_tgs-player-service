@@ -15,5 +15,5 @@ internal class PlayerInfoListQueryService : IQueryService<PlayerInfoListQuery, P
     public IAsyncEnumerable<PlayerInfo> QueryAsync(
         PlayerInfoListQuery query,
         CancellationToken cancellationToken = default)
-        => _playerRepository.QueryPlayerInfoListAsync(query.PlayerCodes, cancellationToken);
+        => _playerRepository.QueryPlayerInfoListAsync(query.BrandId, query.PlayerCodes, cancellationToken);
 }

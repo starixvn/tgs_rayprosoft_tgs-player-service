@@ -44,13 +44,14 @@ public class PlayerQueryTests
 
         var sut = new PlayerInfoListQueryService(fakePlayerRepository);
 
-        var query = new PlayerInfoListQuery(new[] { "player1", "player2" });
+        var query = new PlayerInfoListQuery(new Guid(), new[] { "player1", "player2" });
 
         _ = await sut.QueryAsync(query).ToArrayAsync();
 
         _ = fakePlayerRepository
             .Received(1)
             .QueryPlayerInfoListAsync(
+                Arg.Is(query.BrandId), 
                 Arg.Is<IEnumerable<string>>(players => players.SequenceEqual(query.PlayerCodes)),
                 Arg.Any<CancellationToken>());
     }

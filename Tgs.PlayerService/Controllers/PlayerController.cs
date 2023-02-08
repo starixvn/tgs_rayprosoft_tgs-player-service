@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Tgs.Paging;
 using Tgs.PlayerService.ApplicationServices;
+using Tgs.PlayerService.Constraints;
 using Tgs.PlayerService.ViewModels;
 using Tgs.ServiceUtility;
 using Tgs.WebApi.Toolkits;
@@ -92,7 +93,7 @@ public class PlayerController : ControllerBase
             new GetPlayerDepositedAmountQuery(playerCode),
             HttpContext.RequestAborted);
 
-    [HttpGet("{playerCode}", Name = "GetPlayerInfo")]
+    [HttpGet("{playerCode}", Order = 100, Name = "GetPlayerInfo")]
     [SuccessStatusCode(200, "Player info found")]
     [FailStatusCode(404, "Player info not found")]
     public async ValueTask<PlayerInfoViewModel> GetPlayerInfoAsync(
@@ -235,13 +236,18 @@ public class PlayerController : ControllerBase
 
         return getService.GetAsync(query, HttpContext.RequestAborted);
     }
-
-    [HttpGet("infos")]
+    
+    [HttpHeaderConstraint("Basic")]
+    [HttpGet("{brandId:Guid}", Order = 1, Name = "QueryPlayerInfoList")]
+    [SuccessStatusCode(200, "PlayerInfos")]
     public IAsyncEnumerable<PlayerInfoViewModel> QueryPlayerInfoListAsync(
         [FromServices] IQueryService<PlayerInfoListQuery, PlayerInfo> queryService,
-        [FromQuery(Name = "PlayerCodes")] PlayerInfoListQueryViewModel viewModel)
+        Guid brandId,
+        [FromQuery(Name = "playercodes")] PlayerInfoListQueryViewModel viewModel)
     {
-        var query = new PlayerInfoListQuery(viewModel.PlayerCodes);
+        var query = new PlayerInfoListQuery(
+            brandId,
+            viewModel.PlayerCodes);
 
         return queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Select(info => new PlayerInfoViewModel
@@ -258,7 +264,7 @@ public class PlayerController : ControllerBase
             });
     }
 
-    [HttpGet("{brandId:Guid}")]
+    [HttpGet("{brandId:Guid}", Order = 10, Name = "QueryPlayerList")]
     [SuccessStatusCode(200, "Players")]
     public IAsyncEnumerable<PlayerListItemViewModel> QueryPlayerListAsync(
         [FromServices] IQueryService<PlayerListQuery, PlayerListItem> queryService,

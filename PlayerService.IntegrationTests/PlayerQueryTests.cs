@@ -880,7 +880,7 @@ public class PlayerQueryTests
 
         var playerCodes = new[] { "player1", "player2" };
 
-        var actual = await sut.QueryPlayerInfoListAsync(playerCodes)
+        var actual = await sut.QueryPlayerInfoListAsync(brandId, playerCodes)
             .ToArrayAsync();
 
         Assert.AreEqual(2, actual.Length);

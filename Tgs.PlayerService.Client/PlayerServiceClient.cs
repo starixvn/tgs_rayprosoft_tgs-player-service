@@ -21,9 +21,9 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
     private readonly HttpClient _httpClient;
 
-    public PlayerServiceClient(HttpClient http)
+    public PlayerServiceClient(HttpClient httpClient)
     {
-        _httpClient = http ?? throw new ArgumentNullException(nameof(http));
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
 
     public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default)
@@ -236,16 +236,19 @@ internal class PlayerServiceClient : IPlayerServiceClient
     }
 
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
-        IEnumerable<string> playerCodes, 
+        Guid brandId, 
+        IEnumerable<string> playerCodes,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var queryStrings = new QueryBuilder
         {
-            { "PlayerCodes", string.Join(',', playerCodes) }
+            { "playercodes", string.Join(',', playerCodes) }
         };
+        
+        _httpClient.DefaultRequestHeaders.Add("Basic", string.Empty);
 
         var response = await _httpClient
-            .GetAsync($"/player/infos{queryStrings.ToQueryString().Value}", cancellationToken)
+            .GetAsync($"/player/{brandId}{queryStrings.ToQueryString().Value}", cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();
