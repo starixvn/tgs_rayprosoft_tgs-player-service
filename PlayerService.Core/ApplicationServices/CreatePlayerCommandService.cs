@@ -4,7 +4,7 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
+internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, string>
 {
     private readonly IPasswordHandler _passwordHandler;
     private readonly IPlayerRepository _playerRepository;
@@ -17,7 +17,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             [RegisterSiteType.BackendOffice] = PlayerTagType.BackendOfficeCreated
         }.ToImmutableDictionary();
 
-    public CreatePlayerQueryService(
+    public CreatePlayerCommandService(
         IPlayerRepository playerRepository,
         IPasswordHandler passwordHandler)
     {
@@ -25,30 +25,30 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
         _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
     }
 
-    public async ValueTask<string> GetAsync(CreatePlayerQuery query, CancellationToken cancellationToken = default)
+    public async ValueTask<string> GetAsync(CreatePlayerCommand command, CancellationToken cancellationToken = default)
     {
-        var (salt, password) = _passwordHandler.GenerateCredential(query.Password);
+        var (salt, password) = _passwordHandler.GenerateCredential(command.Password);
 
         var playerCode = await _playerRepository
             .CreatePlayerAsync(
                 new CreatePlayerData
                 {
-                    BrandId = query.BrandId,
-                    AgentId = query.AgentId,
-                    VipId = query.VipId,
-                    UserName = query.Username,
+                    BrandId = command.BrandId,
+                    AgentId = command.AgentId,
+                    VipId = command.VipId,
+                    UserName = command.Username,
                     Salt = salt,
                     Password = password,
-                    CurrencyCode = query.CurrencyCode,
-                    BetLimitId = query.BetLimitId,
-                    Type = query.PlayerType,
+                    CurrencyCode = command.CurrencyCode,
+                    BetLimitId = command.BetLimitId,
+                    Type = command.PlayerType,
                     PlayerStatus = PlayerStatus.RegisterUndone,
-                    UpperPlayerCode = query.UpperPlayerCode
+                    UpperPlayerCode = command.UpperPlayerCode
                 }, cancellationToken)
             .ConfigureAwait(false);
 
         await _playerRepository
-            .CreatePlayerTagAsync(playerCode, _tagMapper[query.RegisterSiteType].ToString(), cancellationToken)
+            .CreatePlayerTagAsync(playerCode, _tagMapper[command.RegisterSiteType].ToString(), cancellationToken)
             .ConfigureAwait(false);
 
         return playerCode;

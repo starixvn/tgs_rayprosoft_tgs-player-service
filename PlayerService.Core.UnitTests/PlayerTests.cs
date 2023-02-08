@@ -163,7 +163,7 @@ public class PlayerTests
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
-        var sut = new CreatePlayerQueryService(fakePlayerRepository, fakePasswordHandler);
+        var sut = new CreatePlayerCommandService(fakePlayerRepository, fakePasswordHandler);
 
         var brandId = Guid.NewGuid();
         var agentId = Guid.NewGuid();
@@ -174,7 +174,7 @@ public class PlayerTests
         var password = "password";
         var agentName = "agentName";
 
-        var query = new CreatePlayerQuery(
+        var query = new CreatePlayerCommand(
             brandId,
             agentId,
             vipId,

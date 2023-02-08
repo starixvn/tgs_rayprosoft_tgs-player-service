@@ -18,10 +18,10 @@ public class PlayerController : ControllerBase
     [HttpPost("create", Name = "CreatePlayer")]
     [SuccessStatusCode(200, "Create player")]
     public ValueTask<string> CreatePlayerAsync(
-        [FromServices] IGetService<CreatePlayerQuery, string> queryService,
+        [FromServices] IGetService<CreatePlayerCommand, string> queryService,
         [FromBody] CreatePlayerViewModel player)
     {
-        var query = new CreatePlayerQuery(
+        var command = new CreatePlayerCommand(
             player.BrandId,
             player.AgentId,
             player.VipId,
@@ -34,7 +34,7 @@ public class PlayerController : ControllerBase
             player.RegisterSiteType,
             player.CreateByUsername);
 
-        return queryService.GetAsync(query, HttpContext.RequestAborted);
+        return queryService.GetAsync(command, HttpContext.RequestAborted);
     }
 
     [HttpGet("parent/{playerCode}", Name = "GetParentPlayerInfo")]
