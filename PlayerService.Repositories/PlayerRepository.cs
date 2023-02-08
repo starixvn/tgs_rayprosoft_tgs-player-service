@@ -328,6 +328,40 @@ internal class PlayerRepository : IPlayerRepository
                 .ConfigureAwait(false)
             ?? 1);
 
+    public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
+        IEnumerable<string> playerCodes, 
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var players = await _dbContext.Players
+            .Where(p => playerCodes.Contains(p.PlayerCode))
+            .Select(p => new
+            {
+                p.PlayerCode,
+                p.BrandId,
+                p.Username,
+                p.IdentityAuthentication,
+                p.PhoneAuthentication,
+                p.Email,
+                p.WithdrawPassword,
+                p.VipId,
+                p.RegisteredOn
+            })
+            .ToArrayAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (var player in players)
+            yield return new PlayerInfo(
+                player.PlayerCode,
+                player.BrandId,
+                player.Username,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                !string.IsNullOrEmpty(player.Email),
+                player.WithdrawPassword.Length > 0,
+                player.VipId,
+                player.RegisteredOn);
+    }
+
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,
         PlayerStatus? status = null,

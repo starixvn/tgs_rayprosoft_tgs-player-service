@@ -4,12 +4,10 @@ public class PlayerCodesQueryViewModel : IParsable<PlayerCodesQueryViewModel>
 {
     public IEnumerable<string> UserNames { get; init; } = Array.Empty<string>();
 
-    public static PlayerCodesQueryViewModel Parse(string s, IFormatProvider? provider)
-    {
-        return !TryParse(s, provider, out var result)
+    public static PlayerCodesQueryViewModel Parse(string s, IFormatProvider? provider) 
+        => !TryParse(s, provider, out var result)
             ? throw new ArgumentException("Could not parse supplied value.", nameof(s))
             : result;
-    }
 
     public static bool TryParse(string? s, IFormatProvider? provider, out PlayerCodesQueryViewModel result)
     {

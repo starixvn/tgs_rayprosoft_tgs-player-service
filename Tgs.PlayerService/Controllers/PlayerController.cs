@@ -236,6 +236,28 @@ public class PlayerController : ControllerBase
         return getService.GetAsync(query, HttpContext.RequestAborted);
     }
 
+    [HttpGet("infos")]
+    public IAsyncEnumerable<PlayerInfoViewModel> QueryPlayerInfoListAsync(
+        [FromServices] IQueryService<PlayerInfoListQuery, PlayerInfo> queryService,
+        [FromQuery(Name = "PlayerCodes")] PlayerInfoListQueryViewModel viewModel)
+    {
+        var query = new PlayerInfoListQuery(viewModel.PlayerCodes);
+
+        return queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Select(info => new PlayerInfoViewModel
+            {
+                PlayerCode = info.PlayerCode,
+                UserName = info.UserName,
+                BrandId = info.BrandId,
+                EmailAuthentication = info.EmailAuthentication,
+                IdentityAuthentication = info.IdentityAuthentication,
+                PhoneAuthentication = info.PhoneAuthentication,
+                IsSetPayPassword = info.IsSetPayPassword,
+                RegisteredOn = info.RegisteredOn,
+                VipLevelId = info.VipLevelId
+            });
+    }
+
     [HttpGet("{brandId:Guid}")]
     [SuccessStatusCode(200, "Players")]
     public IAsyncEnumerable<PlayerListItemViewModel> QueryPlayerListAsync(

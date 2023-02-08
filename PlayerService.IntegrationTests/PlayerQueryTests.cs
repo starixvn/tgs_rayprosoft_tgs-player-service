@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -825,5 +824,65 @@ public class PlayerQueryTests
             .ToArrayAsync();
 
         Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public async Task 查詢多位玩家的PlayerInfo()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName1",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName2",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                Phone = "123456"
+            },
+            new Player
+            {
+                PlayerCode = "player3",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName3",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                RegisteredOn = DateTime.Parse("2022-7-2")
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerCodes = new[] { "player1", "player2" };
+
+        var actual = await sut.QueryPlayerInfoListAsync(playerCodes)
+            .ToArrayAsync();
+
+        Assert.AreEqual(2, actual.Length);
     }
 }

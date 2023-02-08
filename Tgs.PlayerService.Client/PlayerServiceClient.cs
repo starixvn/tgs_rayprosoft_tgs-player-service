@@ -235,6 +235,27 @@ internal class PlayerServiceClient : IPlayerServiceClient
             .ConfigureAwait(false);
     }
 
+    public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
+        IEnumerable<string> playerCodes, 
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var queryStrings = new QueryBuilder
+        {
+            { "PlayerCodes", string.Join(',', playerCodes) }
+        };
+
+        var response = await _httpClient
+            .GetAsync($"/player/infos{queryStrings.ToQueryString().Value}", cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        foreach (var item in await response.Content
+                     .ReadFromJsonAsync<IEnumerable<PlayerInfo>>(_SerializerOptions, cancellationToken)
+                     .ConfigureAwait(false) ?? Array.Empty<PlayerInfo>())
+            yield return item;
+    }
+
     public async IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,
         PlayerListQuery query,

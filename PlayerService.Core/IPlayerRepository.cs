@@ -39,6 +39,10 @@ public interface IPlayerRepository
 
     ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
 
+    IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
+        IEnumerable<string> playerCodes, 
+        CancellationToken cancellationToken);
+
     IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,
         PlayerStatus? status = null,
@@ -69,7 +73,7 @@ public interface IPlayerRepository
         CancellationToken cancellationToken = default);
 
     ValueTask SaveLoginIpAsync(
-                  string playerCode,
+        string playerCode,
         string ip,
         string? host,
         DateTime recordTime,

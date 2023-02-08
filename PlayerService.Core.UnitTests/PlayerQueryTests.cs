@@ -36,4 +36,22 @@ public class PlayerQueryTests
                 Arg.Is(query.BrandId),
                 Arg.Is<IEnumerable<string>>(players => Enumerable.SequenceEqual(players, query.PlayerCodes)));
     }
+
+    [Test]
+    public async Task 查詢多位玩家的PlayerInfo()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new PlayerInfoListQueryService(fakePlayerRepository);
+
+        var query = new PlayerInfoListQuery(new[] { "player1", "player2" });
+
+        _ = await sut.QueryAsync(query).ToArrayAsync();
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .QueryPlayerInfoListAsync(
+                Arg.Is<IEnumerable<string>>(players => players.SequenceEqual(query.PlayerCodes)),
+                Arg.Any<CancellationToken>());
+    }
 }
