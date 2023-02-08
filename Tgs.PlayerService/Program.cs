@@ -11,11 +11,6 @@ using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.Limits.MaxRequestHeadersTotalSize = 1_048_576;
-});
-
 builder.Configuration
     .AddJsonFile("/config/appsettings.json", true)
     .AddEnvironmentVariables();

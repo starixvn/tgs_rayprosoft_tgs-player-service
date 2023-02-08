@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
@@ -112,28 +113,26 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async ValueTask<string?> GetParentPlayerCodeAsync(string playerCode,
-                CancellationToken cancellationToken = default)
+    public async ValueTask<string?> GetParentPlayerCodeAsync(
+        string playerCode,
+        CancellationToken cancellationToken = default)
         => await _dbContext.PlayerParents
             .Where(pp => pp.PlayerCode == playerCode)
             .Select(pp => pp.ParentPlayerCode)
             .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
-    public async ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
-        Guid brandId,
+    public async IAsyncEnumerable<string> GetPlayerCodesByUserNamesAsync(Guid brandId,
         IEnumerable<string> userNames,
-        CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var items = await _dbContext.Players
+        var playerCodes = await _dbContext.Players
             .Where(p => userNames.Contains(p.Username))
-            .Take(1000)
-            .ToDictionaryAsync(
-                p => p.Username,
-                p => p.PlayerCode,
-                cancellationToken)
+            .Select(p => p.PlayerCode)
+            .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        return items.ToImmutableDictionary();
+        foreach (var playerCode in playerCodes)
+            yield return playerCode;
     }
 
     public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode,

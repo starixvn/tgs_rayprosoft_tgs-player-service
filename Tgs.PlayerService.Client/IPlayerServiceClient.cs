@@ -8,7 +8,7 @@ public interface IPlayerServiceClient
 
     ValueTask<PlayerInfo?> GetParentPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
 
-    ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
+    IAsyncEnumerable<string> GetPlayerCodesByUserNamesAsync(
         Guid brandId,
         IEnumerable<string> userNames,
         CancellationToken cancellationToken = default);

@@ -380,7 +380,7 @@ public class PlayerTests
             Guid.NewGuid(),
             new[] { "player1", "player2" });
 
-        _ = await sut.GetAsync(query);
+        _ = await sut.QueryAsync(query).ToArrayAsync();
 
         _ = fakePlayerRepository
             .Received(1)

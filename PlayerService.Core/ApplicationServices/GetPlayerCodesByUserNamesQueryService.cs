@@ -3,8 +3,7 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class GetPlayerCodesByUserNamesQueryService
-    : IGetService<GetPlayerCodesByUserNamesQuery, IImmutableDictionary<string, string>>
+internal class GetPlayerCodesByUserNamesQueryService : IQueryService<GetPlayerCodesByUserNamesQuery, string>
 {
     private readonly IPlayerRepository _playerRepository;
 
@@ -14,8 +13,7 @@ internal class GetPlayerCodesByUserNamesQueryService
         _playerRepository = playerRepository;
     }
 
-    public ValueTask<IImmutableDictionary<string, string>> GetAsync(
-            GetPlayerCodesByUserNamesQuery query,
-            CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<string> QueryAsync(GetPlayerCodesByUserNamesQuery query,
+        CancellationToken cancellationToken = default) 
         => _playerRepository.GetPlayerCodesByUserNamesAsync(query.BrandId, query.UserNames, cancellationToken);
 }

@@ -55,22 +55,27 @@ internal class PlayerServiceClient : IPlayerServiceClient
             .Concat()
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-    public async ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
+    public async IAsyncEnumerable<string> GetPlayerCodesByUserNamesAsync(
         Guid brandId,
         IEnumerable<string> userNames,
-        CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        _httpClient.DefaultRequestHeaders.Add("UserNames", string.Join(',', userNames));
+        var queryStrings = new QueryBuilder
+        {
+            { "UserNames", string.Join(',', userNames) }
+        };
 
         var response = await _httpClient
-            .GetAsync($"/player/playerCodes/{brandId}", cancellationToken)
+            .GetAsync($"/player/playerCodes/{brandId}{queryStrings.ToQueryString().Value}", cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();
 
-        return (await response.Content
-            .ReadFromJsonAsync<IImmutableDictionary<string, string>>(_SerializerOptions, cancellationToken)
-            .ConfigureAwait(false))!;
+        foreach (var item in await response.Content
+                     .ReadFromJsonAsync<IEnumerable<string>>(_SerializerOptions, cancellationToken)
+                     .ConfigureAwait(false) ?? Array.Empty<string>())
+            yield return item;
+
     }
 
     public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default)

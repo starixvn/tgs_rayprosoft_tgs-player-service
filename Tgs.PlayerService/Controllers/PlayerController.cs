@@ -70,23 +70,17 @@ public class PlayerController : ControllerBase
 
     [HttpGet("playerCodes/{brandId:Guid}", Name = "GetPlayerCodesByUserNames")]
     [SuccessStatusCode(200, "PlayerCodes returns")]
-    public async ValueTask<JsonDocument> GetPlayerCodesByUserNamesAsync(
-       [FromServices] IGetService<GetPlayerCodesByUserNamesQuery, IImmutableDictionary<string, string>> getService,
-       [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+    public IAsyncEnumerable<string> GetPlayerCodesByUserNamesAsync(
+       [FromServices] IQueryService<GetPlayerCodesByUserNamesQuery, string> queryService,
        Guid brandId,
-       [FromHeader(Name = "UserNames")] PlayerCodesQueryViewModel viewModel)
+       [FromQuery(Name = "UserNames")] PlayerCodesQueryViewModel viewModel)
     {
-        var jsonSerializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
-
         var query = new GetPlayerCodesByUserNamesQuery(
             brandId,
             viewModel.UserNames);
 
-        var items = await getService
-            .GetAsync(query, HttpContext.RequestAborted)
-            .ConfigureAwait(false);
-
-        return JsonSerializer.SerializeToDocument(items, jsonSerializerOptions);
+        return queryService
+            .QueryAsync(query, HttpContext.RequestAborted);
     }
 
     [HttpGet("deposited/{playerCode}", Name = "GetPlayerDepositedAmount")]

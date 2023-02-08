@@ -18,7 +18,7 @@ public interface IPlayerRepository
 
     ValueTask<string?> GetParentPlayerCodeAsync(string playerCode, CancellationToken cancellationToken = default);
 
-    ValueTask<IImmutableDictionary<string, string>> GetPlayerCodesByUserNamesAsync(
+    IAsyncEnumerable<string> GetPlayerCodesByUserNamesAsync(
         Guid brandId,
         IEnumerable<string> userNames,
         CancellationToken cancellationToken = default);

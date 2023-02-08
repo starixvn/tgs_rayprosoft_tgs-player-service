@@ -819,13 +819,10 @@ public class PlayerQueryTests
 
         var userNames = new[] { "userName1", "userName2" };
 
-        var expected = new Dictionary<string, string>
-        {
-            ["userName1"] = "player1",
-            ["userName2"] = "player2"
-        };
+        var expected = new[] { "player1", "player2" };
 
-        var actual = await sut.GetPlayerCodesByUserNamesAsync(brandId, userNames);
+        var actual = await sut.GetPlayerCodesByUserNamesAsync(brandId, userNames)
+            .ToArrayAsync();
 
         Assert.AreEqual(expected, actual);
     }
