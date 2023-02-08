@@ -62,11 +62,11 @@ internal class PlayerServiceClient : IPlayerServiceClient
     {
         var queryStrings = new QueryBuilder
         {
-            { "UserNames", string.Join(',', userNames) }
+            { "names", string.Join(',', userNames) }
         };
 
         var response = await _httpClient
-            .GetAsync($"/player/playerCodes/{brandId}{queryStrings.ToQueryString().Value}", cancellationToken)
+            .GetAsync($"/player/{brandId}:playercodes{queryStrings.ToQueryString().Value}", cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();

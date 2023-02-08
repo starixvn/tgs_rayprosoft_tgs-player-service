@@ -68,12 +68,12 @@ public class PlayerController : ControllerBase
             };
     }
 
-    [HttpGet("playerCodes/{brandId:Guid}", Name = "GetPlayerCodesByUserNames")]
+    [HttpGet("{brandId}:playercodes", Name = "GetPlayerCodesByUserNames")]
     [SuccessStatusCode(200, "PlayerCodes returns")]
     public IAsyncEnumerable<string> GetPlayerCodesByUserNamesAsync(
        [FromServices] IQueryService<GetPlayerCodesByUserNamesQuery, string> queryService,
        Guid brandId,
-       [FromQuery(Name = "UserNames")] PlayerCodesQueryViewModel viewModel)
+       [FromQuery(Name = "names")] PlayerCodesQueryViewModel viewModel)
     {
         var query = new GetPlayerCodesByUserNamesQuery(
             brandId,
