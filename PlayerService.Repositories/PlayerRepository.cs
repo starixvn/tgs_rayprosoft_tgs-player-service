@@ -135,8 +135,9 @@ internal class PlayerRepository : IPlayerRepository
             yield return playerCode;
     }
 
-    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode,
-            CancellationToken cancellationToken = default)
+    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(
+        string playerCode,
+        CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
             .FindAsync(new object?[]
@@ -148,7 +149,8 @@ internal class PlayerRepository : IPlayerRepository
         return player?.AccumulatedDeposit ?? 0;
     }
 
-    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode,
+    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(
+        string playerCode,
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
@@ -330,7 +332,7 @@ internal class PlayerRepository : IPlayerRepository
 
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         IEnumerable<string> playerCodes, 
-        [EnumeratorCancellation] CancellationToken cancellationToken)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var players = await _dbContext.Players
             .Where(p => playerCodes.Contains(p.PlayerCode))

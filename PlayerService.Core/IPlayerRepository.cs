@@ -41,7 +41,7 @@ public interface IPlayerRepository
 
     IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         IEnumerable<string> playerCodes, 
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,
