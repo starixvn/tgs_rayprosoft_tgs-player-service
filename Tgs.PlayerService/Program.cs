@@ -8,6 +8,7 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.PlayerService.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,8 +89,13 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 
+    options.OperationFilter<HttpHeaderConstraintOperationFilter>();
+
     options.ApplyWebApiToolkitSupport();
     options.ApplyDisplayNameSchemaId();
+
+    options.ResolveConflictingActions(apiDescriptions => 
+        apiDescriptions.First());
 });
 
 builder.Services.AddHealthChecks();

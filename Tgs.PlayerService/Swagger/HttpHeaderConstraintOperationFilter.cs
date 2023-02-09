@@ -4,7 +4,7 @@ using Tgs.PlayerService.Constraints;
 
 namespace Tgs.PlayerService.Swagger;
 
-public class ApiDocOperationFilter : IOperationFilter
+public class HttpHeaderConstraintOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
@@ -17,7 +17,7 @@ public class ApiDocOperationFilter : IOperationFilter
                 Name = header.Header,
                 In = ParameterLocation.Header,
                 AllowEmptyValue = header.AllowEmpty,
-                Required = true
+                Required = false
             };
             operation.Parameters.Add(parameter);
         }
