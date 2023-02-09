@@ -832,7 +832,7 @@ public class PlayerQueryTests
     {
         await using var web = new TestPlayerServiceApplication();
 
-        var delegatingHandlers = new DelegatingHandler[] { new TestHttpHeaderDelegateHandler("Basic") };
+        var delegatingHandlers = new DelegatingHandler[] { new TestHttpHeaderDelegatingHandler("Basic") };
         var httpClient = web.CreateDefaultClient(delegatingHandlers);
 
         var sut = new PlayerServiceClient(httpClient);

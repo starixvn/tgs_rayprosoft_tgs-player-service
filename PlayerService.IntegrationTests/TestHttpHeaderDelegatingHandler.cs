@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Tgs.PlayerService.IntegrationTests;
 
-internal class TestHttpHeaderDelegateHandler : DelegatingHandler
+internal class TestHttpHeaderDelegatingHandler : DelegatingHandler
 {
     private readonly string _headerName;
 
-    public TestHttpHeaderDelegateHandler(string headerName)
+    public TestHttpHeaderDelegatingHandler(string headerName)
     {
         _headerName = headerName ?? throw new ArgumentNullException(nameof(headerName));
     }
