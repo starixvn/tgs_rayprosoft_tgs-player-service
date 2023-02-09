@@ -17,7 +17,7 @@ public class HttpHeaderConstraintOperationFilter : IOperationFilter
                 Name = header.Header,
                 In = ParameterLocation.Header,
                 AllowEmptyValue = header.AllowEmpty,
-                Required = false
+                Required = true
             };
             operation.Parameters.Add(parameter);
         }

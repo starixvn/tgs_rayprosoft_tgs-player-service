@@ -237,7 +237,6 @@ public class PlayerController : ControllerBase
         return getService.GetAsync(query, HttpContext.RequestAborted);
     }
 
-    [ApiExplorerSettings(GroupName = "Basic")]
     [HttpHeaderConstraint("Basic")]
     [HttpGet("{brandId:Guid}", Order = 1, Name = "QueryPlayerInfoList")]
     [SuccessStatusCode(200, "PlayerInfos")]
@@ -265,6 +264,7 @@ public class PlayerController : ControllerBase
             });
     }
 
+    [ApiExplorerSettings(GroupName = "Obsolete")]
     [HttpGet("{brandId:Guid}", Order = 10, Name = "QueryPlayerList")]
     [SuccessStatusCode(200, "Players")]
     public IAsyncEnumerable<PlayerListItemViewModel> QueryPlayerListAsync(

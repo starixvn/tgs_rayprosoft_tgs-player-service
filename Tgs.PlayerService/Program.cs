@@ -83,10 +83,10 @@ builder.Services
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("Basic", new OpenApiInfo
+    options.SwaggerDoc("Obsolete", new OpenApiInfo
     {
         Title = "Player Service",
-        Version = "Basic"
+        Version = "Obsolete"
     });
 
     options.SwaggerDoc("Normal", new OpenApiInfo
@@ -114,7 +114,7 @@ app.MapSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/Normal/swagger.json", "Tgs Player Service - Normal");
-    options.SwaggerEndpoint("/swagger/Basic/swagger.json", "Tgs Player Service - Basic");
+    options.SwaggerEndpoint("/swagger/Obsolete/swagger.json", "Tgs Player Service - Obsolete");
 });
 
 app.MapHealthChecks("/healthz");
