@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Tgs.PlayerService;
 using Tgs.PlayerService.Repositories;
 using Tgs.PlayerService.Repositories.Entities;

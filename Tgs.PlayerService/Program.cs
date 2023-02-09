@@ -8,6 +8,7 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.PlayerService.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,11 +83,22 @@ builder.Services
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
+    options.SwaggerDoc("Obsolete", new OpenApiInfo
     {
         Title = "Player Service",
-        Version = "v1"
+        Version = "Obsolete"
     });
+
+    options.SwaggerDoc("Normal", new OpenApiInfo
+    {
+        Title = "Player Service",
+        Version = "Normal"
+    });
+
+    options.DocInclusionPredicate((groupName, desc)
+        => groupName == "Normal" ? desc.GroupName is null : desc.GroupName == groupName);
+
+    options.OperationFilter<HttpHeaderConstraintOperationFilter>();
 
     options.ApplyWebApiToolkitSupport();
     options.ApplyDisplayNameSchemaId();
@@ -99,7 +111,11 @@ var app = builder.Build();
 app.MapControllers();
 app.MapProfileViewer();
 app.MapSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/Normal/swagger.json", "Tgs Player Service - Normal");
+    options.SwaggerEndpoint("/swagger/Obsolete/swagger.json", "Tgs Player Service - Obsolete");
+});
 
 app.MapHealthChecks("/healthz");
 

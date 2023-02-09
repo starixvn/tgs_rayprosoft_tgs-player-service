@@ -21,9 +21,9 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
     private readonly HttpClient _httpClient;
 
-    public PlayerServiceClient(HttpClient http)
+    public PlayerServiceClient(HttpClient httpClient)
     {
-        _httpClient = http ?? throw new ArgumentNullException(nameof(http));
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
 
     public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default)
@@ -54,6 +54,29 @@ internal class PlayerServiceClient : IPlayerServiceClient
             })
             .Concat()
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+    public async IAsyncEnumerable<string> GetPlayerCodesByUserNamesAsync(
+        Guid brandId,
+        IEnumerable<string> userNames,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var queryStrings = new QueryBuilder
+        {
+            { "names", string.Join(',', userNames) }
+        };
+
+        var response = await _httpClient
+            .GetAsync($"/player/{brandId}:playercodes{queryStrings.ToQueryString().Value}", cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        foreach (var item in await response.Content
+                     .ReadFromJsonAsync<IEnumerable<string>>(_SerializerOptions, cancellationToken)
+                     .ConfigureAwait(false) ?? Array.Empty<string>())
+            yield return item;
+
+    }
 
     public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default)
     {
@@ -212,6 +235,30 @@ internal class PlayerServiceClient : IPlayerServiceClient
             .ConfigureAwait(false);
     }
 
+    public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
+        Guid brandId, 
+        IEnumerable<string> playerCodes,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var queryStrings = new QueryBuilder
+        {
+            { "playercodes", string.Join(',', playerCodes) }
+        };
+        
+        _httpClient.DefaultRequestHeaders.Add("Basic", string.Empty);
+
+        var response = await _httpClient
+            .GetAsync($"/player/{brandId}{queryStrings.ToQueryString().Value}", cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        foreach (var item in await response.Content
+                     .ReadFromJsonAsync<IEnumerable<PlayerInfo>>(_SerializerOptions, cancellationToken)
+                     .ConfigureAwait(false) ?? Array.Empty<PlayerInfo>())
+            yield return item;
+    }
+
     public async IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,
         PlayerListQuery query,
@@ -265,15 +312,15 @@ internal class PlayerServiceClient : IPlayerServiceClient
     }
 
     public async ValueTask RecordLoginIpAsync(
-           string playerCode,
-        string Ip,
-        string? HostName,
+        string playerCode,
+        string ip,
+        string? hostName,
         CancellationToken cancellationToken = default)
     {
         var request = new
         {
-            Ip,
-            HostName
+            Ip = ip,
+            HostName = hostName
         };
 
         var requestContent = new StringContent(
@@ -293,14 +340,14 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
     public async ValueTask RecordRegisterIpAsync(
         string playerCode,
-        string Ip,
-        string? HostName,
+        string ip,
+        string? hostName,
         CancellationToken cancellationToken = default)
     {
         var request = new
         {
-            Ip,
-            HostName
+            Ip = ip,
+            HostName = hostName
         };
 
         var requestContent = new StringContent(

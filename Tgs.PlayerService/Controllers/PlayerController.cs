@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Tgs.Paging;
 using Tgs.PlayerService.ApplicationServices;
+using Tgs.PlayerService.Constraints;
 using Tgs.PlayerService.ViewModels;
 using Tgs.ServiceUtility;
 using Tgs.WebApi.Toolkits;
@@ -15,41 +16,26 @@ namespace Tgs.PlayerService.Controllers;
 [ApiController]
 public class PlayerController : ControllerBase
 {
-    [HttpGet("deposited/{playerCode}", Name = "GetPlayerDepositedAmount")]
-    [SuccessStatusCode(200, "Player deposited amount returns")]
-    public ValueTask<decimal> GetPlayerDepositedAmountAsync(
-        [FromServices] IGetService<GetPlayerDepositedAmountQuery, decimal> getService,
-        string playerCode)
-        => getService.GetAsync(
-            new GetPlayerDepositedAmountQuery(playerCode),
-            HttpContext.RequestAborted);
-
-    [HttpGet("{playerCode}", Name = "GetPlayerInfo")]
-    [SuccessStatusCode(200, "Player info found")]
-    [FailStatusCode(404, "Player info not found")]
-    public async ValueTask<PlayerInfoViewModel> GetPlayerInfoAsync(
-        [FromServices] IGetService<GetPlayerQuery, PlayerInfo?> getService,
-        string playerCode)
+    [HttpPost("create", Name = "CreatePlayer")]
+    [SuccessStatusCode(200, "Create player")]
+    public ValueTask<string> CreatePlayerAsync(
+        [FromServices] IGetService<CreatePlayerCommand, string> queryService,
+        [FromBody] CreatePlayerViewModel player)
     {
-        var playerInfo = await getService
-            .GetAsync(new GetPlayerQuery(playerCode), HttpContext.RequestAborted)
-            .ConfigureAwait(false);
+        var command = new CreatePlayerCommand(
+            player.BrandId,
+            player.AgentId,
+            player.VipId,
+            player.CurrencyCode,
+            player.Username,
+            player.Password,
+            player.UpperPlayerCode,
+            player.BetLimitId,
+            player.PlayerType,
+            player.RegisterSiteType,
+            player.CreateByUsername);
 
-        return playerInfo is null
-            ? await this.FailAsync<PlayerInfoViewModel, object?>(404, null)
-                .ConfigureAwait(false)
-            : new PlayerInfoViewModel
-            {
-                PlayerCode = playerInfo.PlayerCode,
-                BrandId = playerInfo.BrandId,
-                UserName = playerInfo.UserName,
-                IdentityAuthentication = playerInfo.IdentityAuthentication,
-                PhoneAuthentication = playerInfo.PhoneAuthentication,
-                EmailAuthentication = playerInfo.EmailAuthentication,
-                IsSetPayPassword = playerInfo.IsSetPayPassword,
-                VipLevelId = playerInfo.VipLevelId,
-                RegisteredOn = playerInfo.RegisteredOn
-            };
+        return queryService.GetAsync(command, HttpContext.RequestAborted);
     }
 
     [HttpGet("parent/{playerCode}", Name = "GetParentPlayerInfo")]
@@ -80,6 +66,58 @@ public class PlayerController : ControllerBase
                 IsSetPayPassword = parentPlayer.IsSetPayPassword,
                 VipLevelId = parentPlayer.VipLevelId,
                 RegisteredOn = parentPlayer.RegisteredOn
+            };
+    }
+
+    [HttpGet("{brandId}:playercodes", Name = "GetPlayerCodesByUserNames")]
+    [SuccessStatusCode(200, "PlayerCodes returns")]
+    public IAsyncEnumerable<string> GetPlayerCodesByUserNamesAsync(
+       [FromServices] IQueryService<GetPlayerCodesByUserNamesQuery, string> queryService,
+       Guid brandId,
+       [FromQuery(Name = "names")] PlayerCodesQueryViewModel viewModel)
+    {
+        var query = new GetPlayerCodesByUserNamesQuery(
+            brandId,
+            viewModel.UserNames);
+
+        return queryService
+            .QueryAsync(query, HttpContext.RequestAborted);
+    }
+
+    [HttpGet("deposited/{playerCode}", Name = "GetPlayerDepositedAmount")]
+    [SuccessStatusCode(200, "Player deposited amount returns")]
+    public ValueTask<decimal> GetPlayerDepositedAmountAsync(
+        [FromServices] IGetService<GetPlayerDepositedAmountQuery, decimal> getService,
+        string playerCode)
+        => getService.GetAsync(
+            new GetPlayerDepositedAmountQuery(playerCode),
+            HttpContext.RequestAborted);
+
+    [HttpGet("{playerCode}", Order = 100, Name = "GetPlayerInfo")]
+    [SuccessStatusCode(200, "Player info found")]
+    [FailStatusCode(404, "Player info not found")]
+    public async ValueTask<PlayerInfoViewModel> GetPlayerInfoAsync(
+        [FromServices] IGetService<GetPlayerQuery, PlayerInfo?> getService,
+        string playerCode)
+    {
+        var playerInfo = await getService
+            .GetAsync(new GetPlayerQuery(playerCode), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return playerInfo is null
+            ? await this.FailAsync<PlayerInfoViewModel, object?>(404, null)
+                .ConfigureAwait(false)
+            : new PlayerInfoViewModel
+            {
+                PlayerCode = playerInfo.PlayerCode,
+                BrandId = playerInfo.BrandId,
+                UserName = playerInfo.UserName,
+                IdentityAuthentication = playerInfo.IdentityAuthentication,
+                PhoneAuthentication = playerInfo.PhoneAuthentication,
+                EmailAuthentication = playerInfo.EmailAuthentication,
+                IsSetPayPassword = playerInfo.IsSetPayPassword,
+                VipLevelId = playerInfo.VipLevelId,
+                RegisteredOn = playerInfo.RegisteredOn
             };
     }
 
@@ -199,7 +237,35 @@ public class PlayerController : ControllerBase
         return getService.GetAsync(query, HttpContext.RequestAborted);
     }
 
-    [HttpGet("{brandId:Guid}")]
+    [HttpHeaderConstraint("Basic")]
+    [HttpGet("{brandId:Guid}", Order = 1, Name = "QueryPlayerInfoList")]
+    [SuccessStatusCode(200, "PlayerInfos")]
+    public IAsyncEnumerable<PlayerInfoViewModel> QueryPlayerInfoListAsync(
+        [FromServices] IQueryService<PlayerInfoListQuery, PlayerInfo> queryService,
+        Guid brandId,
+        [FromQuery(Name = "playercodes")] PlayerInfoListQueryViewModel viewModel)
+    {
+        var query = new PlayerInfoListQuery(
+            brandId,
+            viewModel.PlayerCodes);
+
+        return queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Select(info => new PlayerInfoViewModel
+            {
+                PlayerCode = info.PlayerCode,
+                UserName = info.UserName,
+                BrandId = info.BrandId,
+                EmailAuthentication = info.EmailAuthentication,
+                IdentityAuthentication = info.IdentityAuthentication,
+                PhoneAuthentication = info.PhoneAuthentication,
+                IsSetPayPassword = info.IsSetPayPassword,
+                RegisteredOn = info.RegisteredOn,
+                VipLevelId = info.VipLevelId
+            });
+    }
+
+    [ApiExplorerSettings(GroupName = "Obsolete")]
+    [HttpGet("{brandId:Guid}", Order = 10, Name = "QueryPlayerList")]
     [SuccessStatusCode(200, "Players")]
     public IAsyncEnumerable<PlayerListItemViewModel> QueryPlayerListAsync(
         [FromServices] IQueryService<PlayerListQuery, PlayerListItem> queryService,
@@ -283,27 +349,5 @@ public class PlayerController : ControllerBase
         var command = new SetPlayerStatusCommand(playerCode, status);
 
         return setService.ExecuteAsync(command, HttpContext.RequestAborted);
-    }
-
-    [HttpPost("create", Name = "CreatePlayer")]
-    [SuccessStatusCode(200, "Create player")]
-    public ValueTask<string> CreatePlayerAsync(
-        [FromServices] IGetService<CreatePlayerQuery,string> queryService,
-        [FromBody] CreatePlayerViewModel player)
-    {
-        var query = new CreatePlayerQuery(
-            player.BrandId,
-            player.AgentId,
-            player.VipId,
-            player.CurrencyCode,
-            player.Username,
-            player.Password,
-            player.UpperPlayerCode,
-            player.BetLimitId,
-            player.PlayerType,
-            player.RegisterSiteType,
-            player.CreateByUsername);
-
-        return queryService.GetAsync(query, HttpContext.RequestAborted);
     }
 }

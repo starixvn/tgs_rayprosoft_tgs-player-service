@@ -163,7 +163,7 @@ public class PlayerTests
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
-        var sut = new CreatePlayerQueryService(fakePlayerRepository, fakePasswordHandler);
+        var sut = new CreatePlayerCommandService(fakePlayerRepository, fakePasswordHandler);
 
         var brandId = Guid.NewGuid();
         var agentId = Guid.NewGuid();
@@ -174,7 +174,7 @@ public class PlayerTests
         var password = "password";
         var agentName = "agentName";
 
-        var query = new CreatePlayerQuery(
+        var query = new CreatePlayerCommand(
             brandId,
             agentId,
             vipId,
@@ -367,6 +367,26 @@ public class PlayerTests
 
         _ = fakePlayerRepository.Received(1)
             .SetPlayerStatusAsync(Arg.Is(command.PlayerCode), Arg.Is(command.Status));
+    }
+
+    [Test]
+    public async Task 用UserNames查詢PlayerCodes()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerCodesByUserNamesQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerCodesByUserNamesQuery(
+            Guid.NewGuid(),
+            new[] { "player1", "player2" });
+
+        _ = await sut.QueryAsync(query).ToArrayAsync();
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .GetPlayerCodesByUserNamesAsync(
+                Arg.Is(query.BrandId),
+                Arg.Is<IEnumerable<string>>(x => x.SequenceEqual(query.UserNames)));
     }
 
     [Test]

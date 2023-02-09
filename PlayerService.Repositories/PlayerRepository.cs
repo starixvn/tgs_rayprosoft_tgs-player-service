@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
@@ -116,14 +113,30 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async ValueTask<string?> GetParentPlayerCodeAsync(string playerCode,
-                CancellationToken cancellationToken = default)
+    public async ValueTask<string?> GetParentPlayerCodeAsync(
+        string playerCode,
+        CancellationToken cancellationToken = default)
         => await _dbContext.PlayerParents
             .Where(pp => pp.PlayerCode == playerCode)
             .Select(pp => pp.ParentPlayerCode)
             .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
-    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode,
+    public async IAsyncEnumerable<string> GetPlayerCodesByUserNamesAsync(Guid brandId,
+        IEnumerable<string> userNames,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var playerCodes = await _dbContext.Players
+            .Where(p => userNames.Contains(p.Username))
+            .Select(p => p.PlayerCode)
+            .ToArrayAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (var playerCode in playerCodes)
+            yield return playerCode;
+    }
+
+    public async ValueTask<decimal> GetPlayerDepositedAmountAsync(
+        string playerCode,
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
@@ -136,7 +149,8 @@ internal class PlayerRepository : IPlayerRepository
         return player?.AccumulatedDeposit ?? 0;
     }
 
-    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode,
+    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(
+        string playerCode,
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
@@ -315,6 +329,41 @@ internal class PlayerRepository : IPlayerRepository
                 .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false)
             ?? 1);
+
+    public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
+        Guid brandId, 
+        IEnumerable<string> playerCodes,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var players = await _dbContext.Players
+            .Where(p => p.BrandId == brandId && playerCodes.Contains(p.PlayerCode))
+            .Select(p => new
+            {
+                p.PlayerCode,
+                p.BrandId,
+                p.Username,
+                p.IdentityAuthentication,
+                p.PhoneAuthentication,
+                p.Email,
+                p.WithdrawPassword,
+                p.VipId,
+                p.RegisteredOn
+            })
+            .ToArrayAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (var player in players)
+            yield return new PlayerInfo(
+                player.PlayerCode,
+                player.BrandId,
+                player.Username,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                !string.IsNullOrEmpty(player.Email),
+                player.WithdrawPassword.Length > 0,
+                player.VipId,
+                player.RegisteredOn);
+    }
 
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
         Guid brandId,

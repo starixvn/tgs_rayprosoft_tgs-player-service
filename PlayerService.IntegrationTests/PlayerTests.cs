@@ -15,6 +15,48 @@ namespace Tgs.PlayerService.IntegrationTests;
 public class PlayerTests
 {
     [Test]
+    public async Task Create_Player()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var vipId = Guid.NewGuid();
+        var betLimitId = 1;
+        var currencyCode = "currencyCode";
+        var username = "username";
+        var password = "password";
+        var agentName = "agentName";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = await sut.CreatePlayerAsync(new Client.CreatePlayerData(
+            brandId,
+            agentId,
+            vipId,
+            currencyCode,
+            username,
+            password,
+            null,
+            betLimitId,
+            Client.PlayerType.RealPlayer,
+            Client.RegisterSiteType.Agent,
+            agentName));
+
+        var player = dbContext.Players.First(x => x.Username == username);
+        var tag = dbContext.PlayerTags.First(x => x.PlayerCode == playerCode);
+
+        Assert.IsNotNull(player);
+        Assert.IsNotNull(player.AgentId == agentId);
+        Assert.IsNotNull(playerCode);
+        Assert.IsNotNull(tag);
+    }
+
+    [Test]
     public async Task Get_DefaultWalletId()
     {
         var walletId = Guid.NewGuid();
@@ -1053,47 +1095,5 @@ public class PlayerTests
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
         Assert.AreEqual("test", playerRow.Remark);
-    }
-
-    [Test]
-    public async Task Create_Player()
-    {
-        await using var web = new TestPlayerServiceApplication();
-
-        var httpClient = web.CreateClient();
-
-        var sut = new PlayerServiceClient(httpClient);
-
-        var brandId = Guid.NewGuid();
-        var agentId = Guid.NewGuid();
-        var vipId = Guid.NewGuid();
-        var betLimitId = 1;
-        var currencyCode = "currencyCode";
-        var username = "username";
-        var password = "password";
-        var agentName = "agentName";
-
-        var dbContext = web.Services.GetRequiredService<TgsContext>();
-
-        var playerCode = await sut.CreatePlayerAsync(new Client.CreatePlayerData(
-            brandId,
-            agentId,
-            vipId,
-            currencyCode,
-            username,
-            password,
-            null,
-            betLimitId,
-            Client.PlayerType.RealPlayer,
-            Client.RegisterSiteType.Agent,
-            agentName));
-
-        var player = dbContext.Players.First(x => x.Username== username);
-        var tag = dbContext.PlayerTags.First(x => x.PlayerCode == playerCode);
-
-        Assert.IsNotNull(player);
-        Assert.IsNotNull(player.AgentId == agentId);
-        Assert.IsNotNull(playerCode);
-        Assert.IsNotNull(tag);
     }
 }
