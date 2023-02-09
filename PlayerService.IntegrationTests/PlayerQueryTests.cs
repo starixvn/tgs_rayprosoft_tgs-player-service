@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -831,7 +832,8 @@ public class PlayerQueryTests
     {
         await using var web = new TestPlayerServiceApplication();
 
-        var httpClient = web.CreateClient();
+        var delegatingHandlers = new DelegatingHandler[] { new TestHttpHeaderDelegateHandler("Basic") };
+        var httpClient = web.CreateDefaultClient(delegatingHandlers);
 
         var sut = new PlayerServiceClient(httpClient);
 
