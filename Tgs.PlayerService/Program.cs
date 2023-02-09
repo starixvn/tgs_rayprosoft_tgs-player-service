@@ -113,8 +113,8 @@ app.MapProfileViewer();
 app.MapSwagger();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/Normal/swagger.json", "TGS Agent API - Normal");
-    options.SwaggerEndpoint("/swagger/Basic/swagger.json", "TGS Agent API - Basic");
+    options.SwaggerEndpoint("/swagger/Normal/swagger.json", "Tgs Player Service - Normal");
+    options.SwaggerEndpoint("/swagger/Basic/swagger.json", "Tgs Player Service - Basic");
 });
 
 app.MapHealthChecks("/healthz");
