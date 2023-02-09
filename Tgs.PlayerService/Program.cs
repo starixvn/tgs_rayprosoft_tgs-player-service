@@ -83,19 +83,25 @@ builder.Services
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
+    options.SwaggerDoc("Basic", new OpenApiInfo
     {
         Title = "Player Service",
-        Version = "v1"
+        Version = "Basic"
     });
+
+    options.SwaggerDoc("Normal", new OpenApiInfo
+    {
+        Title = "Player Service",
+        Version = "Normal"
+    });
+
+    options.DocInclusionPredicate((groupName, desc)
+        => groupName == "Normal" ? desc.GroupName is null : desc.GroupName == groupName);
 
     options.OperationFilter<HttpHeaderConstraintOperationFilter>();
 
     options.ApplyWebApiToolkitSupport();
     options.ApplyDisplayNameSchemaId();
-
-    options.ResolveConflictingActions(apiDescriptions => 
-        apiDescriptions.First());
 });
 
 builder.Services.AddHealthChecks();
@@ -105,7 +111,11 @@ var app = builder.Build();
 app.MapControllers();
 app.MapProfileViewer();
 app.MapSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/Normal/swagger.json", "TGS Agent API - Normal");
+    options.SwaggerEndpoint("/swagger/Basic/swagger.json", "TGS Agent API - Basic");
+});
 
 app.MapHealthChecks("/healthz");
 

@@ -236,7 +236,8 @@ public class PlayerController : ControllerBase
 
         return getService.GetAsync(query, HttpContext.RequestAborted);
     }
-    
+
+    [ApiExplorerSettings(GroupName = "Basic")]
     [HttpHeaderConstraint("Basic")]
     [HttpGet("{brandId:Guid}", Order = 1, Name = "QueryPlayerInfoList")]
     [SuccessStatusCode(200, "PlayerInfos")]
