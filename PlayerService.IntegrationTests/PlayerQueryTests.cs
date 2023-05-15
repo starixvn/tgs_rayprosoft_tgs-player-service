@@ -766,6 +766,55 @@ public class PlayerQueryTests
     }
 
     [Test]
+    public async Task 取得Brand底下Enabled的所有PlayerCode()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+
+        var query = new PlayerListQuery();
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = Guid.NewGuid(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = Guid.NewGuid(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.ListPlayerCodesByBrandIdAsync(brandId).ToArrayAsync();
+
+        Assert.AreEqual(1, actual.Length);
+        Assert.AreEqual("player1", actual[0]);
+    }
+
+    [Test]
     public async Task 用UserNames查詢PlayerCodes()
     {
         await using var web = new TestPlayerServiceApplication();

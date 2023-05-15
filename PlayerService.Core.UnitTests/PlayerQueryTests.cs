@@ -38,6 +38,21 @@ public class PlayerQueryTests
     }
 
     [Test]
+    public async Task 取得Brand下的PlayerCodes()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new BrandAllPlayerCodesQueryService(fakePlayerRepository);
+
+        var query = new BrandAllPlayerCodesQuery(Guid.NewGuid());
+
+        _ = await sut.QueryAsync(query).ToArrayAsync();
+
+        _ = fakePlayerRepository.Received(1)
+            .QueryPlayerListWithoutLimitAsync(Arg.Is(query.BrandId));
+    }
+
+    [Test]
     public async Task 查詢多位玩家的PlayerInfo()
     {
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();

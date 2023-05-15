@@ -22,7 +22,7 @@ public class PlayerController : ControllerBase
         [FromServices] IGetService<CreatePlayerCommand, string> queryService,
         [FromBody] CreatePlayerViewModel player)
     {
-        var command = new CreatePlayerCommand(
+        var query = new CreatePlayerCommand(
             player.BrandId,
             player.AgentId,
             player.VipId,
@@ -35,7 +35,7 @@ public class PlayerController : ControllerBase
             player.RegisterSiteType,
             player.CreateByUsername);
 
-        return queryService.GetAsync(command, HttpContext.RequestAborted);
+        return queryService.GetAsync(query, HttpContext.RequestAborted);
     }
 
     [HttpGet("parent/{playerCode}", Name = "GetParentPlayerInfo")]
@@ -237,6 +237,18 @@ public class PlayerController : ControllerBase
         return getService.GetAsync(query, HttpContext.RequestAborted);
     }
 
+    [HttpGet("player-code/{brandId:Guid}", Name = "ListPlayerCodesByBrandId")]
+    [SuccessStatusCode(200, "PlayerCodes")]
+    public IAsyncEnumerable<string> ListPlayerCodesByBrandIdAsync(
+        [FromServices] IQueryService<BrandAllPlayerCodesQuery, string> queryService,
+        Guid brandId)
+    {
+        var query = new BrandAllPlayerCodesQuery(brandId);
+
+        return queryService.QueryAsync(query, HttpContext.RequestAborted);
+    }
+
+    [HttpGet("{brandId:Guid}", Name = "QueryPlayerList")]
     [HttpHeaderConstraint("Basic")]
     [HttpGet("{brandId:Guid}", Order = 1, Name = "QueryPlayerInfoList")]
     [SuccessStatusCode(200, "PlayerInfos")]
