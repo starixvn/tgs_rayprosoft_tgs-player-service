@@ -235,6 +235,23 @@ internal class PlayerServiceClient : IPlayerServiceClient
             .ConfigureAwait(false);
     }
 
+    public IAsyncEnumerable<string> ListPlayerCodesByBrandIdAsync(Guid brandId, CancellationToken cancellationToken = default)
+        => _httpClient.GetAsync(
+            $"/player/player-code/{brandId}",
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken)
+            .ToAsyncEnumerable()
+            .Do(response => response.EnsureSuccessStatusCode())
+            .SelectMany(response => response.Content
+                .ReadAsStreamAsync(cancellationToken)
+                .ToAsyncEnumerable())
+            .SelectMany(stream => JsonSerializer.DeserializeAsyncEnumerable<string>(
+                stream,
+                _SerializerOptions,
+                cancellationToken))
+            .Where(playerCode => !string.IsNullOrWhiteSpace(playerCode))
+            .Select(playerCode => playerCode!);
+
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId, 
         IEnumerable<string> playerCodes,
@@ -260,7 +277,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
     }
 
     public async IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
-        Guid brandId,
+            Guid brandId,
         PlayerListQuery query,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {

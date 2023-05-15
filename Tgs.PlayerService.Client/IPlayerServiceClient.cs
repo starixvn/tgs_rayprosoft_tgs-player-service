@@ -31,6 +31,8 @@ public interface IPlayerServiceClient
 
     ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
 
+    IAsyncEnumerable<string> ListPlayerCodesByBrandIdAsync(Guid brandId, CancellationToken cancellationToken = default);
+
     IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(Guid brandId, IEnumerable<string> playerCodes,
         CancellationToken cancellationToken = default);
 

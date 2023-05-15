@@ -56,6 +56,10 @@ public interface IPlayerRepository
         DateTime? endRegisterTime = null,
         CancellationToken cancellationToken = default);
 
+    IAsyncEnumerable<PlayerListItem> QueryPlayerListWithoutLimitAsync(
+        Guid brandId,
+        CancellationToken cancellationToken = default);
+
     IAsyncEnumerable<PlayerListItem> QueryPlayerListByPlayersAsync(
         Guid brandId,
         IEnumerable<string> playerCodes,

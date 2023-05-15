@@ -540,8 +540,73 @@ internal class PlayerRepository : IPlayerRepository
             .ToAsyncEnumerable();
     }
 
+    public IAsyncEnumerable<PlayerListItem> QueryPlayerListWithoutLimitAsync(Guid brandId, CancellationToken cancellationToken = default)
+    {
+        var players = InternalQueryPlayerList(
+            brandId,
+            PlayerStatus.Enabled,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+
+        var query = from player in players
+                        .Select(p => new
+                        {
+                            p.PlayerCode,
+                            p.Username,
+                            p.RealName,
+                            p.RegisteredOn,
+                            p.AgentId,
+                            p.VipId,
+                            p.Status
+                        })
+                    join parent in _dbContext.PlayerParents
+                        on player.PlayerCode equals parent.PlayerCode into pg
+                    from parent in pg.DefaultIfEmpty()
+                    join ipRecord in _dbContext.PlayerIpRecords
+                        on new
+                        {
+                            player.PlayerCode,
+                            IpType = (short)PlayerIpType.Register
+                        } equals new
+                        {
+                            ipRecord.PlayerCode,
+                            ipRecord.IpType
+                        } into pirg
+                    from ipRecord in pirg.DefaultIfEmpty()
+                    select new
+                    {
+                        player.PlayerCode,
+                        player.Username,
+                        player.RealName,
+                        player.RegisteredOn,
+                        ipRecord.Host,
+                        player.AgentId,
+                        player.VipId,
+                        player.Status,
+                        parent.ParentPlayerCode
+                    };
+
+        return query
+            .Select(item => new PlayerListItem(
+                item.PlayerCode,
+                item.Username,
+                item.RealName,
+                item.RegisteredOn,
+                item.Host,
+                item.AgentId,
+                item.VipId,
+                (PlayerStatus)item.Status,
+                item.ParentPlayerCode))
+            .ToAsyncEnumerable();
+    }
+
     public async ValueTask SaveLoginIpAsync(
-        string playerCode,
+            string playerCode,
         string ip,
         string? host,
         DateTime recordTime,
@@ -708,7 +773,7 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     private IQueryable<Player> InternalQueryPlayerList(
-            Guid brandId,
+        Guid brandId,
         PlayerStatus? status = null,
         Guid? vipId = null,
         string? userName = null,
