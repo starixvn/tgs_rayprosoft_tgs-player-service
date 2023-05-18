@@ -2,18 +2,18 @@
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class GetPlayerCountByAgentIdQueryService : IGetService<GetPlayerCountByAgentIdQuery, int>
+internal class GetPlayerCountByBrandIdQueryService : IQueryService<GetPlayerCountByBrandIdQuery, PlayerCountInfo>
 {
     private readonly IPlayerRepository _playerRepository;
 
-    public GetPlayerCountByAgentIdQueryService(
+    public GetPlayerCountByBrandIdQueryService(
         IPlayerRepository playerRepository)
     {
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
     }
 
-    public ValueTask<int> GetAsync(
-        GetPlayerCountByAgentIdQuery query,
+    public IAsyncEnumerable<PlayerCountInfo> QueryAsync(
+        GetPlayerCountByBrandIdQuery query,
         CancellationToken cancellationToken = default)
-        => _playerRepository.GetPlayerCountByAgentIdsAsync(query.AgentIds, cancellationToken);
+        => _playerRepository.GetPlayerCountByBrandIdAsync(query.BrandId, cancellationToken);
 }

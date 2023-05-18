@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
 using Tgs.SerialNumberGenerator;
@@ -772,10 +773,11 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public async ValueTask<int> GetPlayerCountByAgentIdsAsync(Guid[] agentIds,
-        CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<PlayerCountInfo> GetPlayerCountByBrandIdAsync(Guid brandId,
+        CancellationToken cancellationToken)
     {
-        return await _dbContext.Players.CountAsync(x => x.AgentId != null && agentIds.Contains(x.AgentId.Value), cancellationToken);
+        return _dbContext.Players.Where(x => x.BrandId == brandId)
+            .GroupBy(x => x.AgentId, (agentId, list) => new PlayerCountInfo(agentId, list.Count())).ToAsyncEnumerable();
     }
 
     private IQueryable<Player> InternalQueryPlayerList(

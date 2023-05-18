@@ -51,5 +51,6 @@ public interface IPlayerServiceClient
 
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
 
-    ValueTask<int> GetPlayerCountByAgentIdsAsync(Guid[] agentIds, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<PlayerCountInfo> GetPlayerCountInfosByBrandIdAsync(Guid brandId,
+        CancellationToken cancellationToken = default);
 }

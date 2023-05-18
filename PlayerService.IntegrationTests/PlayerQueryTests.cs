@@ -946,6 +946,7 @@ public class PlayerQueryTests
 
         var sut = new PlayerServiceClient(httpClient);
 
+        var brandId = Guid.NewGuid();
         var agentId = Guid.NewGuid();
         var agentId2 = Guid.NewGuid();
 
@@ -961,7 +962,7 @@ public class PlayerQueryTests
             new Player
             {
                 PlayerCode = "player1",
-                BrandId = Guid.NewGuid(),
+                BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
                 Password = Array.Empty<byte>(),
                 Salt = Array.Empty<byte>(),
@@ -973,7 +974,7 @@ public class PlayerQueryTests
             new Player
             {
                 PlayerCode = "player2",
-                BrandId = Guid.NewGuid(),
+                BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
                 Password = Array.Empty<byte>(),
                 Salt = Array.Empty<byte>(),
@@ -985,7 +986,7 @@ public class PlayerQueryTests
             new Player
             {
                 PlayerCode = "player3",
-                BrandId = Guid.NewGuid(),
+                BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
                 Password = Array.Empty<byte>(),
                 Salt = Array.Empty<byte>(),
@@ -997,8 +998,10 @@ public class PlayerQueryTests
 
         _ = await dbContext.SaveChangesAsync();
 
-        var actual = await sut.GetPlayerCountByAgentIdsAsync(agentIds);
+        var actual = await sut.GetPlayerCountInfosByBrandIdAsync(brandId, default).ToArrayAsync();
 
-        Assert.AreEqual(3, actual);
+        var actualPlayerCount = actual.Sum(x => x.PlayerCount);
+
+        Assert.AreEqual(3, actualPlayerCount);
     }
 }
