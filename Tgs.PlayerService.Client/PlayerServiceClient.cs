@@ -425,4 +425,22 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
         _ = response.EnsureSuccessStatusCode();
     }
+
+    public async ValueTask<int> GetPlayerCountByAgentIdsAsync(Guid[] agentIds, CancellationToken cancellationToken = default)
+    {
+        var requestContent = new StringContent(
+            JsonSerializer.Serialize(new { agentIds }, _SerializerOptions),
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json);
+
+        var response = await _httpClient
+            .PostAsync("/player/playerCount", requestContent, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+        return string.IsNullOrEmpty(content) ? 0 : Convert.ToInt32(content);
+    }
 }

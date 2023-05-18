@@ -772,6 +772,12 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    public async ValueTask<int> GetPlayerCountByAgentIdsAsync(Guid[] agentIds,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Players.CountAsync(x => x.AgentId != null && agentIds.Contains(x.AgentId.Value), cancellationToken);
+    }
+
     private IQueryable<Player> InternalQueryPlayerList(
         Guid brandId,
         PlayerStatus? status = null,
