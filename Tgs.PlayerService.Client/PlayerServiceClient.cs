@@ -425,4 +425,19 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
         _ = response.EnsureSuccessStatusCode();
     }
+
+    public async IAsyncEnumerable<PlayerCountInfo> GetPlayerCountInfosByBrandIdAsync(Guid brandId,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var response = await _httpClient
+            .GetAsync($"/player/playerCount/{brandId}", cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+
+        await foreach (var playerCountInfo in JsonSerializer.DeserializeAsyncEnumerable<PlayerCountInfo>(contentStream,
+                           _SerializerOptions, cancellationToken)) yield return playerCountInfo!;
+    }
 }

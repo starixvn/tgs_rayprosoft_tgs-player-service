@@ -362,4 +362,16 @@ public class PlayerController : ControllerBase
 
         return setService.ExecuteAsync(command, HttpContext.RequestAborted);
     }
+
+    [HttpGet("playerCount/{brandId}", Name = "GetPlayerCountByBrandId")]
+    [SuccessStatusCode(200, "PlayerCount")]
+    public IAsyncEnumerable<PlayerCountInfoViewModel> GetPlayerCountInfosByBrandIdAsync(
+        [FromServices] IQueryService<GetPlayerCountByBrandIdQuery, PlayerCountInfo> queryService,
+        Guid brandId)
+    {
+        var query = new GetPlayerCountByBrandIdQuery(brandId);
+
+        return queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Select(x => new PlayerCountInfoViewModel(x.AgentId, x.PlayerCount));
+    }
 }

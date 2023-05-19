@@ -936,4 +936,72 @@ public class PlayerQueryTests
 
         Assert.AreEqual(2, actual.Length);
     }
+
+    [Test]
+    public async Task GetPlayerCountByAgentIds()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var agentId2 = Guid.NewGuid();
+
+        var agentIds = new[]
+        {
+            agentId,
+            agentId2
+        };
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = agentId,
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = agentId,
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            },
+            new Player
+            {
+                PlayerCode = "player3",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = agentId2,
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerCountInfosByBrandIdAsync(brandId, default).ToArrayAsync();
+
+        var actualPlayerCount = actual.Sum(x => x.PlayerCount);
+
+        Assert.AreEqual(3, actualPlayerCount);
+    }
 }
