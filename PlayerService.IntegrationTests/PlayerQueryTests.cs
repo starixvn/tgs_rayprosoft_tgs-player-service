@@ -897,6 +897,72 @@ public class PlayerQueryTests
     }
 
     [Test]
+    public async Task 用UserNames查詢UserNamePlayerCodePairs()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName1",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName2",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                Phone = "123456"
+            },
+            new Player
+            {
+                PlayerCode = "player3",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName3",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                RegisteredOn = DateTime.Parse("2022-7-2")
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var userNames = new[] { "userName1", "userName2" };
+
+        var expected = new[] {
+            new KeyValuePair<string, string>("userName1", "player1"),
+            new KeyValuePair<string, string>("userName2", "player2")
+        };
+
+        var actual = await sut.ListPlayerCodesByUserNamesAsync(
+            brandId,
+            userNames).ToArrayAsync();
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
     public async Task 依據UserNamePrefix查詢玩家PlayerCodes()
     {
         await using var web = new TestPlayerServiceApplication(hostBuilder => hostBuilder

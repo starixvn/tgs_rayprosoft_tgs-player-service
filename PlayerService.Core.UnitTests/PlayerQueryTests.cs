@@ -38,6 +38,25 @@ public class PlayerQueryTests
     }
 
     [Test]
+    public async Task 用UserNames查詢PlayerInfos()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new ListPlayerInfosByUserNamesQueryService(fakePlayerRepository);
+
+        var query = new ListPlayerInfosByUserNamesQuery(
+            Guid.NewGuid(),
+            new[] { "player1", "player2" });
+
+        _ = await sut.QueryAsync(query).ToArrayAsync();
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerInfosByUserNamesAsync(
+                Arg.Is(query.BrandId),
+                Arg.Is<IEnumerable<string>>(x => x.SequenceEqual(query.UserNames)));
+    }
+
+    [Test]
     public async Task 依據UserNamePrefix查詢玩家列表()
     {
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();

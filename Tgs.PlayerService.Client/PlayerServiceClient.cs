@@ -283,8 +283,33 @@ internal class PlayerServiceClient : IPlayerServiceClient
                 .ToAsyncEnumerable()
                 .SelectMany(arr => arr!));
 
+    public IAsyncEnumerable<KeyValuePair<string, string>> ListPlayerCodesByUserNamesAsync(
+        Guid brandId,
+        IEnumerable<string> userNames,
+        CancellationToken cancellationToken = default)
+    {
+        var queryStrings = new QueryBuilder
+        {
+            { "names", string.Join(',', userNames) }
+        };
+
+        return _httpClient
+            .GetAsync(
+                $"/player/{brandId}:usernames{queryStrings.ToQueryString().Value}",
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken)
+            .ToAsyncEnumerable()
+            .Do(response => response.EnsureSuccessStatusCode())
+            .SelectMany(response => response.Content
+                .ReadFromJsonAsync<IAsyncEnumerable<KeyValuePair<string, string>>>(
+                    _SerializerOptions,
+                    cancellationToken)
+                .ToAsyncEnumerable()
+                .SelectMany(arr => arr!));
+    }
+
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
-            Guid brandId,
+                Guid brandId,
         IEnumerable<string> playerCodes,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {

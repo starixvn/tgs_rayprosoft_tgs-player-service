@@ -84,6 +84,18 @@ public class PlayerController : ControllerBase
             .QueryAsync(query, HttpContext.RequestAborted);
     }
 
+    [HttpGet("playerCount/{brandId}", Name = "GetPlayerCountByBrandId")]
+    [SuccessStatusCode(200, "PlayerCount")]
+    public IAsyncEnumerable<PlayerCountInfoViewModel> GetPlayerCountInfosByBrandIdAsync(
+        [FromServices] IQueryService<GetPlayerCountByBrandIdQuery, PlayerCountInfo> queryService,
+        Guid brandId)
+    {
+        var query = new GetPlayerCountByBrandIdQuery(brandId);
+
+        return queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Select(x => new PlayerCountInfoViewModel(x.AgentId, x.PlayerCount));
+    }
+
     [HttpGet("deposited/{playerCode}", Name = "GetPlayerDepositedAmount")]
     [SuccessStatusCode(200, "Player deposited amount returns")]
     public ValueTask<decimal> GetPlayerDepositedAmountAsync(
@@ -260,6 +272,21 @@ public class PlayerController : ControllerBase
             .Select(info => new KeyValuePair<string, string>(info.UserName, info.PlayerCode));
     }
 
+    [HttpGet("{brandId}:usernames", Name = "ListPlayerCodesByUserNames")]
+    [SuccessStatusCode(200, "UserName and PlayerCode pairs.")]
+    public IAsyncEnumerable<KeyValuePair<string, string>> ListPlayerCodesByUserNamesAsync(
+                                                [FromServices] IQueryService<ListPlayerInfosByUserNamesQuery, PlayerInfo> queryService,
+        Guid brandId,
+        [FromQuery(Name = "names")] PlayerCodesQueryViewModel viewModel)
+    {
+        var query = new ListPlayerInfosByUserNamesQuery(brandId, viewModel.UserNames);
+
+        return queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Select(info => new KeyValuePair<string, string>(
+                info.UserName,
+                info.PlayerCode));
+    }
+
     [HttpGet("{brandId:Guid}", Name = "QueryPlayerList")]
     [HttpHeaderConstraint("Basic")]
     [SuccessStatusCode(200, "PlayerInfos")]
@@ -373,17 +400,5 @@ public class PlayerController : ControllerBase
         var command = new SetPlayerStatusCommand(playerCode, status);
 
         return setService.ExecuteAsync(command, HttpContext.RequestAborted);
-    }
-
-    [HttpGet("playerCount/{brandId}", Name = "GetPlayerCountByBrandId")]
-    [SuccessStatusCode(200, "PlayerCount")]
-    public IAsyncEnumerable<PlayerCountInfoViewModel> GetPlayerCountInfosByBrandIdAsync(
-        [FromServices] IQueryService<GetPlayerCountByBrandIdQuery, PlayerCountInfo> queryService,
-        Guid brandId)
-    {
-        var query = new GetPlayerCountByBrandIdQuery(brandId);
-
-        return queryService.QueryAsync(query, HttpContext.RequestAborted)
-            .Select(x => new PlayerCountInfoViewModel(x.AgentId, x.PlayerCount));
     }
 }

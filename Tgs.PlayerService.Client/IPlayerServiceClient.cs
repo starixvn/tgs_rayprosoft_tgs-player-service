@@ -41,8 +41,13 @@ public interface IPlayerServiceClient
     IAsyncEnumerable<string> ListPlayerCodesByBrandIdAsync(Guid brandId, CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<KeyValuePair<string, string>> ListPlayerCodesByUserNameAsync(
-                                                Guid brandId,
+        Guid brandId,
         string userNamePrefix,
+        CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<KeyValuePair<string, string>> ListPlayerCodesByUserNamesAsync(
+                                                    Guid brandId,
+        IEnumerable<string> userNames,
         CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
