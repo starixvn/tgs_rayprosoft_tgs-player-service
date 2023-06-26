@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -11,6 +12,74 @@ namespace Tgs.PlayerService.IntegrationTests;
 
 public class PlayerQueryTests
 {
+    [Test]
+    public async Task GetPlayerCountByAgentIds()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var agentId2 = Guid.NewGuid();
+
+        var agentIds = new[]
+        {
+            agentId,
+            agentId2
+        };
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = agentId,
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = agentId,
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            },
+            new Player
+            {
+                PlayerCode = "player3",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = agentId2,
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerCountInfosByBrandIdAsync(brandId, default).ToArrayAsync();
+
+        var actualPlayerCount = actual.Sum(x => x.PlayerCount);
+
+        Assert.AreEqual(3, actualPlayerCount);
+    }
+
     [Test]
     public async Task PlayerListQuery_AgentId_Can_Parse()
     {
@@ -766,55 +835,6 @@ public class PlayerQueryTests
     }
 
     [Test]
-    public async Task 取得Brand底下Enabled的所有PlayerCode()
-    {
-        await using var web = new TestPlayerServiceApplication();
-
-        var httpClient = web.CreateClient();
-
-        var sut = new PlayerServiceClient(httpClient);
-
-        var brandId = Guid.NewGuid();
-
-        var query = new PlayerListQuery();
-
-        var dbContext = web.Services.GetRequiredService<TgsContext>();
-
-        await dbContext.Players.AddRangeAsync(
-            new Player
-            {
-                PlayerCode = "player1",
-                BrandId = brandId,
-                DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                Username = "player1",
-                AgentId = Guid.NewGuid(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
-            },
-            new Player
-            {
-                PlayerCode = "player2",
-                BrandId = Guid.NewGuid(),
-                DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                Username = "player1",
-                AgentId = Guid.NewGuid(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
-            });
-
-        _ = await dbContext.SaveChangesAsync();
-
-        var actual = await sut.ListPlayerCodesByBrandIdAsync(brandId).ToArrayAsync();
-
-        Assert.AreEqual(1, actual.Length);
-        Assert.AreEqual("player1", actual[0]);
-    }
-
-    [Test]
     public async Task 用UserNames查詢PlayerCodes()
     {
         await using var web = new TestPlayerServiceApplication();
@@ -877,6 +897,122 @@ public class PlayerQueryTests
     }
 
     [Test]
+    public async Task 依據UserNamePrefix查詢玩家PlayerCodes()
+    {
+        await using var web = new TestPlayerServiceApplication(hostBuilder => hostBuilder
+            .ConfigureServices(services => services
+                .AddHttpClientLoggingHandler()));
+
+        var httpClient = web.CreateDefaultClient(web.Services.ResolveLoggingHandler<PlayerServiceClient>());
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var usernamePrefix = "username";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName1",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "userName2",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                Phone = "123456"
+            },
+            new Player
+            {
+                PlayerCode = "player3",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "aaa3",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                RegisteredOn = DateTime.Parse("2022-7-2")
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var expected = new[] {
+            new KeyValuePair<string, string>("userName1", "player1"),
+            new KeyValuePair<string, string>("userName2", "player2")
+        };
+
+        var actual = await sut.ListPlayerCodesByUserNameAsync(
+            brandId,
+            usernamePrefix).ToArrayAsync();
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public async Task 取得Brand底下Enabled的所有PlayerCode()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+
+        var query = new PlayerListQuery();
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = Guid.NewGuid(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "player1",
+                AgentId = Guid.NewGuid(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.ListPlayerCodesByBrandIdAsync(brandId).ToArrayAsync();
+
+        Assert.AreEqual(1, actual.Length);
+        Assert.AreEqual("player1", actual[0]);
+    }
+
+    [Test]
     public async Task 查詢多位玩家的PlayerInfo()
     {
         await using var web = new TestPlayerServiceApplication();
@@ -935,73 +1071,5 @@ public class PlayerQueryTests
             .ToArrayAsync();
 
         Assert.AreEqual(2, actual.Length);
-    }
-
-    [Test]
-    public async Task GetPlayerCountByAgentIds()
-    {
-        await using var web = new TestPlayerServiceApplication();
-
-        var httpClient = web.CreateClient();
-
-        var sut = new PlayerServiceClient(httpClient);
-
-        var brandId = Guid.NewGuid();
-        var agentId = Guid.NewGuid();
-        var agentId2 = Guid.NewGuid();
-
-        var agentIds = new[]
-        {
-            agentId,
-            agentId2
-        };
-
-        var dbContext = web.Services.GetRequiredService<TgsContext>();
-
-        await dbContext.Players.AddRangeAsync(
-            new Player
-            {
-                PlayerCode = "player1",
-                BrandId = brandId,
-                DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                Username = "player1",
-                AgentId = agentId,
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
-            },
-            new Player
-            {
-                PlayerCode = "player2",
-                BrandId = brandId,
-                DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                Username = "player1",
-                AgentId = agentId,
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
-            },
-            new Player
-            {
-                PlayerCode = "player3",
-                BrandId = brandId,
-                DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                Username = "player1",
-                AgentId = agentId2,
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
-            });
-
-        _ = await dbContext.SaveChangesAsync();
-
-        var actual = await sut.GetPlayerCountInfosByBrandIdAsync(brandId, default).ToArrayAsync();
-
-        var actualPlayerCount = actual.Sum(x => x.PlayerCount);
-
-        Assert.AreEqual(3, actualPlayerCount);
     }
 }

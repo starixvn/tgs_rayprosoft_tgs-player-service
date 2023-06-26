@@ -248,6 +248,18 @@ public class PlayerController : ControllerBase
         return queryService.QueryAsync(query, HttpContext.RequestAborted);
     }
 
+    [HttpGet("{brandId:Guid}:username/{userNamePrefix}", Name = "ListPlayerCodesByUserName")]
+    public IAsyncEnumerable<KeyValuePair<string, string>> ListPlayerCodesByUserNameAsync(
+        [FromServices] IQueryService<ListPlayerInfosByUserNameQuery, PlayerInfo> queryService,
+        Guid brandId,
+        string userNamePrefix)
+    {
+        var query = new ListPlayerInfosByUserNameQuery(brandId, userNamePrefix);
+
+        return queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Select(info => new KeyValuePair<string, string>(info.UserName, info.PlayerCode));
+    }
+
     [HttpGet("{brandId:Guid}", Name = "QueryPlayerList")]
     [HttpHeaderConstraint("Basic")]
     [SuccessStatusCode(200, "PlayerInfos")]

@@ -75,7 +75,21 @@ internal class PlayerServiceClient : IPlayerServiceClient
                      .ReadFromJsonAsync<IEnumerable<string>>(_SerializerOptions, cancellationToken)
                      .ConfigureAwait(false) ?? Array.Empty<string>())
             yield return item;
+    }
 
+    public async IAsyncEnumerable<PlayerCountInfo> GetPlayerCountInfosByBrandIdAsync(Guid brandId,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var response = await _httpClient
+            .GetAsync($"/player/playerCount/{brandId}", cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+
+        await foreach (var playerCountInfo in JsonSerializer.DeserializeAsyncEnumerable<PlayerCountInfo>(contentStream,
+                           _SerializerOptions, cancellationToken)) yield return playerCountInfo!;
     }
 
     public async ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default)
@@ -252,8 +266,25 @@ internal class PlayerServiceClient : IPlayerServiceClient
             .Where(playerCode => !string.IsNullOrWhiteSpace(playerCode))
             .Select(playerCode => playerCode!);
 
+    public IAsyncEnumerable<KeyValuePair<string, string>> ListPlayerCodesByUserNameAsync(
+        Guid brandId,
+        string userNamePrefix,
+        CancellationToken cancellationToken = default)
+        => _httpClient.GetAsync(
+            $"/player/{brandId}:username/{userNamePrefix}",
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken)
+            .ToAsyncEnumerable()
+            .Do(response => response.EnsureSuccessStatusCode())
+            .SelectMany(response => response.Content
+                .ReadFromJsonAsync<IAsyncEnumerable<KeyValuePair<string, string>>>(
+                    _SerializerOptions,
+                    cancellationToken)
+                .ToAsyncEnumerable()
+                .SelectMany(arr => arr!));
+
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
-        Guid brandId, 
+            Guid brandId,
         IEnumerable<string> playerCodes,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -261,7 +292,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
         {
             { "playercodes", string.Join(',', playerCodes) }
         };
-        
+
         _httpClient.DefaultRequestHeaders.Add("Basic", string.Empty);
 
         var response = await _httpClient
@@ -424,20 +455,5 @@ internal class PlayerServiceClient : IPlayerServiceClient
             cancellationToken).ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();
-    }
-
-    public async IAsyncEnumerable<PlayerCountInfo> GetPlayerCountInfosByBrandIdAsync(Guid brandId,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var response = await _httpClient
-            .GetAsync($"/player/playerCount/{brandId}", cancellationToken)
-            .ConfigureAwait(false);
-
-        _ = response.EnsureSuccessStatusCode();
-
-        var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-
-        await foreach (var playerCountInfo in JsonSerializer.DeserializeAsyncEnumerable<PlayerCountInfo>(contentStream,
-                           _SerializerOptions, cancellationToken)) yield return playerCountInfo!;
     }
 }

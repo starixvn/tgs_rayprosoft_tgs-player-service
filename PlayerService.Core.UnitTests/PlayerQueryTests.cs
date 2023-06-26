@@ -38,6 +38,23 @@ public class PlayerQueryTests
     }
 
     [Test]
+    public async Task 依據UserNamePrefix查詢玩家列表()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new ListPlayerInfosByUserNameQueryService(fakePlayerRepository);
+
+        var query = new ListPlayerInfosByUserNameQuery(Guid.NewGuid(), "test");
+
+        _ = await sut.QueryAsync(query).ToArrayAsync();
+
+        _ = fakePlayerRepository.Received(1)
+            .QueryPlayerInfosByUserNameAsync(
+                Arg.Is(query.BrandId),
+                Arg.Is(query.UserNamePrefix));
+    }
+
+    [Test]
     public async Task 取得Brand下的PlayerCodes()
     {
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
@@ -59,14 +76,14 @@ public class PlayerQueryTests
 
         var sut = new PlayerInfoListQueryService(fakePlayerRepository);
 
-        var query = new PlayerInfoListQuery(new Guid(), new[] { "player1", "player2" });
+        var query = new PlayerInfoListQuery(Guid.NewGuid(), new[] { "player1", "player2" });
 
         _ = await sut.QueryAsync(query).ToArrayAsync();
 
         _ = fakePlayerRepository
             .Received(1)
             .QueryPlayerInfoListAsync(
-                Arg.Is(query.BrandId), 
+                Arg.Is(query.BrandId),
                 Arg.Is<IEnumerable<string>>(players => players.SequenceEqual(query.PlayerCodes)),
                 Arg.Any<CancellationToken>());
     }

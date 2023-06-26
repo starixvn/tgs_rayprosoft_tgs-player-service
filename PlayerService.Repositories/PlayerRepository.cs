@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
 using Tgs.SerialNumberGenerator;
@@ -122,18 +121,11 @@ internal class PlayerRepository : IPlayerRepository
             .Select(pp => pp.ParentPlayerCode)
             .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
-    public async IAsyncEnumerable<string> GetPlayerCodesByUserNamesAsync(Guid brandId,
-        IEnumerable<string> userNames,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<PlayerCountInfo> GetPlayerCountByBrandIdAsync(Guid brandId,
+        CancellationToken cancellationToken)
     {
-        var playerCodes = await _dbContext.Players
-            .Where(p => userNames.Contains(p.Username))
-            .Select(p => p.PlayerCode)
-            .ToArrayAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        foreach (var playerCode in playerCodes)
-            yield return playerCode;
+        return _dbContext.Players.Where(x => x.BrandId == brandId)
+            .GroupBy(x => x.AgentId, (agentId, list) => new PlayerCountInfo(agentId, list.Count())).ToAsyncEnumerable();
     }
 
     public async ValueTask<decimal> GetPlayerDepositedAmountAsync(
@@ -247,6 +239,36 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
+    public IAsyncEnumerable<PlayerInfo> GetPlayerInfosByUserNamesAsync(
+        Guid brandId,
+        IEnumerable<string> userNames,
+        CancellationToken cancellationToken = default)
+        => _dbContext.Players.AsQueryable()
+            .Where(p => userNames.Contains(p.Username))
+            .Select(p => new
+            {
+                p.PlayerCode,
+                p.BrandId,
+                p.Username,
+                p.IdentityAuthentication,
+                p.PhoneAuthentication,
+                p.Email,
+                p.WithdrawPassword,
+                p.VipId,
+                p.RegisteredOn
+            })
+            .ToAsyncEnumerable()
+            .Select(p => new PlayerInfo(
+                p.PlayerCode,
+                p.BrandId,
+                p.Username,
+                p.IdentityAuthentication,
+                p.PhoneAuthentication,
+                !string.IsNullOrEmpty(p.Email),
+                p.WithdrawPassword.Length > 0,
+                p.VipId,
+                p.RegisteredOn));
+
     public async ValueTask<PlayerLoginInfo?> GetPlayerLoginInfoAsync(string playerCode,
         CancellationToken cancellationToken = default)
     {
@@ -331,7 +353,7 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false) ?? 1);
 
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
-        Guid brandId, 
+        Guid brandId,
         IEnumerable<string> playerCodes,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -365,8 +387,48 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
-    public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
+    public IAsyncEnumerable<PlayerInfo> QueryPlayerInfosByUserNameAsync(
         Guid brandId,
+        string userNamePrefix,
+        CancellationToken cancellationToken = default)
+        => InternalQueryPlayerList(
+            brandId,
+            null,
+            null,
+            userNamePrefix,
+            null,
+            null,
+            null,
+            null,
+            null)
+            .Select(p => new
+            {
+                p.PlayerCode,
+                p.BrandId,
+                p.Username,
+                p.IdentityAuthentication,
+                p.PhoneAuthentication,
+                p.Email,
+                p.WithdrawPassword,
+                p.VipId,
+                p.RegisteredOn
+            })
+            .OrderBy(p => p.Username)
+            .Take(1000)
+            .ToAsyncEnumerable()
+            .Select(p => new PlayerInfo(
+                p.PlayerCode,
+                p.BrandId,
+                p.Username,
+                p.IdentityAuthentication,
+                p.PhoneAuthentication,
+                !string.IsNullOrEmpty(p.Email),
+                p.WithdrawPassword.Length > 0,
+                p.VipId,
+                p.RegisteredOn));
+
+    public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
+            Guid brandId,
         PlayerStatus? status = null,
         Guid? vipId = null,
         string? userName = null,
@@ -770,13 +832,6 @@ internal class PlayerRepository : IPlayerRepository
         player.UpdatedOn = DateTime.UtcNow;
 
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    public IAsyncEnumerable<PlayerCountInfo> GetPlayerCountByBrandIdAsync(Guid brandId,
-        CancellationToken cancellationToken)
-    {
-        return _dbContext.Players.Where(x => x.BrandId == brandId)
-            .GroupBy(x => x.AgentId, (agentId, list) => new PlayerCountInfo(agentId, list.Count())).ToAsyncEnumerable();
     }
 
     private IQueryable<Player> InternalQueryPlayerList(
