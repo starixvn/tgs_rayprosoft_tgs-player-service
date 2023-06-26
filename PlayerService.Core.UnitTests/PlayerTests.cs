@@ -384,7 +384,7 @@ public class PlayerTests
 
         _ = fakePlayerRepository
             .Received(1)
-            .GetPlayerCodesByUserNamesAsync(
+            .GetPlayerInfosByUserNamesAsync(
                 Arg.Is(query.BrandId),
                 Arg.Is<IEnumerable<string>>(x => x.SequenceEqual(query.UserNames)));
     }

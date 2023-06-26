@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Tgs.ServiceUtility;
+﻿using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
@@ -13,7 +12,12 @@ internal class GetPlayerCodesByUserNamesQueryService : IQueryService<GetPlayerCo
         _playerRepository = playerRepository;
     }
 
-    public IAsyncEnumerable<string> QueryAsync(GetPlayerCodesByUserNamesQuery query,
-        CancellationToken cancellationToken = default) 
-        => _playerRepository.GetPlayerCodesByUserNamesAsync(query.BrandId, query.UserNames, cancellationToken);
+    public IAsyncEnumerable<string> QueryAsync(
+        GetPlayerCodesByUserNamesQuery query,
+        CancellationToken cancellationToken = default)
+        => _playerRepository.GetPlayerInfosByUserNamesAsync(
+            query.BrandId,
+            query.UserNames,
+            cancellationToken)
+            .Select(info => info.PlayerCode);
 }

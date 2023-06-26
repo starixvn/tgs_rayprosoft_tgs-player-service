@@ -13,13 +13,20 @@ public interface IPlayerServiceClient
         IEnumerable<string> userNames,
         CancellationToken cancellationToken = default);
 
+    IAsyncEnumerable<PlayerCountInfo> GetPlayerCountInfosByBrandIdAsync(Guid brandId,
+        CancellationToken cancellationToken = default);
+
     ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
 
     ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
 
     ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(Guid brandId, string email, CancellationToken cancellationToken = default);
 
-    ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default);
+    ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(
+        Guid brandId,
+        string areaCode,
+        string phone,
+        CancellationToken cancellationToken = default);
 
     ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName, CancellationToken cancellationToken = default);
 
@@ -33,11 +40,26 @@ public interface IPlayerServiceClient
 
     IAsyncEnumerable<string> ListPlayerCodesByBrandIdAsync(Guid brandId, CancellationToken cancellationToken = default);
 
-    IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(Guid brandId, IEnumerable<string> playerCodes,
+    IAsyncEnumerable<KeyValuePair<string, string>> ListPlayerCodesByUserNameAsync(
+        Guid brandId,
+        string userNamePrefix,
+        CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<KeyValuePair<string, string>> ListPlayerCodesByUserNamesAsync(
+                                                    Guid brandId,
+        IEnumerable<string> userNames,
+        CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
+        Guid brandId,
+        IEnumerable<string> playerCodes,
         CancellationToken cancellationToken = default);
 
     [Obsolete("淘汰API")]
-    IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(Guid brandId, PlayerListQuery query, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
+        Guid brandId,
+        PlayerListQuery query,
+        CancellationToken cancellationToken = default);
 
     ValueTask RecordLoginIpAsync(string playerCode, string ip, string? hostName, CancellationToken cancellationToken = default);
 
@@ -51,7 +73,4 @@ public interface IPlayerServiceClient
     ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus playerStatus, CancellationToken cancellationToken = default);
 
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
-
-    IAsyncEnumerable<PlayerCountInfo> GetPlayerCountInfosByBrandIdAsync(Guid brandId,
-        CancellationToken cancellationToken = default);
 }
