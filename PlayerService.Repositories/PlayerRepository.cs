@@ -314,9 +314,9 @@ internal class PlayerRepository : IPlayerRepository
             properties["AgentId"] = player.AgentId.Value.ToString();
 
         foreach (var prop in await _dbContext.PlayerProperties.AsQueryable()
-                     .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)
-                     .ToArrayAsync(cancellationToken)
-                     .ConfigureAwait(false))
+            .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)
+            .ToArrayAsync(cancellationToken)
+            .ConfigureAwait(false))
             properties[prop.Name] = prop.Value;
 
         return properties.ToImmutableDictionary();
@@ -325,11 +325,10 @@ internal class PlayerRepository : IPlayerRepository
     public async ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode,
         CancellationToken cancellationToken = default)
         => (PlayerStatus)(await _dbContext.Players
-                .Where(player => player.PlayerCode == playerCode)
-                .Select(player => (short?)player.Status)
-                .FirstOrDefaultAsync(cancellationToken)
-                .ConfigureAwait(false)
-            ?? 1);
+            .Where(player => player.PlayerCode == playerCode)
+            .Select(player => (short?)player.Status)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false) ?? 1);
 
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId, 

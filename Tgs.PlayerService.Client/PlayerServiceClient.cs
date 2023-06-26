@@ -277,7 +277,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
     }
 
     public async IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
-            Guid brandId,
+        Guid brandId,
         PlayerListQuery query,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
