@@ -54,16 +54,15 @@ builder.Services
     .AddPlayerServiceCache();
 
 builder.Services
-    .AddOpenTelemetryTracing(
-        tracingBuilder => tracingBuilder
-            .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                .AddEnvironmentVariableDetector())
-            .AddSource("Tgs.*")
-            .AddSource("TGS.*")
-            .AddNpgsql()
-            .AddAspNetCoreInstrumentation()
-            .AddProfileViewExporter()
-            .AddOtlpExporter())
+    .AddOpenTelemetryTracing(tracingBuilder => tracingBuilder
+        .SetResourceBuilder(ResourceBuilder.CreateDefault()
+            .AddEnvironmentVariableDetector())
+        .AddSource("Tgs.*")
+        .AddSource("TGS.*")
+        .AddNpgsql()
+        .AddAspNetCoreInstrumentation()
+        .AddProfileViewExporter()
+        .AddOtlpExporter())
     .AddOpenTelemetryMetrics(meterBuiler => meterBuiler
         .SetResourceBuilder(ResourceBuilder.CreateDefault()
             .AddEnvironmentVariableDetector())
@@ -83,20 +82,27 @@ builder.Services
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("Obsolete", new OpenApiInfo
+    options.SwaggerDoc("obsolete", new OpenApiInfo
     {
         Title = "Player Service",
         Version = "Obsolete"
     });
 
-    options.SwaggerDoc("Normal", new OpenApiInfo
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "Player Service",
-        Version = "Normal"
+        Version = "v1"
     });
 
-    options.DocInclusionPredicate((groupName, desc)
-        => groupName == "Normal" ? desc.GroupName is null : desc.GroupName == groupName);
+    options.DocInclusionPredicate((docName, desc) =>
+    {
+        var docInfo = options.SwaggerGeneratorOptions.SwaggerDocs[docName];
+
+        return docInfo is not null
+            && (docName is "v1"
+                ? desc.GroupName is null || desc.GroupName == docInfo.Version
+                : desc.GroupName == docInfo.Version);
+    });
 
     options.OperationFilter<HttpHeaderConstraintOperationFilter>();
 
@@ -113,8 +119,8 @@ app.MapProfileViewer();
 app.MapSwagger();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/Normal/swagger.json", "Tgs Player Service - Normal");
-    options.SwaggerEndpoint("/swagger/Obsolete/swagger.json", "Tgs Player Service - Obsolete");
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.SwaggerEndpoint("/swagger/obsolete/swagger.json", "Obsolete");
 });
 
 app.MapHealthChecks("/healthz");
