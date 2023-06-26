@@ -36,6 +36,7 @@ public interface IPlayerServiceClient
     IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(Guid brandId, IEnumerable<string> playerCodes,
         CancellationToken cancellationToken = default);
 
+    [Obsolete("淘汰API")]
     IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(Guid brandId, PlayerListQuery query, CancellationToken cancellationToken = default);
 
     ValueTask RecordLoginIpAsync(string playerCode, string ip, string? hostName, CancellationToken cancellationToken = default);
