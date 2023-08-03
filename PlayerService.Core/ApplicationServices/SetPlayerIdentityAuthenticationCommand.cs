@@ -1,0 +1,2 @@
+﻿namespace Tgs.PlayerService.ApplicationServices;
+public record SetPlayerIdentityAuthenticationCommand(string PlayerCode, bool IdentityAuthentication);

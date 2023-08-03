@@ -874,4 +874,27 @@ internal class PlayerRepository : IPlayerRepository
 
         return players;
     }
+
+    public async ValueTask SetPlayerIdentityAuthenticationAsync(
+        string playerCode, 
+        bool identityAuthentication,
+        CancellationToken cancellationToken = default)
+    {
+        var player = await _dbContext.Players
+            .FindAsync(new object?[]
+            {
+                playerCode
+            }, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (player == null)
+            return;
+
+        player.IdentityAuthentication = identityAuthentication;
+        player.UpdatedOn = DateTime.UtcNow;
+
+        _ = await _dbContext
+            .SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

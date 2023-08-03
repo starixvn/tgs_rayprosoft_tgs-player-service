@@ -711,6 +711,44 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task Set_Player_Identity_Authentication()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = "player1";
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = Guid.NewGuid(),
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "player1",
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Status = (short)PlayerStatus.RegisterUndone,
+            IdentityAuthentication = false
+        };
+
+        _ = await dbContext.Players
+            .AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        await sut.SetPlayerIdentityAuthenticationAsync(playerCode, true);
+
+        Assert.True(playerRow.IdentityAuthentication);
+    }
+
+    [Test]
     public async Task Set_PlayerProperties_After_Get_By_Cache_Should_Correct()
     {
         await using var web = new TestPlayerServiceApplication();

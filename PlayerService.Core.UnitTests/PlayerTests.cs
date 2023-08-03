@@ -406,4 +406,19 @@ public class PlayerTests
         _ = fakePlayerRepository.Received(1)
             .GetPlayerInfoAsync(Arg.Is("parent1"));
     }
+
+    [Test]
+    public async Task 設置Player身分審核()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        
+        var sut = new SetPlayerIdentityAuthenticationCommandService(fakePlayerRepository);
+
+        var command = new SetPlayerIdentityAuthenticationCommand("playerCode", true);
+
+        await sut.ExecuteAsync(command);
+
+        _ = fakePlayerRepository.Received(1)
+            .SetPlayerIdentityAuthenticationAsync(Arg.Is(command.PlayerCode), Arg.Is(command.IdentityAuthentication));
+    }
 }
