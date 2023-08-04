@@ -566,6 +566,98 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task Set_Player_Id_Number()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            IdNumber = "oldIdNumber"
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.IdNumber] = "newIdNumber"
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.AreEqual("newIdNumber", playerRow.IdNumber);
+    }
+
+    [Test]
+    public async Task Set_Player_Identity_Authentication()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            IdentityAuthentication = false
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.IdentityAuthentication] = "true"
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.True(playerRow.IdentityAuthentication);
+    }
+
+    [Test]
     public async Task Set_Player_Properties()
     {
         await using var web = new TestPlayerServiceApplication();
@@ -850,6 +942,98 @@ public class PlayerTests
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
         Assert.IsNull(playerRow.Email);
+    }
+
+    [Test]
+    public async Task Unset_Player_Id_Number()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            IdNumber = "oldIdNumber"
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.IdNumber] = null
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.IsNull(playerRow.IdNumber);
+    }
+
+    [Test]
+    public async Task Unset_Player_Identity_Authentication()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            IdentityAuthentication = true
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.IdentityAuthentication] = null
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.False(playerRow.IdentityAuthentication);
     }
 
     [Test]

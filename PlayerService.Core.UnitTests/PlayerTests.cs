@@ -406,4 +406,92 @@ public class PlayerTests
         _ = fakePlayerRepository.Received(1)
             .GetPlayerInfoAsync(Arg.Is("parent1"));
     }
+
+    [Test]
+    public async Task Set_Player_Identity_Authentication()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var playerInfo = new PlayerInfo(
+            playerCode,
+            brandId,
+            playerCode,
+            false,
+            false,
+            false,
+            false,
+            null,
+            DateTime.Parse("2022/05/17 00:00:00"));
+
+        var playerProperties = new Dictionary<string, string?>
+        {
+            ["IdentityAuthentication"]  = "true"
+        };
+
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
+
+        _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+            .Returns(playerInfo);
+
+        await sut.ExecuteAsync(command).ConfigureAwait(false);
+
+        _ = fakeDataCommandBuilder.Received(1)
+            .CreatePutCommand(Arg.Is("IdentityAuthentication"), Arg.Is("true"));
+
+        _ = fakePlayerRepository.Received(1)
+            .SetPlayerPropertiesAsync(
+                playerInfo.BrandId,
+                playerInfo.PlayerCode,
+                Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+    }
+
+    [Test]
+    public async Task Set_Player_Id_Number()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var playerInfo = new PlayerInfo(
+            playerCode,
+            brandId,
+            playerCode,
+            false,
+            false,
+            false,
+            false,
+            null,
+            DateTime.Parse("2022/05/17 00:00:00"));
+
+        var playerProperties = new Dictionary<string, string?>
+        {
+            ["IdNumber"] = "newIdNumber"
+        };
+
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
+
+        _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+            .Returns(playerInfo);
+
+        await sut.ExecuteAsync(command).ConfigureAwait(false);
+
+        _ = fakeDataCommandBuilder.Received(1)
+            .CreatePutCommand(Arg.Is("IdNumber"), Arg.Is("newIdNumber"));
+
+        _ = fakePlayerRepository.Received(1)
+            .SetPlayerPropertiesAsync(
+                playerInfo.BrandId,
+                playerInfo.PlayerCode,
+                Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+    }
 }
