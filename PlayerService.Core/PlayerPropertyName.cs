@@ -14,5 +14,6 @@ public enum PlayerPropertyName
     PhoneAuthentication,
     Email,
     Remark,
-    IdentityAuthentication
+    IdentityAuthentication,
+    IdNumber
 }
