@@ -439,7 +439,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
     }
 
     public async ValueTask SetPlayerPropertiesAsync(
-            string playerCode,
+        string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
         CancellationToken cancellationToken = default)
     {
