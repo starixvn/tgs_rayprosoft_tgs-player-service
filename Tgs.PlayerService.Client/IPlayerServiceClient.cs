@@ -68,7 +68,7 @@ public interface IPlayerServiceClient
     ValueTask SetPlayerIdentityAuthenticationAsync(string playerCode, bool identityAuthentication, CancellationToken cancellationToken = default);
 
     ValueTask SetPlayerPropertiesAsync(
-            string playerCode,
+        string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
         CancellationToken cancellationToken = default);
 
