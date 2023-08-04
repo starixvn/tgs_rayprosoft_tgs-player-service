@@ -371,18 +371,6 @@ public class PlayerController : ControllerBase
             });
     }
 
-    [HttpPut("identity/{playerCode}", Name = "SetPlayerIdentityAuthentication")]
-    [SuccessStatusCode(200, "Identity Authentication set")]
-    public ValueTask SetPlayerIdentityAuthenticationAsync(
-        [FromServices] ICommandService<SetPlayerIdentityAuthenticationCommand> setService,
-        string playerCode,
-        [FromBody] bool identityAuthentication)
-    {
-        var command = new SetPlayerIdentityAuthenticationCommand(playerCode, identityAuthentication);
-
-        return setService.ExecuteAsync(command, HttpContext.RequestAborted);
-    }
-
     [HttpPost("prop/{playerCode}", Name = "SetPlayerProperties")]
     [SuccessStatusCode(200, "Set player properties success")]
     [FailStatusCode(400, "Input properties is empty")]

@@ -438,23 +438,6 @@ internal class PlayerServiceClient : IPlayerServiceClient
         _ = response.EnsureSuccessStatusCode();
     }
 
-    public async ValueTask SetPlayerIdentityAuthenticationAsync(
-        string playerCode,
-        bool identityAuthentication,
-        CancellationToken cancellationToken = default)
-    {
-        var requestContent = new StringContent(
-            JsonSerializer.Serialize(identityAuthentication, _SerializerOptions),
-            Encoding.UTF8,
-            MediaTypeNames.Application.Json);
-
-        var response = await _httpClient
-            .PutAsync($"/player/identity/{playerCode}", requestContent, cancellationToken)
-            .ConfigureAwait(false);
-
-        _ = response.EnsureSuccessStatusCode();
-    }
-
     public async ValueTask SetPlayerPropertiesAsync(
             string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,

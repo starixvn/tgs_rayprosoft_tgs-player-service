@@ -45,6 +45,10 @@ internal class PlayerPutDataCommand : PutDataCommand
                 modifyContext.Player.Remark = Value;
                 break;
 
+            case nameof(PlayerPropertyName.IdentityAuthentication):
+                modifyContext.Player.IdentityAuthentication = bool.Parse(Value);
+                break;
+
             default:
                 if (modifyContext.PlayerProperties.TryGetValue(Name, out var value))
                     value.Value = Value;
