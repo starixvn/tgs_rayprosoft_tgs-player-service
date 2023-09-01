@@ -494,4 +494,20 @@ public class PlayerTests
                 playerInfo.PlayerCode,
                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
     }
+
+    [Test]
+    public async Task 查詢當日註冊玩家人數()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new CurrentDayRegisterQueryService(fakePlayerRepository);
+
+        var brandId = Guid.NewGuid();
+
+        _ = await sut.GetAsync(new CurrentDayRegisterQuery(brandId));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CurrentDayRegisterAsync(Arg.Is(brandId));
+    }
 }
