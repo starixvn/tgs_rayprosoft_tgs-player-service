@@ -16,6 +16,15 @@ namespace Tgs.PlayerService.Controllers;
 [ApiController]
 public class PlayerController : ControllerBase
 {
+    [HttpGet("currentregister/{brandId}", Name = "CountCurrentDayRegisterPlayers")]
+    [SuccessStatusCode(200, "Count current day register players")]
+    public ValueTask<int> CountCurrentDayRegisterPlayersAsync(
+        [FromServices] IGetService<CurrentDayRegisterQuery, int> getService,
+        Guid brandId)
+    {
+        return getService.GetAsync(new CurrentDayRegisterQuery(brandId), HttpContext.RequestAborted);
+    }
+
     [HttpPost("create", Name = "CreatePlayer")]
     [SuccessStatusCode(200, "Create player")]
     public ValueTask<string> CreatePlayerAsync(

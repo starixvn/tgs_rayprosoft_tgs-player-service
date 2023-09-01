@@ -15,6 +15,41 @@ namespace Tgs.PlayerService.IntegrationTests;
 public class PlayerTests
 {
     [Test]
+    public async Task Count_Current_Day_Register_Players()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = "playerCode",
+            BrandId = brandId,
+            RegisteredOn = DateTime.UtcNow,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "playerCode",
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Status = (short)PlayerStatus.RegisterUndone,
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.CountCurrentDayRegisterPlayersAsync(brandId);
+
+        Assert.AreEqual(1, actual);
+    }
+
+    [Test]
     public async Task Create_Player()
     {
         await using var web = new TestPlayerServiceApplication();

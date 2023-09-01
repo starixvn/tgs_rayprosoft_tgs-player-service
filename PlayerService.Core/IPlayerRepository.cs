@@ -16,6 +16,8 @@ public interface IPlayerRepository
 
     ValueTask CreatePlayerTagAsync(string playerCode, string tag, CancellationToken cancellationToken = default);
 
+    ValueTask<int> CurrentDayRegisterAsync(Guid brandId, CancellationToken cancellationToken = default);
+
     ValueTask<string?> GetParentPlayerCodeAsync(string playerCode, CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<PlayerCountInfo> GetPlayerCountByBrandIdAsync(Guid brandId, CancellationToken cancellationToken = default);
