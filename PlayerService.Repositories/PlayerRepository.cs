@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
 using Tgs.SerialNumberGenerator;
@@ -65,6 +64,7 @@ internal class PlayerRepository : IPlayerRepository
                             ipRecord.IpType
                         } into pirg
                     from ipRecord in pirg.DefaultIfEmpty()
+                    where ipRecord.RecordOn >= currentDay
                     select new
                     {
                         player.PlayerCode
