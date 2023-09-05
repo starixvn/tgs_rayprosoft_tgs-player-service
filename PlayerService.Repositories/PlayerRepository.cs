@@ -53,7 +53,7 @@ internal class PlayerRepository : IPlayerRepository
             .UtcDateTime;
 
         var query = from player in _dbContext.Players.AsQueryable()
-            .Where(p => p.BrandId == brandId)
+                    where player.BrandId == brandId
                     join ipRecord in _dbContext.PlayerIpRecords
                         on new
                         {
