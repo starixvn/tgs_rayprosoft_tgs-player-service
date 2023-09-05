@@ -44,6 +44,37 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    public async ValueTask<int> CountCurrentDayLoginAsync(Guid brandId, CancellationToken cancellationToken = default)
+    {
+        var currentDay = new DateTimeOffset(
+            DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8D)).Date,
+            TimeSpan.FromHours(8D))
+            .UtcDateTime;
+
+        var query = from player in _dbContext.Players.AsQueryable()
+                    where player.BrandId == brandId
+                    join ipRecord in _dbContext.PlayerIpRecords
+                        on new
+                        {
+                            player.PlayerCode,
+                            IpType = (short)PlayerIpType.Login
+                        } equals new
+                        {
+                            ipRecord.PlayerCode,
+                            ipRecord.IpType
+                        } into pirg
+                    from ipRecord in pirg.DefaultIfEmpty()
+                    where ipRecord.RecordOn >= currentDay
+                    select new
+                    {
+                        player.PlayerCode
+                    };
+
+        return await query
+            .CountAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data,
             CancellationToken cancellationToken = default)
     {

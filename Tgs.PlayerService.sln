@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.PlayerService.Client", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerService.IntegrationTests", "PlayerService.IntegrationTests\PlayerService.IntegrationTests.csproj", "{838FF75A-6979-4756-BC2F-EFD0332F55FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerService.Core.Cache", "PlayerService.Core.Cache\PlayerService.Core.Cache.csproj", "{1E8D0A4C-0F80-4BAA-AE30-467C4F56911C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerService.Core.Cache", "PlayerService.Core.Cache\PlayerService.Core.Cache.csproj", "{1E8D0A4C-0F80-4BAA-AE30-467C4F56911C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayerService.Repositories.UnitTests", "PlayerService.Repositories.UnitTests\PlayerService.Repositories.UnitTests.csproj", "{1BD0CD00-E382-4DE4-9650-E076FD3E6706}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{1E8D0A4C-0F80-4BAA-AE30-467C4F56911C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E8D0A4C-0F80-4BAA-AE30-467C4F56911C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E8D0A4C-0F80-4BAA-AE30-467C4F56911C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BD0CD00-E382-4DE4-9650-E076FD3E6706}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BD0CD00-E382-4DE4-9650-E076FD3E6706}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BD0CD00-E382-4DE4-9650-E076FD3E6706}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BD0CD00-E382-4DE4-9650-E076FD3E6706}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

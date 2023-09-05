@@ -26,6 +26,19 @@ internal class PlayerServiceClient : IPlayerServiceClient
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
 
+    public async ValueTask<int> CountCurrentDayLoginPlayersAsync(Guid brandId, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient
+        .GetAsync($"/login-record/currentday/{brandId}", cancellationToken)
+        .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+        return JsonSerializer.Deserialize<int>(content, _SerializerOptions);
+    }
+
     public async ValueTask<int> CountCurrentDayRegisterPlayersAsync(Guid brandId, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient
