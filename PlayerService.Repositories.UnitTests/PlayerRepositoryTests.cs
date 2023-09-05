@@ -10,7 +10,7 @@ namespace PlayerService.Repositories.UnitTests;
 public class PlayerRepositoryTests
 {
     [Test]
-    public async Task Count_Current_Day_Login()
+    public async Task 查詢當日登入總人數()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
         _ = dbContextOptionsBuilder
@@ -32,26 +32,10 @@ public class PlayerRepositoryTests
         await dbContext.PlayerIpRecords.AddRangeAsync(
             new PlayerIpRecord
             {
-                IpType = 1,
-                Host = "localhost",
-                Ip = "127.0.0.1",
-                PlayerCode = playerCode1,
-                RecordOn = DateTime.UtcNow
-            },
-            new PlayerIpRecord
-            {
                 IpType = 2,
                 Host = "localhost",
                 Ip = "127.0.0.2",
                 PlayerCode = playerCode1,
-                RecordOn = DateTime.UtcNow
-            },
-            new PlayerIpRecord
-            {
-                IpType = 1,
-                Host = "localhost",
-                Ip = "127.0.0.3",
-                PlayerCode = playerCode2,
                 RecordOn = DateTime.UtcNow
             },
             new PlayerIpRecord
@@ -95,7 +79,7 @@ public class PlayerRepositoryTests
     }
 
     [Test]
-    public async Task Count_Current_Day_Login2()
+    public async Task 查詢當日登入總人數_非當日紀錄不列入()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
         _ = dbContextOptionsBuilder
@@ -164,7 +148,7 @@ public class PlayerRepositoryTests
     }
 
     [Test]
-    public async Task Count_Current_Day_Register()
+    public async Task 查詢當日註冊人數()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
         _ = dbContextOptionsBuilder
