@@ -9,6 +9,16 @@ namespace Tgs.PlayerService.Controllers;
 [ApiController]
 public class LoginRecordController : ControllerBase
 {
+    [HttpGet("currentday/{brandId}", Name = "CountCurrentDayLogin")]
+    public ValueTask<int> CountCurrentDayLoginAsync(
+        [FromServices] IGetService<CountCurrentDayLoginQuery, int> getService,
+        Guid brandId)
+    {
+        var query = new CountCurrentDayLoginQuery(brandId);
+
+        return getService.GetAsync(query, HttpContext.RequestAborted);
+    }
+
     [HttpGet("{playerCode}", Name = "GetLoginInfo")]
     public ValueTask<PlayerLoginInfoViewModel?> GetLoginInfoAsync(
         [FromServices] IGetService<GetPlayerLoginInfoQuery, PlayerLoginInfo?> getService,

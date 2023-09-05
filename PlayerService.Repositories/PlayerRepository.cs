@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
 using Tgs.SerialNumberGenerator;
@@ -42,6 +43,36 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
 
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public async ValueTask<int> CountCurrentDayLoginAsync(Guid brandId, CancellationToken cancellationToken = default)
+    {
+        var currentDay = new DateTimeOffset(
+            DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8D)).Date,
+            TimeSpan.FromHours(8D))
+            .UtcDateTime;
+
+        var query = from player in _dbContext.Players.AsQueryable()
+            .Where(p => p.BrandId == brandId)
+                    join ipRecord in _dbContext.PlayerIpRecords
+                        on new
+                        {
+                            player.PlayerCode,
+                            IpType = (short)PlayerIpType.Login
+                        } equals new
+                        {
+                            ipRecord.PlayerCode,
+                            ipRecord.IpType
+                        } into pirg
+                    from ipRecord in pirg.DefaultIfEmpty()
+                    select new
+                    {
+                        player.PlayerCode
+                    };
+
+        return await query
+            .CountAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data,

@@ -67,4 +67,22 @@ public class PlayerRecordTests
         _ = fakePlayerRepository.Received(1)
             .GetPlayerLoginInfoAsync(Arg.Is(query.PlayerCode));
     }
+
+    [Test]
+    public async Task 查詢當日玩家登入總人數()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new CountCurrentDayLoginQueryService(fakePlayerRepository);
+
+        var brandId = Guid.NewGuid();
+
+        var query = new CountCurrentDayLoginQuery(brandId);
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CountCurrentDayLoginAsync(Arg.Is(brandId));
+    }
 }

@@ -169,4 +169,84 @@ public class LoginRecordTests
         Assert.AreEqual("127.0.0.1", actual!.RegisterIp);
         Assert.AreEqual("127.0.0.2", actual!.LoginIp);
     }
+
+    [Test]
+    public async Task 查詢當日玩家登入總人數()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+        var playerCode1 = "playerCode1";
+        var playerCode2 = "playerCode2";
+
+        await dbContext.PlayerIpRecords.AddRangeAsync(
+            new PlayerIpRecord
+            {
+                IpType = 1,
+                Host = "localhost",
+                Ip = "127.0.0.1",
+                PlayerCode = playerCode1,
+                RecordOn = DateTime.UtcNow
+            },
+            new PlayerIpRecord
+            {
+                IpType = 2,
+                Host = "localhost",
+                Ip = "127.0.0.2",
+                PlayerCode = playerCode1,
+                RecordOn = DateTime.UtcNow
+            },
+            new PlayerIpRecord
+            {
+                IpType = 1,
+                Host = "localhost",
+                Ip = "127.0.0.3",
+                PlayerCode = playerCode2,
+                RecordOn = DateTime.UtcNow
+            },
+            new PlayerIpRecord
+            {
+                IpType = 2,
+                Host = "localhost",
+                Ip = "127.0.0.4",
+                PlayerCode = playerCode2,
+                RecordOn = DateTime.UtcNow
+            });
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = playerCode1,
+                BrandId = brandId,
+                Username = "username1",
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            },
+            new Player
+            {
+                PlayerCode = playerCode2,
+                BrandId = brandId,
+                Username = "username2",
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.CountCurrentDayLoginPlayersAsync(brandId);
+
+        Assert.AreEqual(2, actual);
+    }
 }
