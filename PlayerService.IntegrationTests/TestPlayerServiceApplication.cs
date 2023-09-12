@@ -6,8 +6,11 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 using OpenTelemetry.Exporter;
+using Tgs.MarketingReport.Client;
 using Tgs.PlayerService.Repositories.Entities;
+using Tgs.SerialNumberGenerator;
 
 namespace Tgs.PlayerService.IntegrationTests;
 
@@ -24,6 +27,9 @@ internal class TestPlayerServiceApplication : WebApplicationFactory<PlayerSvc.Pr
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
+        var fakeSystemClock = Substitute.For<ISystemClock>();
+
         _ = builder
             .ConfigureAppConfiguration(c => c.Sources.Clear())
             .ConfigureServices(services => services
@@ -34,6 +40,8 @@ internal class TestPlayerServiceApplication : WebApplicationFactory<PlayerSvc.Pr
                         {
                             exporterOptions.TimeoutMilliseconds = 0;
                         }))
+                .AddSingleton(fakeSystemClock)
+                .AddSingleton(fakeMarketingReportClient)
                 .Replace(ServiceDescriptor.Singleton(sp =>
                 {
                     var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
