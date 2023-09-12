@@ -42,7 +42,20 @@ internal class PlayerServiceClient : IPlayerServiceClient
     public async ValueTask<int> CountCurrentDayRegisterPlayersAsync(Guid brandId, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient
-        .GetAsync($"/player/currentregister/{brandId}", cancellationToken)
+        .GetAsync($"/player/register/currentday/{brandId}", cancellationToken)
+        .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+        return JsonSerializer.Deserialize<int>(content, _SerializerOptions);
+    }
+
+    public async ValueTask<int> CountReportDateRegisterPlayersAsync(Guid brandId, DateOnly reportDate, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient
+        .GetAsync($"/player/register/report-date/{brandId}?date={reportDate}", cancellationToken)
         .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();

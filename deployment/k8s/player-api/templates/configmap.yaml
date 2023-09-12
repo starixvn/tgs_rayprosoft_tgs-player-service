@@ -12,6 +12,9 @@ data:
           "Endpoint": "http://localhost:4317",
           "ExportProcessorType": "Batch"
         }
+      },
+      "PlayerService": {
+        "MarketingReportBaseUrl": "http://marketing-report-api"
       }
     }
   otel-collector-config.yaml: |

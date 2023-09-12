@@ -75,6 +75,23 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
     }
 
+    public async ValueTask<int> CountYesterdayReigsterAsync(Guid brandId, CancellationToken cancellationToken = default)
+    {
+        var currentDay = new DateTimeOffset(
+            DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8D)).Date,
+            TimeSpan.FromHours(8D))
+            .UtcDateTime;
+
+        var yesterday = currentDay.AddDays(-1);
+
+        return await _dbContext.Players
+            .Where(p => p.BrandId == brandId
+                && p.RegisteredOn >= yesterday
+                && p.RegisteredOn < currentDay)
+            .CountAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data,
             CancellationToken cancellationToken = default)
     {

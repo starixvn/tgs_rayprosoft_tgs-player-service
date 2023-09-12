@@ -1,7 +1,10 @@
 ﻿using System.Collections.Immutable;
+
 using NSubstitute;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.MarketingReport.Client;
 using Tgs.PlayerService.ApplicationServices;
+using Tgs.SerialNumberGenerator;
 
 namespace Tgs.PlayerService.Core.UnitTests;
 
@@ -355,103 +358,6 @@ public class PlayerTests
     }
 
     [Test]
-    public async Task Set_Player_Status()
-    {
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-
-        var sut = new SetPlayerStatusCommandService(fakePlayerRepository);
-
-        var command = new SetPlayerStatusCommand("player1", PlayerStatus.Enabled);
-
-        await sut.ExecuteAsync(command);
-
-        _ = fakePlayerRepository.Received(1)
-            .SetPlayerStatusAsync(Arg.Is(command.PlayerCode), Arg.Is(command.Status));
-    }
-
-    [Test]
-    public async Task 用UserNames查詢PlayerCodes()
-    {
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-
-        var sut = new GetPlayerCodesByUserNamesQueryService(fakePlayerRepository);
-
-        var query = new GetPlayerCodesByUserNamesQuery(
-            Guid.NewGuid(),
-            new[] { "player1", "player2" });
-
-        _ = await sut.QueryAsync(query).ToArrayAsync();
-
-        _ = fakePlayerRepository
-            .Received(1)
-            .GetPlayerInfosByUserNamesAsync(
-                Arg.Is(query.BrandId),
-                Arg.Is<IEnumerable<string>>(x => x.SequenceEqual(query.UserNames)));
-    }
-
-    [Test]
-    public async Task 查詢ParentPlayer()
-    {
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-
-        var sut = new GetParentPlayerInfoQueryService(fakePlayerRepository);
-
-        var query = new GetParentPlayerInfoQuery("test1");
-
-        _ = fakePlayerRepository.GetParentPlayerCodeAsync(Arg.Is(query.PlayerCode))
-            .Returns("parent1");
-
-        _ = await sut.GetAsync(query);
-
-        _ = fakePlayerRepository.Received(1)
-            .GetPlayerInfoAsync(Arg.Is("parent1"));
-    }
-
-    [Test]
-    public async Task Set_Player_Identity_Authentication()
-    {
-        var brandId = Guid.NewGuid();
-        var playerCode = "player1";
-
-        var playerInfo = new PlayerInfo(
-            playerCode,
-            brandId,
-            playerCode,
-            false,
-            false,
-            false,
-            false,
-            null,
-            DateTime.Parse("2022/05/17 00:00:00"));
-
-        var playerProperties = new Dictionary<string, string?>
-        {
-            ["IdentityAuthentication"]  = "true"
-        };
-
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
-
-        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
-
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
-
-        _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
-            .Returns(playerInfo);
-
-        await sut.ExecuteAsync(command).ConfigureAwait(false);
-
-        _ = fakeDataCommandBuilder.Received(1)
-            .CreatePutCommand(Arg.Is("IdentityAuthentication"), Arg.Is("true"));
-
-        _ = fakePlayerRepository.Received(1)
-            .SetPlayerPropertiesAsync(
-                playerInfo.BrandId,
-                playerInfo.PlayerCode,
-                Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
-    }
-
-    [Test]
     public async Task Set_Player_Id_Number()
     {
         var brandId = Guid.NewGuid();
@@ -493,6 +399,184 @@ public class PlayerTests
                 playerInfo.BrandId,
                 playerInfo.PlayerCode,
                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+    }
+
+    [Test]
+    public async Task Set_Player_Identity_Authentication()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var playerInfo = new PlayerInfo(
+            playerCode,
+            brandId,
+            playerCode,
+            false,
+            false,
+            false,
+            false,
+            null,
+            DateTime.Parse("2022/05/17 00:00:00"));
+
+        var playerProperties = new Dictionary<string, string?>
+        {
+            ["IdentityAuthentication"] = "true"
+        };
+
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
+
+        _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+            .Returns(playerInfo);
+
+        await sut.ExecuteAsync(command).ConfigureAwait(false);
+
+        _ = fakeDataCommandBuilder.Received(1)
+            .CreatePutCommand(Arg.Is("IdentityAuthentication"), Arg.Is("true"));
+
+        _ = fakePlayerRepository.Received(1)
+            .SetPlayerPropertiesAsync(
+                playerInfo.BrandId,
+                playerInfo.PlayerCode,
+                Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+    }
+
+    [Test]
+    public async Task Set_Player_Status()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new SetPlayerStatusCommandService(fakePlayerRepository);
+
+        var command = new SetPlayerStatusCommand("player1", PlayerStatus.Enabled);
+
+        await sut.ExecuteAsync(command);
+
+        _ = fakePlayerRepository.Received(1)
+            .SetPlayerStatusAsync(Arg.Is(command.PlayerCode), Arg.Is(command.Status));
+    }
+
+    [Test]
+    public async Task 用UserNames查詢PlayerCodes()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerCodesByUserNamesQueryService(fakePlayerRepository);
+
+        var query = new GetPlayerCodesByUserNamesQuery(
+            Guid.NewGuid(),
+            new[] { "player1", "player2" });
+
+        _ = await sut.QueryAsync(query).ToArrayAsync();
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .GetPlayerInfosByUserNamesAsync(
+                Arg.Is(query.BrandId),
+                Arg.Is<IEnumerable<string>>(x => x.SequenceEqual(query.UserNames)));
+    }
+
+    [Test]
+    public async Task 指定日期註冊玩家人數_查詢日期為前天()
+    {
+        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
+
+        var sut = new CountReportDateRegisterQueryService(fakeSystemClock, fakePlayerRepository, fakeMarketingReportClient);
+
+        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+        var reportDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-2));
+
+        var now = DateTimeOffset.UtcNow;
+        _ = fakeSystemClock.UtcNow.Returns(now);
+
+        _ = fakeMarketingReportClient
+            .QueryBrandMarketingStatisticsAsync(brandId, reportDate)
+            .Returns(new DailyBrandMarketingStatisticInfo
+            {
+                BrandId = brandId,
+                ReportDate = reportDate,
+                DirectlyGamingCount = 1,
+                DirectlyRegisterCount = 1,
+                TotalGamingCount = 1,
+                TotalRegisterCount = 9
+            });
+
+        var actual = await sut.GetAsync(new CountReportDateRegisterQuery(brandId, reportDate));
+
+        Assert.AreEqual(9, actual);
+    }
+
+    [Test]
+    public async Task 指定日期註冊玩家人數_查詢日期為昨天且時間小於排程時間()
+    {
+        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
+
+        var sut = new CountReportDateRegisterQueryService(fakeSystemClock, fakePlayerRepository, fakeMarketingReportClient);
+
+        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+        var reportDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
+
+        var today = DateTimeOffset.UtcNow;
+        _ = fakeSystemClock.UtcNow
+            .Returns(new DateTimeOffset(today.Year, today.Month, today.Day, hour: 6, 0, 0, TimeSpan.FromHours(8d)));
+
+        _ = fakePlayerRepository
+            .CountYesterdayReigsterAsync(brandId)
+            .Returns(6);
+
+        var actual = await sut.GetAsync(new CountReportDateRegisterQuery(brandId, reportDate));
+
+        Assert.AreEqual(6, actual);
+    }
+
+    [Test]
+    public async Task 指定日期註冊玩家人數_查詢當日()
+    {
+        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
+
+        var sut = new CountReportDateRegisterQueryService(fakeSystemClock, fakePlayerRepository, fakeMarketingReportClient);
+
+        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+        var reportDate = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var currentTime = DateTimeOffset.UtcNow;
+        _ = fakeSystemClock.UtcNow.Returns(currentTime);
+
+        _ = fakePlayerRepository
+            .CurrentDayRegisterAsync(brandId)
+            .Returns(3);
+
+        var actual = await sut.GetAsync(new CountReportDateRegisterQuery(brandId, reportDate));
+
+        Assert.AreEqual(3, actual);
+    }
+
+    [Test]
+    public async Task 查詢ParentPlayer()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetParentPlayerInfoQueryService(fakePlayerRepository);
+
+        var query = new GetParentPlayerInfoQuery("test1");
+
+        _ = fakePlayerRepository.GetParentPlayerCodeAsync(Arg.Is(query.PlayerCode))
+            .Returns("parent1");
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerInfoAsync(Arg.Is("parent1"));
     }
 
     [Test]

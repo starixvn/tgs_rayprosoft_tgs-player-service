@@ -51,7 +51,12 @@ builder.Services
     .AddPlayerServiceRepositories((sp, optionsBuilder) => optionsBuilder
         .UseNpgsql("name=Tgs"))
     .AddMemoryCache()
-    .AddPlayerServiceCache();
+    .AddPlayerServiceCache()
+    .AddMarketingReportClient((options, sp) => 
+    { 
+        var config = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = config.GetValue<Uri>("PlayerService:MarketingReportBaseUrl")!;
+    });
 
 builder.Services
     .AddOpenTelemetryTracing(tracingBuilder => tracingBuilder

@@ -15,7 +15,7 @@ namespace Tgs.PlayerService.IntegrationTests;
 public class PlayerTests
 {
     [Test]
-    public async Task Count_Current_Day_Register_Players()
+    public async Task 查詢當日玩家註冊人數()
     {
         await using var web = new TestPlayerServiceApplication();
 
@@ -45,6 +45,42 @@ public class PlayerTests
         _ = await dbContext.SaveChangesAsync();
 
         var actual = await sut.CountCurrentDayRegisterPlayersAsync(brandId);
+
+        Assert.AreEqual(1, actual);
+    }
+
+    [Test]
+    public async Task 查詢指定日期玩家註冊人數()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var reportDate = DateOnly.Parse("2023-09-12");
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = "playerCode",
+            BrandId = brandId,
+            RegisteredOn = new DateTime(2023,9,12,18,0,0),
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "playerCode",
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Status = (short)PlayerStatus.RegisterUndone,
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.CountReportDateRegisterPlayersAsync(brandId,reportDate);
 
         Assert.AreEqual(1, actual);
     }
