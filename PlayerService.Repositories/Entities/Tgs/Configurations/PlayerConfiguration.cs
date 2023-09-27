@@ -55,7 +55,7 @@ namespace Tgs.PlayerService.Repositories.Entities.Configurations
             entity.Property(e => e.Birthday)
                 .HasMaxLength(4)
                 .HasColumnName("birthday")
-                .HasComputedColumnSql("(lpad((EXTRACT(month FROM birthdate))::text, 2, '0'::text) || lpad((EXTRACT(day FROM birthdate))::text, 2, '0'::text))", true);
+                .HasComputedColumnSql("(lpad((date_part('month'::text, birthdate))::text, 2, '0'::text) || lpad((date_part('day'::text, birthdate))::text, 2, '0'::text))", true);
 
             entity.Property(e => e.BrandId).HasColumnName("brand_id");
 
@@ -102,6 +102,8 @@ namespace Tgs.PlayerService.Repositories.Entities.Configurations
             entity.Property(e => e.Remark).HasColumnName("remark");
 
             entity.Property(e => e.Salt).HasColumnName("salt");
+
+            entity.Property(e => e.SnapshotEventId).HasColumnName("snapshot_event_id");
 
             entity.Property(e => e.Status).HasColumnName("status");
 
