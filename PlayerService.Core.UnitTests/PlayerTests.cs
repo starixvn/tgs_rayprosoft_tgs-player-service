@@ -1,5 +1,7 @@
 ﻿using System.Collections.Immutable;
-
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.MarketingReport.Client;
@@ -165,8 +167,16 @@ public class PlayerTests
     {
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
-        var sut = new CreatePlayerCommandService(fakePlayerRepository, fakePasswordHandler);
+        var sut = new CreatePlayerCommandService(
+            fakePlayerRepository,
+            fakePasswordHandler,
+            fakeSystemClock,
+            fakeSerialNumberGenerator,
+            jsonOptionsAccessor);
 
         var brandId = Guid.NewGuid();
         var agentId = Guid.NewGuid();
@@ -194,6 +204,24 @@ public class PlayerTests
 
         _ = fakePlayerRepository.Received(1)
             .CreatePlayerAsync(Arg.Any<CreatePlayerData>());
+
+        _ = fakePlayerRepository.Received(1)
+            .CreatePlayerTagAsync(Arg.Any<string>(), Arg.Any<string>());
+
+        _ = fakePlayerRepository.Received(1)
+            .CreatePlayerEventAsync(
+                Arg.Any<Guid>(),
+                Arg.Is(brandId),
+                Arg.Any<string>(),
+                Arg.Is(EventAction.Create),
+                Arg.Any<JsonDocument>(),
+                Arg.Any<string?>());
+
+        _ = fakePlayerRepository.Received(1)
+            .UpdatePlayerSnapshotAsync(
+                Arg.Any<PlayerSnapshot>(),
+                Arg.Any<Guid>(),
+                Arg.Any<DateTime>());
     }
 
     [Test]

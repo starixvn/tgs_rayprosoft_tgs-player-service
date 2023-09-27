@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json;
 
 namespace Tgs.PlayerService;
 
@@ -17,6 +18,15 @@ public interface IPlayerRepository
     ValueTask<int> CountYesterdayReigsterAsync(Guid brandId, CancellationToken cancellationToken = default);
 
     ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default);
+
+    ValueTask CreatePlayerEventAsync(
+        Guid eventId,
+        Guid brandId,
+        string playerCode,
+        EventAction action,
+        JsonDocument changeSets,
+        string? modifier,
+        CancellationToken cancellationToken = default);
 
     ValueTask CreatePlayerTagAsync(string playerCode, string tag, CancellationToken cancellationToken = default);
 
@@ -115,4 +125,10 @@ public interface IPlayerRepository
     ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status, CancellationToken cancellationToken = default);
 
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
+
+    ValueTask UpdatePlayerSnapshotAsync(
+        PlayerSnapshot snapshot,
+        Guid snapshotId,
+        DateTime updatedOn,
+        CancellationToken cancellationToken = default);
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.PlayerService.Repositories.Entities;
@@ -145,6 +146,33 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken);
 
         return playerCode;
+    }
+
+    public async ValueTask CreatePlayerEventAsync(
+        Guid eventId,
+        Guid brandId,
+        string playerCode,
+        EventAction action,
+        JsonDocument changeSets,
+        string? modifier,
+        CancellationToken cancellationToken = default)
+    {
+        _ = await _dbContext.PlayerEventSources.AddAsync(
+            new PlayerEventSource
+            {
+                Id = eventId,
+                BrandId = brandId,
+                Action = action.ToString(),
+                PlayerCode = playerCode,
+                ChangeSets = JsonSerializer.Serialize(changeSets),
+                ModifyUser = modifier,
+                CreatedOn = DateTime.UtcNow,
+            },
+            cancellationToken).ConfigureAwait(false);
+
+        _ = await _dbContext
+            .SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async ValueTask CreatePlayerTagAsync(string playerCode, string tag,
@@ -891,6 +919,40 @@ internal class PlayerRepository : IPlayerRepository
 
         player.UpdatedByUsername = playerCode;
         player.UpdatedOn = DateTime.UtcNow;
+
+        _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public async ValueTask UpdatePlayerSnapshotAsync(PlayerSnapshot snapshot, Guid snapshotId, DateTime updatedOn, CancellationToken cancellationToken = default)
+    {
+        var dbSnapshot = await _dbContext.Players
+            .FindAsync(new object?[] { snapshot.PlayerCode }, cancellationToken: cancellationToken)
+            .ConfigureAwait(false)
+            ?? (await _dbContext.Players.AddAsync(new Player
+            {
+                PlayerCode = snapshot.PlayerCode
+            }, cancellationToken).ConfigureAwait(false)).Entity;
+
+        if (dbSnapshot.SnapshotEventId is null || dbSnapshot.SnapshotEventId.Value.CompareTo(snapshotId) == -1)
+        {
+            dbSnapshot.BrandId = snapshot.BrandId;
+            dbSnapshot.IdNumber = snapshot.IdNumber;
+            dbSnapshot.Username = snapshot.Username;
+            dbSnapshot.RealName = snapshot.RealName;
+            dbSnapshot.Status = (short)snapshot.PlayerStatus;
+            dbSnapshot.Email = snapshot.Email;
+            dbSnapshot.AreaCode = snapshot.AreaCode;
+            dbSnapshot.Phone = snapshot.Phone;
+            dbSnapshot.Qq = snapshot.Qq;
+            dbSnapshot.Wechat = snapshot.Wechat;
+            dbSnapshot.IdentityAuthentication = snapshot.IdentityAuthentication;
+            dbSnapshot.PhoneAuthentication = snapshot.PhoneAuthentication;
+            dbSnapshot.Birthdate = snapshot.Birthdate;
+            dbSnapshot.Remark = snapshot.Remark;
+
+            dbSnapshot.SnapshotEventId = snapshotId;
+            dbSnapshot.UpdatedOn = updatedOn;
+        }
 
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
