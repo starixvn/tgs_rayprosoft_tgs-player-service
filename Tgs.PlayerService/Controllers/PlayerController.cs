@@ -410,10 +410,11 @@ public class PlayerController : ControllerBase
     [SuccessStatusCode(200, "Status set")]
     public ValueTask SetPlayerStatusAsync(
         [FromServices] ICommandService<SetPlayerStatusCommand> setService,
+        [FromHeader(Name = "ModifyUser")] string? modifyUser,
         string playerCode,
         [FromBody] PlayerStatus status)
     {
-        var command = new SetPlayerStatusCommand(playerCode, status);
+        var command = new SetPlayerStatusCommand(playerCode, status, modifyUser);
 
         return setService.ExecuteAsync(command, HttpContext.RequestAborted);
     }

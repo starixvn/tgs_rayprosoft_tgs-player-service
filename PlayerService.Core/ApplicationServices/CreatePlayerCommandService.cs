@@ -45,8 +45,9 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
     {
         var (salt, password) = _passwordHandler.GenerateCredential(command.Password);
 
-        var eventId = await _serialNumberGenerator.GenerateAsync(
-            cancellationToken).ConfigureAwait(false);
+        var eventId = await _serialNumberGenerator
+            .GenerateAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         var playerCode = await _playerRepository
             .CreatePlayerAsync(

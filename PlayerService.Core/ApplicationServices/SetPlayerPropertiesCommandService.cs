@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using Json.Patch;
 using Json.Pointer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
 
@@ -10,16 +12,19 @@ internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerProp
 {
     private readonly IDataCommandBuilder _dataCommandBuilder;
     private readonly IPlayerRepository _playerRepository;
+    private readonly JsonSerializerOptions _serializerOptions;
     private readonly ISerialNumberGenerator _serialNumberGenerator;
 
     public SetPlayerPropertiesCommandService(
         IPlayerRepository playerRepository,
         IDataCommandBuilder dataCommandBuilder,
-        ISerialNumberGenerator serialNumberGenerator)
+        ISerialNumberGenerator serialNumberGenerator,
+        IOptions<JsonOptions> jsonOptionsAccessor)
     {
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _dataCommandBuilder = dataCommandBuilder ?? throw new ArgumentNullException(nameof(dataCommandBuilder));
         _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+        _serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
     }
 
     public async ValueTask ExecuteAsync(
@@ -75,7 +80,7 @@ internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerProp
             player.BrandId,
             player.PlayerCode,
             EventAction.Update,
-            JsonSerializer.SerializeToDocument(changeSets),
+            JsonSerializer.SerializeToDocument(changeSets, _serializerOptions),
             command.Modifier,
             cancellationToken).ConfigureAwait(false);
 

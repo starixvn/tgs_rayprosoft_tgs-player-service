@@ -501,12 +501,16 @@ internal class PlayerServiceClient : IPlayerServiceClient
     public async ValueTask SetPlayerStatusAsync(
         string playerCode,
         PlayerStatus playerStatus,
+        string? modifyUser = null,
         CancellationToken cancellationToken = default)
     {
         var requestContent = new StringContent(
             JsonSerializer.Serialize(playerStatus, _SerializerOptions),
             Encoding.UTF8,
             MediaTypeNames.Application.Json);
+
+        if (!string.IsNullOrWhiteSpace(modifyUser))
+            requestContent.Headers.Add("ModifyUser", modifyUser);
 
         var response = await _httpClient
             .PutAsync($"/player/status/{playerCode}", requestContent, cancellationToken)
