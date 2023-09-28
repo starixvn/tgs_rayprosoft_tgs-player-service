@@ -957,6 +957,25 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    public async ValueTask UpdatePlayerSnapshotAsync(string playerCode, Guid snapshotId, DateTime updatedOn, CancellationToken cancellationToken)
+    {
+        var dbSnapshot = await _dbContext.Players
+            .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)
+            .ConfigureAwait(false)
+            ?? (await _dbContext.Players.AddAsync(new Player
+            {
+                PlayerCode = playerCode
+            }, cancellationToken).ConfigureAwait(false)).Entity;
+
+        if (dbSnapshot.SnapshotEventId is null || dbSnapshot.SnapshotEventId.Value.CompareTo(snapshotId) == -1)
+        {
+            dbSnapshot.SnapshotEventId = snapshotId;
+            dbSnapshot.UpdatedOn = updatedOn;
+        }
+
+        _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
     private IQueryable<Player> InternalQueryPlayerList(
         Guid brandId,
         PlayerStatus? status = null,

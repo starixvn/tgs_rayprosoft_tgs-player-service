@@ -74,6 +74,7 @@ public interface IPlayerServiceClient
     ValueTask SetPlayerPropertiesAsync(
         string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
+        string? modifyUser = null,
         CancellationToken cancellationToken = default);
 
     ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus playerStatus, CancellationToken cancellationToken = default);

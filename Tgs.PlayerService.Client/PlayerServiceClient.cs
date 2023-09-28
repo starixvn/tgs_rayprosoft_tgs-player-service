@@ -480,12 +480,16 @@ internal class PlayerServiceClient : IPlayerServiceClient
     public async ValueTask SetPlayerPropertiesAsync(
         string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
+        string? modifyUser = null,
         CancellationToken cancellationToken = default)
     {
         var requestContent = new StringContent(
             JsonSerializer.Serialize(properties, _SerializerOptions),
             Encoding.UTF8,
             MediaTypeNames.Application.Json);
+
+        if (!string.IsNullOrWhiteSpace(modifyUser))
+            requestContent.Headers.Add("ModifyUser", modifyUser);
 
         var response = await _httpClient
             .PostAsync($"/player/prop/{playerCode}", requestContent, cancellationToken)

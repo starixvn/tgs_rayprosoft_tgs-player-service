@@ -131,4 +131,10 @@ public interface IPlayerRepository
         Guid snapshotId,
         DateTime updatedOn,
         CancellationToken cancellationToken = default);
+
+    ValueTask UpdatePlayerSnapshotAsync(
+        string playerCode,
+        Guid snapshotId,
+        DateTime updatedOn,
+        CancellationToken cancellationToken);
 }

@@ -289,7 +289,7 @@ public class PlayerController : ControllerBase
     [HttpGet("{brandId}:usernames", Name = "ListPlayerCodesByUserNames")]
     [SuccessStatusCode(200, "UserName and PlayerCode pairs.")]
     public IAsyncEnumerable<KeyValuePair<string, string>> ListPlayerCodesByUserNamesAsync(
-                                                [FromServices] IQueryService<ListPlayerInfosByUserNamesQuery, PlayerInfo> queryService,
+        [FromServices] IQueryService<ListPlayerInfosByUserNamesQuery, PlayerInfo> queryService,
         Guid brandId,
         [FromQuery(Name = "names")] PlayerCodesQueryViewModel viewModel)
     {
@@ -390,6 +390,7 @@ public class PlayerController : ControllerBase
     [FailStatusCode(400, "Input properties is empty")]
     public ValueTask SetPlayerPropertiesAsync(
         [FromServices] ICommandService<SetPlayerPropertiesCommand> commandService,
+        [FromHeader(Name = "ModifyUser")] string? modifyUser,
         string playerCode,
         [FromBody] IImmutableDictionary<string, string?> properties)
     {
@@ -398,7 +399,8 @@ public class PlayerController : ControllerBase
 
         var command = new SetPlayerPropertiesCommand(
             playerCode,
-            properties);
+            properties,
+            modifyUser);
 
         return commandService
             .ExecuteAsync(command, HttpContext.RequestAborted);
