@@ -923,41 +923,7 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public async ValueTask UpdatePlayerSnapshotAsync(PlayerSnapshot snapshot, Guid snapshotId, DateTime updatedOn, CancellationToken cancellationToken = default)
-    {
-        var dbSnapshot = await _dbContext.Players
-            .FindAsync(new object?[] { snapshot.PlayerCode }, cancellationToken: cancellationToken)
-            .ConfigureAwait(false)
-            ?? (await _dbContext.Players.AddAsync(new Player
-            {
-                PlayerCode = snapshot.PlayerCode
-            }, cancellationToken).ConfigureAwait(false)).Entity;
-
-        if (dbSnapshot.SnapshotEventId is null || dbSnapshot.SnapshotEventId.Value.CompareTo(snapshotId) == -1)
-        {
-            dbSnapshot.BrandId = snapshot.BrandId;
-            dbSnapshot.IdNumber = snapshot.IdNumber;
-            dbSnapshot.Username = snapshot.Username;
-            dbSnapshot.RealName = snapshot.RealName;
-            dbSnapshot.Status = (short)snapshot.PlayerStatus;
-            dbSnapshot.Email = snapshot.Email;
-            dbSnapshot.AreaCode = snapshot.AreaCode;
-            dbSnapshot.Phone = snapshot.Phone;
-            dbSnapshot.Qq = snapshot.Qq;
-            dbSnapshot.Wechat = snapshot.Wechat;
-            dbSnapshot.IdentityAuthentication = snapshot.IdentityAuthentication;
-            dbSnapshot.PhoneAuthentication = snapshot.PhoneAuthentication;
-            dbSnapshot.Birthdate = snapshot.Birthdate;
-            dbSnapshot.Remark = snapshot.Remark;
-
-            dbSnapshot.SnapshotEventId = snapshotId;
-            dbSnapshot.UpdatedOn = updatedOn;
-        }
-
-        _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    public async ValueTask UpdatePlayerSnapshotAsync(string playerCode, Guid snapshotId, DateTime updatedOn, CancellationToken cancellationToken)
+    public async ValueTask UpdatePlayerSnapshotAsync(string playerCode, Guid snapshotId, DateTime updatedOn, CancellationToken cancellationToken = default)
     {
         var dbSnapshot = await _dbContext.Players
             .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)

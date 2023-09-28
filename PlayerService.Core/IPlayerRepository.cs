@@ -127,14 +127,8 @@ public interface IPlayerRepository
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
 
     ValueTask UpdatePlayerSnapshotAsync(
-        PlayerSnapshot snapshot,
-        Guid snapshotId,
-        DateTime updatedOn,
-        CancellationToken cancellationToken = default);
-
-    ValueTask UpdatePlayerSnapshotAsync(
         string playerCode,
         Guid snapshotId,
         DateTime updatedOn,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 }

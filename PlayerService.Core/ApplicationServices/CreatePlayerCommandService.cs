@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Json.Patch;
 using Json.Pointer;
 using Microsoft.AspNetCore.Mvc;
@@ -69,34 +70,42 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
             .CreatePlayerTagAsync(playerCode, _tagMapper[command.RegisterSiteType].ToString(), cancellationToken)
             .ConfigureAwait(false);
 
-        var createPlayerSnapshot = PlayerSnapshot._Default with
-        {
-            BrandId = command.BrandId,
-            AgentId = command.AgentId,
-            VipId = command.VipId,
-            Username = command.Username,
-            Type = command.PlayerType,
-            PlayerStatus = PlayerStatus.RegisterUndone,
-            UpperPlayerCode = command.UpperPlayerCode,
-        };
-
         var currentTime = _systemClock.UtcNow.UtcDateTime;
 
-        var changeSets = new JsonPatch(PatchOperation.Add(
-            JsonPointer.Create<PlayerSnapshot>(o => o),
-            JsonSerializer.SerializeToNode(createPlayerSnapshot, _serializerOptions)));
+        var createMainSnapshot = new
+        {
+            command.BrandId,
+            command.AgentId,
+            command.VipId,
+            command.Username,
+            command.CurrencyCode,
+            command.BetLimitId,
+            Type = command.PlayerType,
+            Status = PlayerStatus.RegisterUndone,
+        };
+
+        var patchOperations = Array.Empty<PatchOperation>();
+
+        patchOperations = patchOperations.Append(PatchOperation.Add(JsonPointer.Parse(""), JsonNode.Parse(JsonSerializer.Serialize(createMainSnapshot, _serializerOptions)))).ToArray();
+
+        if (!string.IsNullOrWhiteSpace(command.UpperPlayerCode))
+        {
+            patchOperations = patchOperations.Append(PatchOperation.Replace(JsonPointer.Parse("/parentPlayerCode"), command.UpperPlayerCode)).ToArray();
+        }
+
+        var changeSets = new JsonPatch(patchOperations);
 
         await _playerRepository.CreatePlayerEventAsync(
-                eventId,
-                command.BrandId,
-                playerCode,
-                EventAction.Create,
-                JsonSerializer.SerializeToDocument(changeSets),
-                null,
-                cancellationToken).ConfigureAwait(false);
+            eventId,
+            command.BrandId,
+            playerCode,
+            EventAction.Create,
+            JsonSerializer.SerializeToDocument(changeSets),
+            null,
+            cancellationToken).ConfigureAwait(false);
 
         await _playerRepository.UpdatePlayerSnapshotAsync(
-            createPlayerSnapshot,
+            playerCode,
             eventId,
             currentTime,
             cancellationToken).ConfigureAwait(false);

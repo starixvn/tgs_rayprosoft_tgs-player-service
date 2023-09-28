@@ -255,7 +255,7 @@ public class PlayerTests
 
         _ = fakePlayerRepository.Received(1)
             .UpdatePlayerSnapshotAsync(
-                Arg.Any<PlayerSnapshot>(),
+                Arg.Any<string>(),
                 Arg.Any<Guid>(),
                 Arg.Any<DateTime>());
     }

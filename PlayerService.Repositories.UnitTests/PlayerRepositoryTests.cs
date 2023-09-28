@@ -48,13 +48,8 @@ public class PlayerRepositoryTests
 
         var sut = new PlayerRepository(dbContext, fakeSerialNumberGenerator);
 
-        var snapshot = PlayerSnapshot._Default with
-        {
-            PlayerCode = playerCode
-        };
-
         await sut.UpdatePlayerSnapshotAsync(
-            snapshot,
+            playerCode,
             eventId,
             DateTime.UtcNow);
 
