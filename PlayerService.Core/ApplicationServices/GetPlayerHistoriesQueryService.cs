@@ -20,6 +20,6 @@ internal class GetPlayerHistoriesQueryService
             query.PlayerCode,
             query.From,
             query.To),
-            query.Paging,
+            query.Skip,
             cancellationToken);
 }

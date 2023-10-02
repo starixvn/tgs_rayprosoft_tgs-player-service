@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,6 @@ using Tgs.Core.Infrastructures.Utility;
 using Tgs.Paging;
 using Tgs.PlayerService.Repositories.Entities;
 using Tgs.SerialNumberGenerator;
-
 namespace Tgs.PlayerService.Repositories;
 
 internal class PlayerRepository : IPlayerRepository
@@ -468,7 +468,7 @@ internal class PlayerRepository : IPlayerRepository
 
     public IAsyncEnumerable<PlayerHistoryInfo> QueryPlayerEventAsync(
         PlayerEventQueryConditions conditions,
-        Paging<PlayerHistoryInfo> paging,
+        int skip = 0,
         CancellationToken cancellationToken = default)
     {
         var dataQuery = MakePlayerHistoriesQuery(conditions)
@@ -476,15 +476,25 @@ internal class PlayerRepository : IPlayerRepository
                 p.Id,
                 p.Action,
                 p.ModifyUser,
-                p.CreatedOn))
-            .ToAsyncEnumerable();
+                p.CreatedOn));
 
-        dataQuery = dataQuery.ApplyOrderBy(paging);
-
-        if (paging.RowCount > 0)
-            dataQuery = dataQuery.ApplyPaging(paging);
-
-        return dataQuery;
+        return dataQuery
+            .OrderByDescending(record => record.CreatedOn)
+            .Select(record => new
+            {
+                record.EventId,
+                record.Action,
+                record.Modifier,
+                record.CreatedOn,
+            })
+            .Skip(skip)
+            .Take(1000)
+            .ToAsyncEnumerable()
+            .Select(row => new PlayerHistoryInfo(
+                row.EventId,
+                row.Action,
+                row.Modifier,
+                row.CreatedOn));
     }
 
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(

@@ -1396,17 +1396,11 @@ public class PlayerTests
             To = DateTimeOffset.Now
         };
 
-        var paging = new Client.Paging
-        {
-            IsDesc = true,
-            Page = 1,
-            Rows = 20,
-        };
-        var actual = await sut.GetPlayerHistoriesAsync(conditions, paging);
+        var actual = await sut.GetPlayerHistoriesAsync(conditions, 10, 0).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.TotalCount);
-        Assert.AreEqual(EventAction.Create.ToString(), actual.Items.First().Action);
-        Assert.AreEqual(eventId, actual.Items.First().EventId);
+        Assert.AreEqual(1, actual.Length);
+        Assert.AreEqual(EventAction.Create.ToString(), actual[0].Action);
+        Assert.AreEqual(eventId, actual[0].EventId);
     }
 
     [Test]

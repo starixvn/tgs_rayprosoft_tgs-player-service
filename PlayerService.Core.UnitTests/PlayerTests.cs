@@ -761,17 +761,12 @@ public class PlayerTests
         var playerCode = "playerCode";
         var from = DateTimeOffset.Now.AddDays(-14);
         var to = DateTimeOffset.Now;
-        var paging = new Paging.Paging<PlayerHistoryInfo>
-        {
-            IsDesc = true,
-            Page = 1,
-            RowCount = 20,
-        };
+        var skip = 10;
 
-        _ = await sut.QueryAsync(new GetPlayerHistoriesQuery(playerCode, from, to, paging)).ToArrayAsync();
+        _ = await sut.QueryAsync(new GetPlayerHistoriesQuery(playerCode, from, to, skip)).ToArrayAsync();
 
         _ = fakePlayerRepository.Received(1)
-            .QueryPlayerEventAsync(Arg.Is(new PlayerEventQueryConditions(playerCode, from, to)), Arg.Is(paging));
+            .QueryPlayerEventAsync(Arg.Is(new PlayerEventQueryConditions(playerCode, from, to)), Arg.Is(skip));
     }
 
     [Test]
@@ -799,14 +794,9 @@ public class PlayerTests
         var playerCode = "playerCode";
         var from = DateTimeOffset.Now.AddDays(-14);
         var to = DateTimeOffset.Now;
-        var paging = new Paging.Paging<PlayerHistoryInfo>
-        {
-            IsDesc = true,
-            Page = 1,
-            RowCount = 20,
-        };
+        var skip = 10;
 
-        _ = await sut.GetAsync(new GetPlayerHistoriesQuery(playerCode, from, to, paging));
+        _ = await sut.GetAsync(new GetPlayerHistoriesQuery(playerCode, from, to, skip));
 
         _ = fakePlayerRepository.Received(1)
             .CountPlayerEventAsync(Arg.Is(new PlayerEventQueryConditions(playerCode, from, to)));

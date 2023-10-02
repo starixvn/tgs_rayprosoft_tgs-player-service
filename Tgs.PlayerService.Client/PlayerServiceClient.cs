@@ -145,43 +145,32 @@ internal class PlayerServiceClient : IPlayerServiceClient
         return JsonSerializer.Deserialize<decimal>(content, _SerializerOptions);
     }
 
-    public async ValueTask<PagingResponse<PlayerHistoryInfo>> GetPlayerHistoriesAsync(GetPlayerHistoriesQueryConditions conditions, Paging paging, CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<PlayerHistoryInfo> GetPlayerHistoriesAsync(
+        GetPlayerHistoriesQueryConditions conditions,
+        int totalCount,
+        int skip = 0,
+        CancellationToken cancellationToken = default)
     {
         var queryStrings = HttpUtility.ParseQueryString(string.Empty);
 
         queryStrings.Add("from", conditions.From.ToString("o"));
         queryStrings.Add("to", conditions.To.ToString("o"));
 
-        if (paging.ShowAll == true)
-            queryStrings.Add("all", "true");
-        else
-        {
-            if (paging.Page != null)
-                queryStrings.Add("page", paging.Page.ToString());
-
-            if (paging.Rows != null)
-                queryStrings.Add("rows", paging.Rows.ToString());
-        }
-
-        if (!string.IsNullOrWhiteSpace(paging.SortBy))
-        {
-            queryStrings.Add("sort", paging.SortBy);
-
-            if (paging.IsDesc == true)
-                queryStrings.Add("desc", "true");
-        }
-
-        var response = await _httpClient
-            .GetAsync($"/player/histories/{conditions.PlayerCode}?{queryStrings}", cancellationToken)
-            .ConfigureAwait(false);
-
-        _ = response.EnsureSuccessStatusCode();
-
-        var contentJson = await response.Content
-            .ReadAsStringAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        return JsonSerializer.Deserialize<PagingResponse<PlayerHistoryInfo>>(contentJson, _SerializerOptions)!;
+        return AsyncEnumerableEx.Return(totalCount)
+            .SelectMany(count => AsyncEnumerable.Range(0, (int)Math.Ceiling(count / 1000D))
+                .SelectMany(idx => _httpClient.GetAsync($"/player/histories/{conditions.PlayerCode}?{queryStrings}&skip={skip + idx * 1000}")
+                    .ToAsyncEnumerable()
+                    .Do(response =>
+                    {
+                        _ = response.EnsureSuccessStatusCode();
+                        _ = response.Headers.GetValues("Tgs-Return").ToAsyncEnumerable().Take(1).Select(int.Parse).FirstOrDefaultAsync(cancellationToken);
+                    })
+                    .SelectMany(response => response.Content
+                        .ReadFromJsonAsync<IAsyncEnumerable<PlayerHistoryInfo>>(_SerializerOptions, cancellationToken)
+                        .ToAsyncEnumerable()
+                        .Where(arr => arr is not null)
+                        .SelectMany(arr => arr!))))
+            .Select(record => record); ;
     }
 
     public async ValueTask<PlayerEventInfo?> GetPlayerHistoryAsync(Guid eventId, CancellationToken cancellationToken = default)

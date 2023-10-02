@@ -93,7 +93,7 @@ public class PlayerRepositoryTests
             playerCode,
             DateTimeOffset.Now.AddDays(-14),
             DateTimeOffset.Now),
-            new Tgs.Paging.Paging<PlayerHistoryInfo> { IsDesc = true, Page = 1, RowCount = 20 }).ToArrayAsync();
+            0).ToArrayAsync();
 
         Assert.That(actual, Has.Length.EqualTo(1));
         Assert.That(actual[0].EventId, Is.EqualTo(eventId));

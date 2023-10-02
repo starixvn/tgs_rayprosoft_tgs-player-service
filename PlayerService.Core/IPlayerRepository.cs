@@ -66,7 +66,7 @@ public interface IPlayerRepository
 
     IAsyncEnumerable<PlayerHistoryInfo> QueryPlayerEventAsync(
         PlayerEventQueryConditions conditions,
-        Paging<PlayerHistoryInfo> paging,
+        int skip = 0,
         CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(

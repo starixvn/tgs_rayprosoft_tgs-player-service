@@ -24,10 +24,11 @@ public interface IPlayerServiceClient
 
     ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
 
-    ValueTask<PagingResponse<PlayerHistoryInfo>> GetPlayerHistoriesAsync(
+    IAsyncEnumerable<PlayerHistoryInfo> GetPlayerHistoriesAsync(
         GetPlayerHistoriesQueryConditions conditions,
-        Paging paging, CancellationToken
-        cancellationToken = default);
+        int totalCount,
+        int skip = 0,
+        CancellationToken cancellationToken = default);
 
     ValueTask<PlayerEventInfo?> GetPlayerHistoryAsync(Guid eventId, CancellationToken cancellationToken = default);
 

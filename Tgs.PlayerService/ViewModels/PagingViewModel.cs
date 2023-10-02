@@ -13,9 +13,6 @@ public class PagingViewModel
     [FromQuery(Name = "rows")]
     public int? Rows { get; set; }
 
-    [FromQuery(Name = "all")]
-    public bool? ShowAll { get; set; } = false;
-
     [FromQuery(Name = "sort")]
     public string? SortBy { get; set; }
 }

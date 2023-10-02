@@ -119,47 +119,26 @@ public class PlayerController : ControllerBase
             new GetPlayerDepositedAmountQuery(playerCode),
             HttpContext.RequestAborted);
 
-    [HttpGet("histories/{playerCode}", Name = "GetPlayerHistories")]    
-    public async Task<PagingResponseViewModel<PlayerHistoryInfoViewModel>> GetPlayerHistoriesAsync(
+    [HttpGet("histories/{playerCode}", Name = "GetPlayerHistories")]
+    public IAsyncEnumerable<PlayerHistoryInfoViewModel> GetPlayerHistoriesAsync(
         [FromServices] IQueryService<GetPlayerHistoriesQuery, PlayerHistoryInfo> queryService,
         [FromServices] IGetService<GetPlayerHistoriesQuery, int> countService,
         string playerCode,
         [FromQuery] PlayerHistoryQueryViewModel request,
-        [FromQuery] PagingViewModel paging)
+        [FromQuery(Name = "skip")] int skip = 0)
     {
-        var sourcePaging = new Paging<PlayerHistoryInfo>
-        {
-            Page = paging.Page ?? 1,
-            RowCount = paging.Rows ?? 10
-        };
+        var query = new GetPlayerHistoriesQuery(playerCode, request.From, request.To, skip);
 
-        if (paging.ShowAll == true)
-        {
-            sourcePaging.Page = -1;
-            sourcePaging.RowCount = -1;
-        }
+        var totalCount = countService.GetAsync(query, HttpContext.RequestAborted).ConfigureAwait(false);
 
-        if (!string.IsNullOrWhiteSpace(paging.SortBy))
-            sourcePaging.SortByPropertyName(paging.SortBy, paging.IsDesc ?? false);
+        HttpContext.Response.Headers.Add("Tgs-Return", totalCount.ToString());
 
-        var query = new GetPlayerHistoriesQuery(playerCode, request.From, request.To, sourcePaging);
-
-        var totalCount = await countService.GetAsync(query, HttpContext.RequestAborted).ConfigureAwait(false);
-
-        var items = queryService.QueryAsync(query, HttpContext.RequestAborted)
+        return queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Select(row => new PlayerHistoryInfoViewModel(
                 row.EventId,
                 row.Action,
                 row.Modifier,
                 row.CreatedOn));
-
-        return new PagingResponseViewModel<PlayerHistoryInfoViewModel>
-        {
-            TotalCount = totalCount,
-            Page = paging.Page.GetValueOrDefault(1),
-            Rows = paging.Rows.GetValueOrDefault(10),
-            Items = items.ToEnumerable(),
-        };
     }
 
     [HttpGet("history/{eventId}", Name = "GetPlayerHistory")]
