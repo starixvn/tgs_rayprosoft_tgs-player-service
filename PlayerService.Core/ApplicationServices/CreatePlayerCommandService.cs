@@ -102,7 +102,7 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
             playerCode,
             EventAction.Create,
             JsonSerializer.SerializeToDocument(changeSets),
-            null,
+            modifier: null,
             cancellationToken).ConfigureAwait(false);
 
         await _playerRepository.UpdatePlayerSnapshotAsync(
