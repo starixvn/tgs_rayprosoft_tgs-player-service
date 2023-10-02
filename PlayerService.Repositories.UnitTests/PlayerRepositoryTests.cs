@@ -59,6 +59,120 @@ public class PlayerRepositoryTests
     }
 
     [Test]
+    public async Task 查詢Player_Event_Source()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
+        _ = dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(
+                InMemoryEventId.TransactionIgnoredWarning));
+
+        var dbContext = new TgsContext(dbContextOptionsBuilder.Options);
+
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var playerCode = "playerCode";
+        var eventId = Guid.NewGuid();
+
+        var playerEvent = new PlayerEventSource
+        {
+            Id = eventId,
+            Action = EventAction.Create.ToString(),
+            ChangeSets = "{}",
+            CreatedOn = DateTime.UtcNow.AddDays(-1),
+            BrandId = Guid.NewGuid(),
+            PlayerCode = playerCode,
+        };
+
+        _ = await dbContext.PlayerEventSources.AddAsync(playerEvent);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var sut = new PlayerRepository(dbContext, fakeSerialNumberGenerator);
+
+        var actual = await sut.QueryPlayerEventAsync(new PlayerEventQueryConditions(
+            playerCode,
+            DateTimeOffset.Now.AddDays(-14),
+            DateTimeOffset.Now),
+            new Tgs.Paging.Paging<PlayerHistoryInfo> { IsDesc = true, Page = 1, RowCount = 20 }).ToArrayAsync();
+
+        Assert.That(actual, Has.Length.EqualTo(1));
+        Assert.That(actual[0].EventId, Is.EqualTo(eventId));
+    }
+
+    [Test]
+    public async Task 查詢Player_Event_Source細項()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
+        _ = dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(
+                InMemoryEventId.TransactionIgnoredWarning));
+
+        var dbContext = new TgsContext(dbContextOptionsBuilder.Options);
+
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+        var eventId = Guid.Parse("018a218f-b4cb-0000-0001-07e7e07dc945");
+        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+
+        _ = await dbContext.PlayerEventSources.AddAsync(new PlayerEventSource
+        {
+            Id = eventId,
+            Action = EventAction.Create.ToString(),
+            BrandId = brandId,
+            ChangeSets = "{}",
+            CreatedOn = DateTime.UtcNow,
+            PlayerCode = "playerCode"
+        });
+        _ = await dbContext.SaveChangesAsync();
+
+        var sut = new PlayerRepository(dbContext, fakeSerialNumberGenerator);
+
+        var actual = await sut.GetPlayerEventAsync(eventId);
+
+        Assert.That(actual, Is.Not.Null);
+        Assert.That(actual.Action, Is.EqualTo(EventAction.Create));
+    }
+
+    [Test]
+    public async Task 查詢Player_Event_Source總筆數()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
+        _ = dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(
+                InMemoryEventId.TransactionIgnoredWarning));
+
+        var dbContext = new TgsContext(dbContextOptionsBuilder.Options);
+
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var playerCode = "playerCode";
+
+        var playerEvent = new PlayerEventSource
+        {
+            Id = Guid.NewGuid(),
+            Action = EventAction.Create.ToString(),
+            ChangeSets = "{}",
+            CreatedOn = DateTime.UtcNow.AddDays(-1),
+            BrandId = Guid.NewGuid(),
+            PlayerCode = playerCode,
+        };
+
+        _ = await dbContext.PlayerEventSources.AddAsync(playerEvent);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var sut = new PlayerRepository(dbContext, fakeSerialNumberGenerator);
+
+        var actual = await sut.CountPlayerEventAsync(new PlayerEventQueryConditions(
+            playerCode,
+            DateTimeOffset.Now.AddDays(-14),
+            DateTimeOffset.Now));
+
+        Assert.That(actual, Is.EqualTo(1));
+    }
+
+    [Test]
     public async Task 查詢昨日註冊人數()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();

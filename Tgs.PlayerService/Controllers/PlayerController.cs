@@ -119,6 +119,69 @@ public class PlayerController : ControllerBase
             new GetPlayerDepositedAmountQuery(playerCode),
             HttpContext.RequestAborted);
 
+    [HttpGet("histories/{playerCode}", Name = "GetPlayerHistories")]    
+    public async Task<PagingResponseViewModel<PlayerHistoryInfoViewModel>> GetPlayerHistoriesAsync(
+        [FromServices] IQueryService<GetPlayerHistoriesQuery, PlayerHistoryInfo> queryService,
+        [FromServices] IGetService<GetPlayerHistoriesQuery, int> countService,
+        string playerCode,
+        [FromQuery] PlayerHistoryQueryViewModel request,
+        [FromQuery] PagingViewModel paging)
+    {
+        var sourcePaging = new Paging<PlayerHistoryInfo>
+        {
+            Page = paging.Page ?? 1,
+            RowCount = paging.Rows ?? 10
+        };
+
+        if (paging.ShowAll == true)
+        {
+            sourcePaging.Page = -1;
+            sourcePaging.RowCount = -1;
+        }
+
+        if (!string.IsNullOrWhiteSpace(paging.SortBy))
+            sourcePaging.SortByPropertyName(paging.SortBy, paging.IsDesc ?? false);
+
+        var query = new GetPlayerHistoriesQuery(playerCode, request.From, request.To, sourcePaging);
+
+        var totalCount = await countService.GetAsync(query, HttpContext.RequestAborted).ConfigureAwait(false);
+
+        var items = queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Select(row => new PlayerHistoryInfoViewModel(
+                row.EventId,
+                row.Action,
+                row.Modifier,
+                row.CreatedOn));
+
+        return new PagingResponseViewModel<PlayerHistoryInfoViewModel>
+        {
+            TotalCount = totalCount,
+            Page = paging.Page.GetValueOrDefault(1),
+            Rows = paging.Rows.GetValueOrDefault(10),
+            Items = items.ToEnumerable(),
+        };
+    }
+
+    [HttpGet("history/{eventId}", Name = "GetPlayerHistory")]
+    [SuccessStatusCode(200, "Player event info found")]
+    [FailStatusCode(404, "Player event info not found")]
+    public async ValueTask<PlayerEventInfoViewModel?> GetPlayerHistoryAsync(
+        [FromServices] IGetService<GetPlayerEventQuery, EventInfo> getService,
+        Guid eventId)
+    {
+        var result = await getService.GetAsync(new GetPlayerEventQuery(eventId)).ConfigureAwait(false);
+
+        return result is null
+            ? await this.FailAsync<PlayerEventInfoViewModel, object?>(404, default)
+            : new PlayerEventInfoViewModel
+            {
+                Action = result.Action,
+                ChangeSets = result.ChangeSets,
+                Modifier = result.Modifier,
+                CreatedOn = result.CreatedOn,
+            };
+    }
+
     [HttpGet("{playerCode}", Order = 100, Name = "GetPlayerInfo")]
     [SuccessStatusCode(200, "Player info found")]
     [FailStatusCode(404, "Player info not found")]

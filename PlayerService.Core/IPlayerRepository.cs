@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
+using Tgs.Paging;
 
 namespace Tgs.PlayerService;
 
@@ -14,6 +15,8 @@ public interface IPlayerRepository
         CancellationToken cancellationToken = default);
 
     ValueTask<int> CountCurrentDayLoginAsync(Guid brandId, CancellationToken cancellationToken = default);
+
+    ValueTask<int> CountPlayerEventAsync(PlayerEventQueryConditions conditions, CancellationToken cancellationToken = default);
 
     ValueTask<int> CountYesterdayReigsterAsync(Guid brandId, CancellationToken cancellationToken = default);
 
@@ -38,6 +41,8 @@ public interface IPlayerRepository
 
     ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
 
+    ValueTask<EventInfo?> GetPlayerEventAsync(Guid eventId, CancellationToken cancellationToken = default);
+
     ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
 
     ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(Guid brandId, string email, CancellationToken cancellationToken = default);
@@ -58,6 +63,11 @@ public interface IPlayerRepository
         CancellationToken cancellationToken = default);
 
     ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<PlayerHistoryInfo> QueryPlayerEventAsync(
+        PlayerEventQueryConditions conditions,
+        Paging<PlayerHistoryInfo> paging,
+        CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,

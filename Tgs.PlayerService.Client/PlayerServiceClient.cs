@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Web;
 using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Tgs.PlayerService.Client;
@@ -142,6 +143,69 @@ internal class PlayerServiceClient : IPlayerServiceClient
         var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
         return JsonSerializer.Deserialize<decimal>(content, _SerializerOptions);
+    }
+
+    public async ValueTask<PagingResponse<PlayerHistoryInfo>> GetPlayerHistoriesAsync(GetPlayerHistoriesQueryConditions conditions, Paging paging, CancellationToken cancellationToken = default)
+    {
+        var queryStrings = HttpUtility.ParseQueryString(string.Empty);
+
+        queryStrings.Add("from", conditions.From.ToString("o"));
+        queryStrings.Add("to", conditions.To.ToString("o"));
+
+        if (paging.ShowAll == true)
+            queryStrings.Add("all", "true");
+        else
+        {
+            if (paging.Page != null)
+                queryStrings.Add("page", paging.Page.ToString());
+
+            if (paging.Rows != null)
+                queryStrings.Add("rows", paging.Rows.ToString());
+        }
+
+        if (!string.IsNullOrWhiteSpace(paging.SortBy))
+        {
+            queryStrings.Add("sort", paging.SortBy);
+
+            if (paging.IsDesc == true)
+                queryStrings.Add("desc", "true");
+        }
+
+        var response = await _httpClient
+            .GetAsync($"/player/histories/{conditions.PlayerCode}?{queryStrings}", cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        var contentJson = await response.Content
+            .ReadAsStringAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return JsonSerializer.Deserialize<PagingResponse<PlayerHistoryInfo>>(contentJson, _SerializerOptions)!;
+    }
+
+    public async ValueTask<PlayerEventInfo?> GetPlayerHistoryAsync(Guid eventId, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient
+           .GetAsync($"/player/history/{eventId}", cancellationToken)
+           .ConfigureAwait(false);
+
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.OK:
+                {
+                    var content = await response.Content
+                        .ReadAsStringAsync(cancellationToken)
+                        .ConfigureAwait(false);
+
+                    return JsonSerializer.Deserialize<PlayerEventInfo>(content, _SerializerOptions);
+                }
+            case HttpStatusCode.NotFound:
+                return null;
+
+            default:
+                throw new PlayerServiceApiException("Unknown error");
+        }
     }
 
     public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default)

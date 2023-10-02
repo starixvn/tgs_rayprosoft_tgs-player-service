@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
+using Tgs.Paging;
 using Tgs.PlayerService.Repositories.Entities;
 using Tgs.SerialNumberGenerator;
 
@@ -72,6 +73,15 @@ internal class PlayerRepository : IPlayerRepository
                     };
 
         return await query
+            .CountAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async ValueTask<int> CountPlayerEventAsync(PlayerEventQueryConditions conditions, CancellationToken cancellationToken = default)
+    {
+        var dataQuery = MakePlayerHistoriesQuery(conditions);
+
+        return await dataQuery
             .CountAsync(cancellationToken)
             .ConfigureAwait(false);
     }
@@ -200,6 +210,21 @@ internal class PlayerRepository : IPlayerRepository
             .Where(p => p.BrandId == brandId && p.RegisteredOn >= currentDay)
             .CountAsync(cancellationToken: cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    public async ValueTask<EventInfo?> GetPlayerEventAsync(Guid eventId, CancellationToken cancellationToken = default)
+    {
+        var eventSource = await _dbContext.PlayerEventSources
+            .FirstOrDefaultAsync(p => p.Id == eventId, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return eventSource is null
+            ? null
+            : new EventInfo(
+                Enum.Parse<EventAction>(eventSource.Action),
+                JsonDocument.Parse(eventSource.ChangeSets),
+                eventSource.ModifyUser,
+                eventSource.CreatedOn);
     }
 
     public async ValueTask<string?> GetParentPlayerCodeAsync(
@@ -440,6 +465,27 @@ internal class PlayerRepository : IPlayerRepository
             .Select(player => (short?)player.Status)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false) ?? 1);
+
+    public IAsyncEnumerable<PlayerHistoryInfo> QueryPlayerEventAsync(
+        PlayerEventQueryConditions conditions,
+        Paging<PlayerHistoryInfo> paging,
+        CancellationToken cancellationToken = default)
+    {
+        var dataQuery = MakePlayerHistoriesQuery(conditions)
+            .Select(p => new PlayerHistoryInfo(
+                p.Id,
+                p.Action,
+                p.ModifyUser,
+                p.CreatedOn))
+            .ToAsyncEnumerable();
+
+        dataQuery = dataQuery.ApplyOrderBy(paging);
+
+        if (paging.RowCount > 0)
+            dataQuery = dataQuery.ApplyPaging(paging);
+
+        return dataQuery;
+    }
 
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,
@@ -981,5 +1027,15 @@ internal class PlayerRepository : IPlayerRepository
             players = players.Where(p => p.RegisteredOn < endRegisterTime.Value.ToUniversalTime());
 
         return players;
+    }
+
+    private IQueryable<PlayerEventSource> MakePlayerHistoriesQuery(PlayerEventQueryConditions conditions)
+    {
+        var dataQuery = _dbContext.PlayerEventSources.AsQueryable()
+            .Where(p => p.PlayerCode == conditions.PlayerCode
+                && p.CreatedOn >= conditions.From
+                && p.CreatedOn < conditions.To);
+
+        return dataQuery;
     }
 }

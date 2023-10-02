@@ -224,7 +224,7 @@ public class PlayerTests
         var username = "username";
         var password = "password";
         var agentName = "agentName";
-        var eventId = Guid.NewGuid();        
+        var eventId = Guid.NewGuid();
 
         _ = fakeSerialNumberGenerator.GenerateAsync()
             .Returns(eventId);
@@ -243,7 +243,6 @@ public class PlayerTests
             agentName);
 
         _ = await sut.GetAsync(query);
-
 
         _ = fakePlayerRepository.Received(1)
             .CreatePlayerAsync(Arg.Any<CreatePlayerData>());
@@ -750,6 +749,67 @@ public class PlayerTests
 
         _ = fakePlayerRepository.Received(1)
             .GetPlayerInfoAsync(Arg.Is("parent1"));
+    }
+
+    [Test]
+    public async Task 查詢玩家Event_Source()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerHistoriesQueryService(fakePlayerRepository);
+
+        var playerCode = "playerCode";
+        var from = DateTimeOffset.Now.AddDays(-14);
+        var to = DateTimeOffset.Now;
+        var paging = new Paging.Paging<PlayerHistoryInfo>
+        {
+            IsDesc = true,
+            Page = 1,
+            RowCount = 20,
+        };
+
+        _ = await sut.QueryAsync(new GetPlayerHistoriesQuery(playerCode, from, to, paging)).ToArrayAsync();
+
+        _ = fakePlayerRepository.Received(1)
+            .QueryPlayerEventAsync(Arg.Is(new PlayerEventQueryConditions(playerCode, from, to)), Arg.Is(paging));
+    }
+
+    [Test]
+    public async Task 查詢玩家Event_Source_細項()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerEventQueryService(fakePlayerRepository);
+
+        var eventId = Guid.NewGuid();
+
+        _ = await sut.GetAsync(new GetPlayerEventQuery(eventId));
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerEventAsync(Arg.Is(eventId));
+    }
+
+    [Test]
+    public async Task 查詢玩家Event_Source總筆數()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerHistoriesQueryService(fakePlayerRepository);
+
+        var playerCode = "playerCode";
+        var from = DateTimeOffset.Now.AddDays(-14);
+        var to = DateTimeOffset.Now;
+        var paging = new Paging.Paging<PlayerHistoryInfo>
+        {
+            IsDesc = true,
+            Page = 1,
+            RowCount = 20,
+        };
+
+        _ = await sut.GetAsync(new GetPlayerHistoriesQuery(playerCode, from, to, paging));
+
+        _ = fakePlayerRepository.Received(1)
+            .CountPlayerEventAsync(Arg.Is(new PlayerEventQueryConditions(playerCode, from, to)));
     }
 
     [Test]
