@@ -224,6 +224,10 @@ public class PlayerTests
         var username = "username";
         var password = "password";
         var agentName = "agentName";
+        var eventId = Guid.NewGuid();        
+
+        _ = fakeSerialNumberGenerator.GenerateAsync()
+            .Returns(eventId);
 
         var query = new CreatePlayerCommand(
             brandId,
@@ -240,6 +244,7 @@ public class PlayerTests
 
         _ = await sut.GetAsync(query);
 
+
         _ = fakePlayerRepository.Received(1)
             .CreatePlayerAsync(Arg.Any<CreatePlayerData>());
 
@@ -248,7 +253,7 @@ public class PlayerTests
 
         _ = fakePlayerRepository.Received(1)
             .CreatePlayerEventAsync(
-                Arg.Any<Guid>(),
+                Arg.Is(eventId),
                 Arg.Is(brandId),
                 Arg.Any<string>(),
                 Arg.Is(EventAction.Create),
@@ -258,7 +263,7 @@ public class PlayerTests
         _ = fakePlayerRepository.Received(1)
             .UpdatePlayerSnapshotAsync(
                 Arg.Any<string>(),
-                Arg.Any<Guid>(),
+                Arg.Is(eventId),
                 Arg.Any<DateTime>());
     }
 
