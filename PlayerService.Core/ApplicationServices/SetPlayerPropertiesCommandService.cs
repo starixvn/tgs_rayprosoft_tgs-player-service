@@ -55,12 +55,12 @@ internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerProp
             if (value == null)
             {
                 dataCommands.Add(_dataCommandBuilder.CreateDeleteCommand(key));
-                patchOperations = patchOperations.Append(PatchOperation.Remove(JsonPointer.Parse($"/{key}"))).ToArray();
+                patchOperations = patchOperations.Append(PatchOperation.Remove(JsonPointer.Parse($"/properties/{key}"))).ToArray();
             }
             else
             {
                 dataCommands.Add(_dataCommandBuilder.CreatePutCommand(key, value));
-                patchOperations = patchOperations.Append(PatchOperation.Replace(JsonPointer.Parse($"/{key}"), value)).ToArray();
+                patchOperations = patchOperations.Append(PatchOperation.Replace(JsonPointer.Parse($"/properties/{key}"), value)).ToArray();
             }
         }
 
