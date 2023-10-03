@@ -53,6 +53,27 @@ internal class PlayerServiceClient : IPlayerServiceClient
         return JsonSerializer.Deserialize<int>(content, _SerializerOptions);
     }
 
+    public ValueTask<int> CountPlayerHistoriesAsync(GetPlayerHistoriesQueryConditions conditions, CancellationToken cancellationToken = default)
+    {
+        var queryStrings = HttpUtility.ParseQueryString(string.Empty);
+
+        queryStrings.Add("from", conditions.From.ToString("o"));
+        queryStrings.Add("to", conditions.To.ToString("o"));
+
+        var requestPath = $"/player/histories/{conditions.PlayerCode}?{queryStrings}";
+        var countRequest = new HttpRequestMessage(HttpMethod.Head, $"{requestPath}");
+
+        return _httpClient.SendAsync(countRequest, cancellationToken)
+            .ToAsyncEnumerable()
+            .Do(response => response.EnsureSuccessStatusCode())
+            .SelectMany(response => response.Headers
+                .GetValues("Tgs-Return")
+                .ToAsyncEnumerable()
+                .Take(1))
+            .Select(int.Parse)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async ValueTask<int> CountReportDateRegisterPlayersAsync(Guid brandId, DateOnly reportDate, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient
@@ -160,17 +181,13 @@ internal class PlayerServiceClient : IPlayerServiceClient
             .SelectMany(count => AsyncEnumerable.Range(0, (int)Math.Ceiling(count / 1000D))
                 .SelectMany(idx => _httpClient.GetAsync($"/player/histories/{conditions.PlayerCode}?{queryStrings}&skip={skip + idx * 1000}")
                     .ToAsyncEnumerable()
-                    .Do(response =>
-                    {
-                        _ = response.EnsureSuccessStatusCode();
-                        _ = response.Headers.GetValues("Tgs-Return").ToAsyncEnumerable().Take(1).Select(int.Parse).FirstOrDefaultAsync(cancellationToken);
-                    })
+                    .Do(response => response.EnsureSuccessStatusCode())
                     .SelectMany(response => response.Content
                         .ReadFromJsonAsync<IAsyncEnumerable<PlayerHistoryInfo>>(_SerializerOptions, cancellationToken)
                         .ToAsyncEnumerable()
                         .Where(arr => arr is not null)
                         .SelectMany(arr => arr!))))
-            .Select(record => record); ;
+            .Select(record => record);
     }
 
     public async ValueTask<PlayerEventInfo?> GetPlayerHistoryAsync(Guid eventId, CancellationToken cancellationToken = default)

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,25 @@ public class PlayerController : ControllerBase
         [FromServices] IGetService<CurrentDayRegisterQuery, int> getService,
         Guid brandId)
         => getService.GetAsync(new CurrentDayRegisterQuery(brandId), HttpContext.RequestAborted);
+
+    [HttpHead("histories/{playerCode}", Name = "CountPlayerHistories")]
+    [Description("查詢玩家操作紀錄總筆數")]
+    public async Task<NoContentResult> CountPlayerHistoriesAsync(
+        [FromServices] IGetService<GetPlayerHistoriesQuery, int> countService,
+        string playerCode,
+        [FromQuery] PlayerHistoryQueryViewModel request,
+        [FromQuery(Name = "skip")] int skip = 0)
+    {
+        var query = new GetPlayerHistoriesQuery(playerCode, request.From, request.To, skip);
+
+        var count = await countService
+            .GetAsync(query, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        HttpContext.Response.Headers.Add("Tgs-Return", count.ToString());
+
+        return NoContent();
+    }
 
     [HttpGet("register/report-date/{brandId}")]
     public ValueTask<int> CountReportDateRegisterPlayersAsync(
@@ -120,25 +140,21 @@ public class PlayerController : ControllerBase
             HttpContext.RequestAborted);
 
     [HttpGet("histories/{playerCode}", Name = "GetPlayerHistories")]
+    [Description("查詢玩家操作紀錄")]
     public IAsyncEnumerable<PlayerHistoryInfoViewModel> GetPlayerHistoriesAsync(
         [FromServices] IQueryService<GetPlayerHistoriesQuery, PlayerHistoryInfo> queryService,
-        [FromServices] IGetService<GetPlayerHistoriesQuery, int> countService,
         string playerCode,
         [FromQuery] PlayerHistoryQueryViewModel request,
         [FromQuery(Name = "skip")] int skip = 0)
     {
         var query = new GetPlayerHistoriesQuery(playerCode, request.From, request.To, skip);
 
-        var totalCount = countService.GetAsync(query, HttpContext.RequestAborted).ConfigureAwait(false);
-
-        HttpContext.Response.Headers.Add("Tgs-Return", totalCount.ToString());
-
         return queryService.QueryAsync(query, HttpContext.RequestAborted)
-            .Select(row => new PlayerHistoryInfoViewModel(
-                row.EventId,
-                row.Action,
-                row.Modifier,
-                row.CreatedOn));
+            .Select(item => new PlayerHistoryInfoViewModel(
+                item.EventId,
+                item.Action,
+                item.Modifier,
+                item.CreatedOn));
     }
 
     [HttpGet("history/{eventId}", Name = "GetPlayerHistory")]

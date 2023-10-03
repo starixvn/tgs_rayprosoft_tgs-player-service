@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +6,7 @@ using Tgs.Core.Infrastructures.Utility;
 using Tgs.Paging;
 using Tgs.PlayerService.Repositories.Entities;
 using Tgs.SerialNumberGenerator;
+
 namespace Tgs.PlayerService.Repositories;
 
 internal class PlayerRepository : IPlayerRepository
@@ -78,13 +78,9 @@ internal class PlayerRepository : IPlayerRepository
     }
 
     public async ValueTask<int> CountPlayerEventAsync(PlayerEventQueryConditions conditions, CancellationToken cancellationToken = default)
-    {
-        var dataQuery = MakePlayerHistoriesQuery(conditions);
-
-        return await dataQuery
+        => await MakePlayerHistoriesQuery(conditions)
             .CountAsync(cancellationToken)
             .ConfigureAwait(false);
-    }
 
     public async ValueTask<int> CountYesterdayReigsterAsync(Guid brandId, CancellationToken cancellationToken = default)
     {
@@ -212,21 +208,6 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
     }
 
-    public async ValueTask<EventInfo?> GetPlayerEventAsync(Guid eventId, CancellationToken cancellationToken = default)
-    {
-        var eventSource = await _dbContext.PlayerEventSources
-            .FirstOrDefaultAsync(p => p.Id == eventId, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        return eventSource is null
-            ? null
-            : new EventInfo(
-                Enum.Parse<EventAction>(eventSource.Action),
-                JsonDocument.Parse(eventSource.ChangeSets),
-                eventSource.ModifyUser,
-                eventSource.CreatedOn);
-    }
-
     public async ValueTask<string?> GetParentPlayerCodeAsync(
         string playerCode,
         CancellationToken cancellationToken = default)
@@ -254,6 +235,21 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
 
         return player?.AccumulatedDeposit ?? 0;
+    }
+
+    public async ValueTask<EventInfo?> GetPlayerEventAsync(Guid eventId, CancellationToken cancellationToken = default)
+    {
+        var eventSource = await _dbContext.PlayerEventSources
+            .FirstOrDefaultAsync(p => p.Id == eventId, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return eventSource is null
+            ? null
+            : new EventInfo(
+                Enum.Parse<EventAction>(eventSource.Action),
+                JsonDocument.Parse(eventSource.ChangeSets),
+                eventSource.ModifyUser,
+                eventSource.CreatedOn);
     }
 
     public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(
@@ -471,29 +467,24 @@ internal class PlayerRepository : IPlayerRepository
         int skip = 0,
         CancellationToken cancellationToken = default)
     {
-        var dataQuery = MakePlayerHistoriesQuery(conditions)
-            .Select(p => new PlayerHistoryInfo(
-                p.Id,
-                p.Action,
-                p.ModifyUser,
-                p.CreatedOn));
+        var dataQuery = MakePlayerHistoriesQuery(conditions);
 
         return dataQuery
             .OrderByDescending(record => record.CreatedOn)
             .Select(record => new
             {
-                record.EventId,
+                record.Id,
                 record.Action,
-                record.Modifier,
+                record.ModifyUser,
                 record.CreatedOn,
             })
             .Skip(skip)
             .Take(1000)
             .ToAsyncEnumerable()
             .Select(row => new PlayerHistoryInfo(
-                row.EventId,
+                row.Id,
                 row.Action,
-                row.Modifier,
+                row.ModifyUser,
                 row.CreatedOn));
     }
 
@@ -1041,10 +1032,11 @@ internal class PlayerRepository : IPlayerRepository
 
     private IQueryable<PlayerEventSource> MakePlayerHistoriesQuery(PlayerEventQueryConditions conditions)
     {
-        var dataQuery = _dbContext.PlayerEventSources.AsQueryable()
-            .Where(p => p.PlayerCode == conditions.PlayerCode
-                && p.CreatedOn >= conditions.From
-                && p.CreatedOn < conditions.To);
+        var dataQuery = from p in _dbContext.PlayerEventSources.AsQueryable()
+                        where p.PlayerCode == conditions.PlayerCode
+                            && p.CreatedOn >= conditions.From
+                            && p.CreatedOn < conditions.To
+                        select p;
 
         return dataQuery;
     }
