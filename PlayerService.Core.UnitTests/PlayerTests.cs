@@ -759,8 +759,8 @@ public class PlayerTests
         var sut = new GetPlayerHistoriesQueryService(fakePlayerRepository);
 
         var playerCode = "playerCode";
-        var from = DateTimeOffset.Now.AddDays(-14);
-        var to = DateTimeOffset.Now;
+        var from = DateTime.Now.AddDays(-14);
+        var to = DateTime.Now;
         var skip = 10;
 
         _ = await sut.QueryAsync(new GetPlayerHistoriesQuery(playerCode, from, to, skip)).ToArrayAsync();
@@ -792,8 +792,8 @@ public class PlayerTests
         var sut = new GetPlayerHistoriesQueryService(fakePlayerRepository);
 
         var playerCode = "playerCode";
-        var from = DateTimeOffset.Now.AddDays(-14);
-        var to = DateTimeOffset.Now;
+        var from = DateTime.Now.AddDays(-14);
+        var to = DateTime.Now;
         var skip = 10;
 
         _ = await sut.GetAsync(new GetPlayerHistoriesQuery(playerCode, from, to, skip));

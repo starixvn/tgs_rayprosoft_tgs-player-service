@@ -2,5 +2,5 @@
 
 public record PlayerEventQueryConditions(
     string PlayerCode,
-    DateTimeOffset From,
-    DateTimeOffset To);
+    DateTime From,
+    DateTime To);
