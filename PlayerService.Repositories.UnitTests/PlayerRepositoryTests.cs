@@ -91,8 +91,8 @@ public class PlayerRepositoryTests
 
         var actual = await sut.QueryPlayerEventAsync(new PlayerEventQueryConditions(
             playerCode,
-            DateTimeOffset.Now.AddDays(-14),
-            DateTimeOffset.Now),
+            DateTime.Now.AddDays(-14),
+            DateTime.Now),
             0).ToArrayAsync();
 
         Assert.That(actual, Has.Length.EqualTo(1));
@@ -166,8 +166,8 @@ public class PlayerRepositoryTests
 
         var actual = await sut.CountPlayerEventAsync(new PlayerEventQueryConditions(
             playerCode,
-            DateTimeOffset.Now.AddDays(-14),
-            DateTimeOffset.Now));
+            DateTime.Now.AddDays(-14),
+            DateTime.Now));
 
         Assert.That(actual, Is.EqualTo(1));
     }
