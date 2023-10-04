@@ -2,6 +2,6 @@
 
 public record PlayerHistoryInfoViewModel(
     Guid EventId,
-    string Action,
+    EventAction Action,
     string? Modifier,
     DateTimeOffset CreatedOn);

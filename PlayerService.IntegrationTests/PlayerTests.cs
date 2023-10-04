@@ -1429,7 +1429,7 @@ public class PlayerTests
         var actual = await sut.GetPlayerHistoriesAsync(conditions, 10, 0).ToArrayAsync();
 
         Assert.AreEqual(1, actual.Length);
-        Assert.AreEqual(EventAction.Create.ToString(), actual[0].Action);
+        Assert.AreEqual(Client.EventAction.Create, actual[0].Action);
         Assert.AreEqual(eventId, actual[0].EventId);
     }
 
