@@ -2,6 +2,6 @@
 
 public record GetPlayerHistoriesQuery(
     string PlayerCode,
-    DateTimeOffset From,
-    DateTimeOffset To,
+    DateTime From,
+    DateTime To,
     int Skip = 0);

@@ -5,8 +5,8 @@ namespace Tgs.PlayerService.ViewModels;
 public class PlayerHistoryQueryViewModel
 {
     [FromQuery(Name = "from")]
-    public DateTimeOffset From { get; set; }
+    public DateTime From { get; set; }
 
     [FromQuery(Name = "to")]
-    public DateTimeOffset To { get; set; }
+    public DateTime To { get; set; }
 }

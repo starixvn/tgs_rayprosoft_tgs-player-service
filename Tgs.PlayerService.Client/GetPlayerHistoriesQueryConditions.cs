@@ -2,5 +2,5 @@
 
 public record GetPlayerHistoriesQueryConditions(
     string PlayerCode,
-    DateTimeOffset From,
-    DateTimeOffset To);
+    DateTime From,
+    DateTime To);

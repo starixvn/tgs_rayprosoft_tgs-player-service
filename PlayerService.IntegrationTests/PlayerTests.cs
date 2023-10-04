@@ -1424,7 +1424,7 @@ public class PlayerTests
 
         _ = await dbContext.SaveChangesAsync();
 
-        var conditions = new GetPlayerHistoriesQueryConditions(playerCode, DateTimeOffset.Now.AddDays(-14), DateTimeOffset.Now);
+        var conditions = new GetPlayerHistoriesQueryConditions(playerCode, DateTime.Now.AddDays(-14), DateTime.Now);
 
         var actual = await sut.GetPlayerHistoriesAsync(conditions, 10, 0).ToArrayAsync();
 
@@ -1462,7 +1462,7 @@ public class PlayerTests
 
         _ = await dbContext.SaveChangesAsync();
 
-        var conditions = new GetPlayerHistoriesQueryConditions(playerCode, DateTimeOffset.Now.AddDays(-14), DateTimeOffset.Now);
+        var conditions = new GetPlayerHistoriesQueryConditions(playerCode, DateTime.Now.AddDays(-14), DateTime.Now);
 
         var actual = await sut.CountPlayerHistoriesAsync(conditions);
 
