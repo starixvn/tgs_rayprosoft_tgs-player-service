@@ -2,7 +2,7 @@
 
 public class PlayerHistoryInfo
 {
-    public string Action { get; set; } = default!;
+    public EventAction Action { get; set; } = default!;
 
     public DateTimeOffset CreatedOn { get; set; }
 

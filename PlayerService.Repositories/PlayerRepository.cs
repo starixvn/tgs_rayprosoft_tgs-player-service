@@ -483,7 +483,7 @@ internal class PlayerRepository : IPlayerRepository
             .ToAsyncEnumerable()
             .Select(row => new PlayerHistoryInfo(
                 row.Id,
-                row.Action,
+                Enum.Parse<EventAction>(row.Action),
                 row.ModifyUser,
                 row.CreatedOn));
     }
