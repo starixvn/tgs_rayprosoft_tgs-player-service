@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json;
+using Tgs.Paging;
 
 namespace Tgs.PlayerService;
 
@@ -14,9 +16,20 @@ public interface IPlayerRepository
 
     ValueTask<int> CountCurrentDayLoginAsync(Guid brandId, CancellationToken cancellationToken = default);
 
+    ValueTask<int> CountPlayerEventAsync(PlayerEventQueryConditions conditions, CancellationToken cancellationToken = default);
+
     ValueTask<int> CountYesterdayReigsterAsync(Guid brandId, CancellationToken cancellationToken = default);
 
     ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default);
+
+    ValueTask CreatePlayerEventAsync(
+        Guid eventId,
+        Guid brandId,
+        string playerCode,
+        EventAction action,
+        JsonDocument changeSets,
+        string? modifier,
+        CancellationToken cancellationToken = default);
 
     ValueTask CreatePlayerTagAsync(string playerCode, string tag, CancellationToken cancellationToken = default);
 
@@ -27,6 +40,8 @@ public interface IPlayerRepository
     IAsyncEnumerable<PlayerCountInfo> GetPlayerCountByBrandIdAsync(Guid brandId, CancellationToken cancellationToken = default);
 
     ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
+
+    ValueTask<EventInfo?> GetPlayerEventAsync(Guid eventId, CancellationToken cancellationToken = default);
 
     ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
 
@@ -48,6 +63,11 @@ public interface IPlayerRepository
         CancellationToken cancellationToken = default);
 
     ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<PlayerHistoryInfo> QueryPlayerEventAsync(
+        PlayerEventQueryConditions conditions,
+        int skip = 0,
+        CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,
@@ -115,4 +135,10 @@ public interface IPlayerRepository
     ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status, CancellationToken cancellationToken = default);
 
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
+
+    ValueTask UpdatePlayerSnapshotAsync(
+        string playerCode,
+        Guid snapshotId,
+        DateTime updatedOn,
+        CancellationToken cancellationToken = default);
 }

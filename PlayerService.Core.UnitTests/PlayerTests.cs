@@ -1,5 +1,7 @@
 ﻿using System.Collections.Immutable;
-
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.MarketingReport.Client;
@@ -87,13 +89,20 @@ public class PlayerTests
 
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
-        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder, fakeSerialNumberGenerator, jsonOptionsAccessor);
 
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary(), "50ce61eb-8c9d-4f84-3cf6-08d9262ce1a5");
 
         _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
             .Returns(playerInfo);
+
+        var eventId = Guid.NewGuid();
+        _ = fakeSerialNumberGenerator
+            .GenerateAsync()
+            .Returns(eventId);
 
         await sut.ExecuteAsync(command).ConfigureAwait(false);
 
@@ -105,6 +114,18 @@ public class PlayerTests
                 playerInfo.BrandId,
                 playerInfo.PlayerCode,
                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CreatePlayerEventAsync(Arg.Is(eventId), Arg.Is(brandId), Arg.Is(playerCode), Arg.Is(EventAction.Update), Arg.Any<JsonDocument>(), Arg.Any<string?>());
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .UpdatePlayerSnapshotAsync(
+                playerCode: Arg.Is(playerCode),
+                Arg.Is(eventId),
+                Arg.Any<DateTime>(),
+                Arg.Any<CancellationToken>());
     }
 
     [Test]
@@ -134,13 +155,20 @@ public class PlayerTests
 
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
-        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder, fakeSerialNumberGenerator, jsonOptionsAccessor);
 
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary(), "50ce61eb-8c9d-4f84-3cf6-08d9262ce1a5");
 
         _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
             .Returns(playerInfo);
+
+        var eventId = Guid.NewGuid();
+        _ = fakeSerialNumberGenerator
+            .GenerateAsync()
+            .Returns(eventId);
 
         await sut.ExecuteAsync(command).ConfigureAwait(false);
 
@@ -158,6 +186,18 @@ public class PlayerTests
                 playerInfo.BrandId,
                 playerInfo.PlayerCode,
                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 3));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CreatePlayerEventAsync(Arg.Is(eventId), Arg.Is(brandId), Arg.Is(playerCode), Arg.Is(EventAction.Update), Arg.Any<JsonDocument>(), Arg.Any<string?>());
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .UpdatePlayerSnapshotAsync(
+                playerCode: Arg.Is(playerCode),
+                Arg.Is(eventId),
+                Arg.Any<DateTime>(),
+                Arg.Any<CancellationToken>());
     }
 
     [Test]
@@ -165,8 +205,16 @@ public class PlayerTests
     {
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
-        var sut = new CreatePlayerCommandService(fakePlayerRepository, fakePasswordHandler);
+        var sut = new CreatePlayerCommandService(
+            fakePlayerRepository,
+            fakePasswordHandler,
+            fakeSystemClock,
+            fakeSerialNumberGenerator,
+            jsonOptionsAccessor);
 
         var brandId = Guid.NewGuid();
         var agentId = Guid.NewGuid();
@@ -176,6 +224,10 @@ public class PlayerTests
         var username = "username";
         var password = "password";
         var agentName = "agentName";
+        var eventId = Guid.NewGuid();
+
+        _ = fakeSerialNumberGenerator.GenerateAsync()
+            .Returns(eventId);
 
         var query = new CreatePlayerCommand(
             brandId,
@@ -194,6 +246,24 @@ public class PlayerTests
 
         _ = fakePlayerRepository.Received(1)
             .CreatePlayerAsync(Arg.Any<CreatePlayerData>());
+
+        _ = fakePlayerRepository.Received(1)
+            .CreatePlayerTagAsync(Arg.Any<string>(), Arg.Any<string>());
+
+        _ = fakePlayerRepository.Received(1)
+            .CreatePlayerEventAsync(
+                Arg.Is(eventId),
+                Arg.Is(brandId),
+                Arg.Any<string>(),
+                Arg.Is(EventAction.Create),
+                Arg.Any<JsonDocument>(),
+                Arg.Any<string?>());
+
+        _ = fakePlayerRepository.Received(1)
+            .UpdatePlayerSnapshotAsync(
+                Arg.Any<string>(),
+                Arg.Is(eventId),
+                Arg.Any<DateTime>());
     }
 
     [Test]
@@ -287,13 +357,20 @@ public class PlayerTests
 
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
-        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder, fakeSerialNumberGenerator, jsonOptionsAccessor);
 
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary(), "50ce61eb-8c9d-4f84-3cf6-08d9262ce1a5");
 
         _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
             .Returns(playerInfo);
+
+        var eventId = Guid.NewGuid();
+        _ = fakeSerialNumberGenerator
+            .GenerateAsync()
+            .Returns(eventId);
 
         await sut.ExecuteAsync(command).ConfigureAwait(false);
 
@@ -311,6 +388,18 @@ public class PlayerTests
                 playerInfo.BrandId,
                 playerInfo.PlayerCode,
                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 3));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CreatePlayerEventAsync(Arg.Is(eventId), Arg.Is(brandId), Arg.Is(playerCode), Arg.Is(EventAction.Update), Arg.Any<JsonDocument>(), Arg.Any<string?>());
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .UpdatePlayerSnapshotAsync(
+                playerCode: Arg.Is(playerCode),
+                Arg.Is(eventId),
+                Arg.Any<DateTime>(),
+                Arg.Any<CancellationToken>());
     }
 
     [Test]
@@ -337,13 +426,20 @@ public class PlayerTests
 
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
-        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder, fakeSerialNumberGenerator, jsonOptionsAccessor);
 
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary(), "50ce61eb-8c9d-4f84-3cf6-08d9262ce1a5");
 
         _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
             .Returns(playerInfo);
+
+        var eventId = Guid.NewGuid();
+        _ = fakeSerialNumberGenerator
+            .GenerateAsync()
+            .Returns(eventId);
 
         await sut.ExecuteAsync(command).ConfigureAwait(false);
 
@@ -355,6 +451,18 @@ public class PlayerTests
                 playerInfo.BrandId,
                 playerInfo.PlayerCode,
                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CreatePlayerEventAsync(Arg.Is(eventId), Arg.Is(brandId), Arg.Is(playerCode), Arg.Is(EventAction.Update), Arg.Any<JsonDocument>(), Arg.Any<string?>());
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .UpdatePlayerSnapshotAsync(
+                playerCode: Arg.Is(playerCode),
+                Arg.Is(eventId),
+                Arg.Any<DateTime>(),
+                Arg.Any<CancellationToken>());
     }
 
     [Test]
@@ -381,13 +489,20 @@ public class PlayerTests
 
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
-        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder, fakeSerialNumberGenerator, jsonOptionsAccessor);
 
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary(), "50ce61eb-8c9d-4f84-3cf6-08d9262ce1a5");
 
         _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
             .Returns(playerInfo);
+
+        var eventId = Guid.NewGuid();
+        _ = fakeSerialNumberGenerator
+            .GenerateAsync()
+            .Returns(eventId);
 
         await sut.ExecuteAsync(command).ConfigureAwait(false);
 
@@ -399,6 +514,18 @@ public class PlayerTests
                 playerInfo.BrandId,
                 playerInfo.PlayerCode,
                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CreatePlayerEventAsync(Arg.Is(eventId), Arg.Is(brandId), Arg.Is(playerCode), Arg.Is(EventAction.Update), Arg.Any<JsonDocument>(), Arg.Any<string?>());
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .UpdatePlayerSnapshotAsync(
+                playerCode: Arg.Is(playerCode),
+                Arg.Is(eventId),
+                Arg.Any<DateTime>(),
+                Arg.Any<CancellationToken>());
     }
 
     [Test]
@@ -425,13 +552,20 @@ public class PlayerTests
 
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
-        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder);
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder, fakeSerialNumberGenerator, jsonOptionsAccessor);
 
-        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary());
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary(), "50ce61eb-8c9d-4f84-3cf6-08d9262ce1a5");
 
         _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
             .Returns(playerInfo);
+
+        var eventId = Guid.NewGuid();
+        _ = fakeSerialNumberGenerator
+            .GenerateAsync()
+            .Returns(eventId);
 
         await sut.ExecuteAsync(command).ConfigureAwait(false);
 
@@ -443,21 +577,59 @@ public class PlayerTests
                 playerInfo.BrandId,
                 playerInfo.PlayerCode,
                 Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CreatePlayerEventAsync(Arg.Is(eventId), Arg.Is(brandId), Arg.Is(playerCode), Arg.Is(EventAction.Update), Arg.Any<JsonDocument>(), Arg.Any<string?>());
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .UpdatePlayerSnapshotAsync(
+                playerCode: Arg.Is(playerCode),
+                Arg.Is(eventId),
+                Arg.Any<DateTime>(),
+                Arg.Any<CancellationToken>());
     }
 
     [Test]
     public async Task Set_Player_Status()
     {
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
-        var sut = new SetPlayerStatusCommandService(fakePlayerRepository);
+        var playerCode = "4ucmqplxb029";
+        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+        var eventId = Guid.NewGuid();
+        var modifier = "50ce61eb-8c9d-4f84-3cf6-08d9262ce1a5";
 
-        var command = new SetPlayerStatusCommand("player1", PlayerStatus.Enabled);
+        _ = fakePlayerRepository
+            .GetPlayerInfoAsync(playerCode)
+            .Returns(new PlayerInfo(playerCode, brandId, "4ucmqplxb029", true, true, true, true, Guid.NewGuid(), DateTime.Now.AddDays(-1)));
+
+        _ = fakeSerialNumberGenerator.GenerateAsync()
+            .Returns(eventId);
+
+        var sut = new SetPlayerStatusCommandService(fakePlayerRepository, fakeSystemClock, fakeSerialNumberGenerator);
+
+        var command = new SetPlayerStatusCommand(playerCode, PlayerStatus.Enabled, modifier);
 
         await sut.ExecuteAsync(command);
 
         _ = fakePlayerRepository.Received(1)
             .SetPlayerStatusAsync(Arg.Is(command.PlayerCode), Arg.Is(command.Status));
+
+        _ = fakePlayerRepository.Received(1)
+            .CreatePlayerEventAsync(
+                Arg.Is(eventId),
+                Arg.Is(brandId),
+                Arg.Is(playerCode),
+                Arg.Is(EventAction.Update),
+                Arg.Any<JsonDocument>(),
+                Arg.Is(modifier));
+
+        _ = fakePlayerRepository.Received(1)
+            .UpdatePlayerSnapshotAsync(Arg.Is(playerCode), Arg.Is(eventId), Arg.Any<DateTime>());
     }
 
     [Test]
@@ -577,6 +749,57 @@ public class PlayerTests
 
         _ = fakePlayerRepository.Received(1)
             .GetPlayerInfoAsync(Arg.Is("parent1"));
+    }
+
+    [Test]
+    public async Task 查詢玩家Event_Source()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerHistoriesQueryService(fakePlayerRepository);
+
+        var playerCode = "playerCode";
+        var from = DateTimeOffset.Now.AddDays(-14);
+        var to = DateTimeOffset.Now;
+        var skip = 10;
+
+        _ = await sut.QueryAsync(new GetPlayerHistoriesQuery(playerCode, from, to, skip)).ToArrayAsync();
+
+        _ = fakePlayerRepository.Received(1)
+            .QueryPlayerEventAsync(Arg.Is(new PlayerEventQueryConditions(playerCode, from, to)), Arg.Is(skip));
+    }
+
+    [Test]
+    public async Task 查詢玩家Event_Source_細項()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerEventQueryService(fakePlayerRepository);
+
+        var eventId = Guid.NewGuid();
+
+        _ = await sut.GetAsync(new GetPlayerEventQuery(eventId));
+
+        _ = fakePlayerRepository.Received(1)
+            .GetPlayerEventAsync(Arg.Is(eventId));
+    }
+
+    [Test]
+    public async Task 查詢玩家Event_Source總筆數()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+        var sut = new GetPlayerHistoriesQueryService(fakePlayerRepository);
+
+        var playerCode = "playerCode";
+        var from = DateTimeOffset.Now.AddDays(-14);
+        var to = DateTimeOffset.Now;
+        var skip = 10;
+
+        _ = await sut.GetAsync(new GetPlayerHistoriesQuery(playerCode, from, to, skip));
+
+        _ = fakePlayerRepository.Received(1)
+            .CountPlayerEventAsync(Arg.Is(new PlayerEventQueryConditions(playerCode, from, to)));
     }
 
     [Test]

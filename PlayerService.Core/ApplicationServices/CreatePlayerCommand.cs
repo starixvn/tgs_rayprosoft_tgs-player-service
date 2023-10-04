@@ -1,4 +1,5 @@
 ﻿namespace Tgs.PlayerService.ApplicationServices;
+
 public record CreatePlayerCommand(
     Guid BrandId,
     Guid? AgentId,

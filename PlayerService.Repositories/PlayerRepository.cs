@@ -1,7 +1,9 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
+using Tgs.Paging;
 using Tgs.PlayerService.Repositories.Entities;
 using Tgs.SerialNumberGenerator;
 
@@ -75,6 +77,11 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
     }
 
+    public async ValueTask<int> CountPlayerEventAsync(PlayerEventQueryConditions conditions, CancellationToken cancellationToken = default)
+        => await MakePlayerHistoriesQuery(conditions)
+            .CountAsync(cancellationToken)
+            .ConfigureAwait(false);
+
     public async ValueTask<int> CountYesterdayReigsterAsync(Guid brandId, CancellationToken cancellationToken = default)
     {
         var currentDay = new DateTimeOffset(
@@ -147,6 +154,33 @@ internal class PlayerRepository : IPlayerRepository
         return playerCode;
     }
 
+    public async ValueTask CreatePlayerEventAsync(
+        Guid eventId,
+        Guid brandId,
+        string playerCode,
+        EventAction action,
+        JsonDocument changeSets,
+        string? modifier,
+        CancellationToken cancellationToken = default)
+    {
+        _ = await _dbContext.PlayerEventSources.AddAsync(
+            new PlayerEventSource
+            {
+                Id = eventId,
+                BrandId = brandId,
+                Action = action.ToString(),
+                PlayerCode = playerCode,
+                ChangeSets = JsonSerializer.Serialize(changeSets),
+                ModifyUser = modifier,
+                CreatedOn = DateTime.UtcNow,
+            },
+            cancellationToken).ConfigureAwait(false);
+
+        _ = await _dbContext
+            .SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async ValueTask CreatePlayerTagAsync(string playerCode, string tag,
         CancellationToken cancellationToken = default)
     {
@@ -201,6 +235,21 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
 
         return player?.AccumulatedDeposit ?? 0;
+    }
+
+    public async ValueTask<EventInfo?> GetPlayerEventAsync(Guid eventId, CancellationToken cancellationToken = default)
+    {
+        var eventSource = await _dbContext.PlayerEventSources
+            .FirstOrDefaultAsync(p => p.Id == eventId, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return eventSource is null
+            ? null
+            : new EventInfo(
+                Enum.Parse<EventAction>(eventSource.Action),
+                JsonDocument.Parse(eventSource.ChangeSets),
+                eventSource.ModifyUser,
+                eventSource.CreatedOn);
     }
 
     public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(
@@ -412,6 +461,32 @@ internal class PlayerRepository : IPlayerRepository
             .Select(player => (short?)player.Status)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false) ?? 1);
+
+    public IAsyncEnumerable<PlayerHistoryInfo> QueryPlayerEventAsync(
+        PlayerEventQueryConditions conditions,
+        int skip = 0,
+        CancellationToken cancellationToken = default)
+    {
+        var dataQuery = MakePlayerHistoriesQuery(conditions);
+
+        return dataQuery
+            .OrderByDescending(record => record.CreatedOn)
+            .Select(record => new
+            {
+                record.Id,
+                record.Action,
+                record.ModifyUser,
+                record.CreatedOn,
+            })
+            .Skip(skip)
+            .Take(1000)
+            .ToAsyncEnumerable()
+            .Select(row => new PlayerHistoryInfo(
+                row.Id,
+                row.Action,
+                row.ModifyUser,
+                row.CreatedOn));
+    }
 
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,
@@ -895,6 +970,25 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    public async ValueTask UpdatePlayerSnapshotAsync(string playerCode, Guid snapshotId, DateTime updatedOn, CancellationToken cancellationToken = default)
+    {
+        var dbSnapshot = await _dbContext.Players
+            .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)
+            .ConfigureAwait(false)
+            ?? (await _dbContext.Players.AddAsync(new Player
+            {
+                PlayerCode = playerCode
+            }, cancellationToken).ConfigureAwait(false)).Entity;
+
+        if (dbSnapshot.SnapshotEventId is null || dbSnapshot.SnapshotEventId.Value.CompareTo(snapshotId) == -1)
+        {
+            dbSnapshot.SnapshotEventId = snapshotId;
+            dbSnapshot.UpdatedOn = updatedOn;
+        }
+
+        _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
     private IQueryable<Player> InternalQueryPlayerList(
         Guid brandId,
         PlayerStatus? status = null,
@@ -934,5 +1028,16 @@ internal class PlayerRepository : IPlayerRepository
             players = players.Where(p => p.RegisteredOn < endRegisterTime.Value.ToUniversalTime());
 
         return players;
+    }
+
+    private IQueryable<PlayerEventSource> MakePlayerHistoriesQuery(PlayerEventQueryConditions conditions)
+    {
+        var dataQuery = from p in _dbContext.PlayerEventSources.AsQueryable()
+                        where p.PlayerCode == conditions.PlayerCode
+                            && p.CreatedOn >= conditions.From
+                            && p.CreatedOn < conditions.To
+                        select p;
+
+        return dataQuery;
     }
 }

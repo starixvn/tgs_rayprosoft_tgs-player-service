@@ -1,4 +1,10 @@
-﻿using Tgs.ServiceUtility;
+﻿using System.Text.Json;
+using Json.Patch;
+using Json.Pointer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Tgs.SerialNumberGenerator;
+using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
@@ -6,13 +12,19 @@ internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerProp
 {
     private readonly IDataCommandBuilder _dataCommandBuilder;
     private readonly IPlayerRepository _playerRepository;
+    private readonly JsonSerializerOptions _serializerOptions;
+    private readonly ISerialNumberGenerator _serialNumberGenerator;
 
     public SetPlayerPropertiesCommandService(
         IPlayerRepository playerRepository,
-        IDataCommandBuilder dataCommandBuilder)
+        IDataCommandBuilder dataCommandBuilder,
+        ISerialNumberGenerator serialNumberGenerator,
+        IOptions<JsonOptions> jsonOptionsAccessor)
     {
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _dataCommandBuilder = dataCommandBuilder ?? throw new ArgumentNullException(nameof(dataCommandBuilder));
+        _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+        _serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
     }
 
     public async ValueTask ExecuteAsync(
@@ -29,6 +41,8 @@ internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerProp
             StringComparer.OrdinalIgnoreCase);
         var dataCommands = new List<IDataCommand>();
 
+        var patchOperations = Array.Empty<PatchOperation>();
+
         foreach (var (key, value) in command.Properties
             .Select(kv => (
                 KV: kv,
@@ -39,13 +53,40 @@ internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerProp
             .ToDictionary(g => g.RegularName!, g => g.KV.Value))
         {
             if (value == null)
+            {
                 dataCommands.Add(_dataCommandBuilder.CreateDeleteCommand(key));
+                patchOperations = patchOperations.Append(PatchOperation.Remove(JsonPointer.Parse($"/properties/{key}"))).ToArray();
+            }
             else
+            {
                 dataCommands.Add(_dataCommandBuilder.CreatePutCommand(key, value));
+                patchOperations = patchOperations.Append(PatchOperation.Replace(JsonPointer.Parse($"/properties/{key}"), value)).ToArray();
+            }
         }
 
         await _playerRepository
             .SetPlayerPropertiesAsync(player.BrandId, player.PlayerCode, dataCommands, cancellationToken)
             .ConfigureAwait(false);
+
+        var changeSets = new JsonPatch(patchOperations);
+        var eventId = await _serialNumberGenerator
+            .GenerateAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var currentTime = DateTimeOffset.UtcNow.UtcDateTime;
+
+        await _playerRepository.CreatePlayerEventAsync(
+            eventId,
+            player.BrandId,
+            player.PlayerCode,
+            EventAction.Update,
+            JsonSerializer.SerializeToDocument(changeSets, _serializerOptions),
+            command.Modifier,
+            cancellationToken).ConfigureAwait(false);
+
+        await _playerRepository.UpdatePlayerSnapshotAsync(
+            player.PlayerCode,
+            eventId,
+            currentTime, cancellationToken).ConfigureAwait(false);
     }
 }

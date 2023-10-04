@@ -1244,7 +1244,7 @@ public class PlayerTests
     [Test]
     public async Task 指定日期玩家註冊人數_查詢前天()
     {
-        await using var web = new TestPlayerServiceApplication();        
+        await using var web = new TestPlayerServiceApplication();
 
         var httpClient = web.CreateClient();
 
@@ -1257,7 +1257,7 @@ public class PlayerTests
 
         _ = fakeSystemClock.UtcNow
             .Returns(new DateTimeOffset(2023, 9, 12, 0, 0, 0, TimeSpan.FromHours(8d)));
-        
+
         var fakeMarketingReportClient = web.Services.GetRequiredService<IMarketingReportClient>();
         _ = fakeMarketingReportClient
             .QueryBrandMarketingStatisticsAsync(brandId, reportDate, Arg.Any<CancellationToken>())
@@ -1277,47 +1277,6 @@ public class PlayerTests
     }
 
     [Test]
-    public async Task 指定日期玩家註冊人數_查詢當天()
-    {
-        await using var web = new TestPlayerServiceApplication();
-
-        var httpClient = web.CreateClient();
-
-        var sut = new PlayerServiceClient(httpClient);
-
-        var brandId = Guid.NewGuid();
-        var reportDate = DateOnly.Parse("2023-09-12");
-
-        var fakeSystemClock = web.Services.GetRequiredService<ISystemClock>();
-
-        _ = fakeSystemClock.UtcNow
-            .Returns(new DateTimeOffset(2023, 9, 12, 20, 0, 0, TimeSpan.FromHours(8d)));
-
-        var dbContext = web.Services.GetRequiredService<TgsContext>();
-
-        _ = await dbContext.Players.AddAsync(new Player
-        {
-            PlayerCode = "playerCode",
-            BrandId = brandId,
-            RegisteredOn = new DateTime(2023, 9, 12, 18, 0, 0),
-            DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
-            Username = "playerCode",
-            RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
-            Status = (short)PlayerStatus.RegisterUndone,
-        });
-
-        _ = await dbContext.SaveChangesAsync();    
-
-        var actual = await sut.CountReportDateRegisterPlayersAsync(brandId, reportDate);
-
-        Assert.AreEqual(1, actual);
-    }
-
-    [Test]
     public async Task 指定日期玩家註冊人數_查詢昨天()
     {
         await using var web = new TestPlayerServiceApplication();
@@ -1333,7 +1292,7 @@ public class PlayerTests
 
         var now = DateTimeOffset.UtcNow;
         _ = fakeSystemClock.UtcNow
-            .Returns(new DateTimeOffset(now.Year,now.Month,now.Day,6,0,0,TimeSpan.FromHours(8d)));
+            .Returns(new DateTimeOffset(now.Year, now.Month, now.Day, 6, 0, 0, TimeSpan.FromHours(8d)));
 
         var dbContext = web.Services.GetRequiredService<TgsContext>();
 
@@ -1357,6 +1316,126 @@ public class PlayerTests
         var actual = await sut.CountReportDateRegisterPlayersAsync(brandId, reportDate);
 
         Assert.AreEqual(1, actual);
+    }
+
+    [Test]
+    public async Task 指定日期玩家註冊人數_查詢當天()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var now = DateTimeOffset.UtcNow;
+        var reportDate = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var fakeSystemClock = web.Services.GetRequiredService<ISystemClock>();
+
+        _ = fakeSystemClock.UtcNow
+            .Returns(new DateTimeOffset(now.Year, now.Month, now.Day, 10, 0, 0, TimeSpan.FromHours(8d)));
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = "playerCode",
+            BrandId = brandId,
+            RegisteredOn = now.DateTime,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "playerCode",
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Status = (short)PlayerStatus.RegisterUndone,
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.CountReportDateRegisterPlayersAsync(brandId, reportDate);
+
+        Assert.AreEqual(1, actual);
+    }
+
+    [Test]
+    public async Task 查詢玩家操作紀錄()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = "player1";
+        var eventId = Guid.NewGuid();
+
+        var playerEvent = new PlayerEventSource
+        {
+            Id = eventId,
+            PlayerCode = playerCode,
+            BrandId = Guid.NewGuid(),
+            ChangeSets = "{}",
+            Action = EventAction.Create.ToString(),
+            CreatedOn = DateTime.UtcNow.AddDays(-1),
+        };
+
+        _ = await dbContext.PlayerEventSources
+            .AddAsync(playerEvent);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var conditions = new GetPlayerHistoriesQueryConditions
+        {
+            PlayerCode = playerCode,
+            From = DateTimeOffset.Now.AddDays(-14),
+            To = DateTimeOffset.Now
+        };
+
+        var actual = await sut.GetPlayerHistoriesAsync(conditions, 10, 0).ToArrayAsync();
+
+        Assert.AreEqual(1, actual.Length);
+        Assert.AreEqual(EventAction.Create.ToString(), actual[0].Action);
+        Assert.AreEqual(eventId, actual[0].EventId);
+    }
+
+    [Test]
+    public async Task 查詢玩家操作紀錄細項()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = "player1";
+        var eventId = Guid.NewGuid();
+
+        var playerEvent = new PlayerEventSource
+        {
+            Id = eventId,
+            PlayerCode = playerCode,
+            BrandId = Guid.NewGuid(),
+            ChangeSets = "{}",
+            Action = EventAction.Create.ToString(),
+            CreatedOn = DateTime.UtcNow.AddDays(-1),
+        };
+
+        _ = await dbContext.PlayerEventSources
+            .AddAsync(playerEvent);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerHistoryAsync(eventId);
+
+        Assert.NotNull(actual);
+        Assert.AreEqual(Client.EventAction.Create, actual!.Action);
     }
 
     [Test]

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Web;
 using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Tgs.PlayerService.Client;
@@ -50,6 +51,27 @@ internal class PlayerServiceClient : IPlayerServiceClient
         var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
         return JsonSerializer.Deserialize<int>(content, _SerializerOptions);
+    }
+
+    public ValueTask<int> CountPlayerHistoriesAsync(GetPlayerHistoriesQueryConditions conditions, CancellationToken cancellationToken = default)
+    {
+        var queryStrings = HttpUtility.ParseQueryString(string.Empty);
+
+        queryStrings.Add("from", conditions.From.ToString("o"));
+        queryStrings.Add("to", conditions.To.ToString("o"));
+
+        var requestPath = $"/player/histories/{conditions.PlayerCode}?{queryStrings}";
+        var countRequest = new HttpRequestMessage(HttpMethod.Head, $"{requestPath}");
+
+        return _httpClient.SendAsync(countRequest, cancellationToken)
+            .ToAsyncEnumerable()
+            .Do(response => response.EnsureSuccessStatusCode())
+            .SelectMany(response => response.Headers
+                .GetValues("Tgs-Return")
+                .ToAsyncEnumerable()
+                .Take(1))
+            .Select(int.Parse)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async ValueTask<int> CountReportDateRegisterPlayersAsync(Guid brandId, DateOnly reportDate, CancellationToken cancellationToken = default)
@@ -142,6 +164,54 @@ internal class PlayerServiceClient : IPlayerServiceClient
         var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
         return JsonSerializer.Deserialize<decimal>(content, _SerializerOptions);
+    }
+
+    public IAsyncEnumerable<PlayerHistoryInfo> GetPlayerHistoriesAsync(
+        GetPlayerHistoriesQueryConditions conditions,
+        int totalCount,
+        int skip = 0,
+        CancellationToken cancellationToken = default)
+    {
+        var queryStrings = HttpUtility.ParseQueryString(string.Empty);
+
+        queryStrings.Add("from", conditions.From.ToString("o"));
+        queryStrings.Add("to", conditions.To.ToString("o"));
+
+        return AsyncEnumerableEx.Return(totalCount)
+            .SelectMany(count => AsyncEnumerable.Range(0, (int)Math.Ceiling(count / 1000D))
+                .SelectMany(idx => _httpClient.GetAsync($"/player/histories/{conditions.PlayerCode}?{queryStrings}&skip={skip + idx * 1000}")
+                    .ToAsyncEnumerable()
+                    .Do(response => response.EnsureSuccessStatusCode())
+                    .SelectMany(response => response.Content
+                        .ReadFromJsonAsync<IAsyncEnumerable<PlayerHistoryInfo>>(_SerializerOptions, cancellationToken)
+                        .ToAsyncEnumerable()
+                        .Where(arr => arr is not null)
+                        .SelectMany(arr => arr!))))
+            .Select(record => record);
+    }
+
+    public async ValueTask<PlayerEventInfo?> GetPlayerHistoryAsync(Guid eventId, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient
+           .GetAsync($"/player/history/{eventId}", cancellationToken)
+           .ConfigureAwait(false);
+
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.OK:
+                {
+                    var content = await response.Content
+                        .ReadAsStringAsync(cancellationToken)
+                        .ConfigureAwait(false);
+
+                    return JsonSerializer.Deserialize<PlayerEventInfo>(content, _SerializerOptions);
+                }
+            case HttpStatusCode.NotFound:
+                return null;
+
+            default:
+                throw new PlayerServiceApiException("Unknown error");
+        }
     }
 
     public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default)
@@ -480,12 +550,16 @@ internal class PlayerServiceClient : IPlayerServiceClient
     public async ValueTask SetPlayerPropertiesAsync(
         string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
+        string? modifyUser = null,
         CancellationToken cancellationToken = default)
     {
         var requestContent = new StringContent(
             JsonSerializer.Serialize(properties, _SerializerOptions),
             Encoding.UTF8,
             MediaTypeNames.Application.Json);
+
+        if (!string.IsNullOrWhiteSpace(modifyUser))
+            requestContent.Headers.Add("ModifyUser", modifyUser);
 
         var response = await _httpClient
             .PostAsync($"/player/prop/{playerCode}", requestContent, cancellationToken)
@@ -497,12 +571,16 @@ internal class PlayerServiceClient : IPlayerServiceClient
     public async ValueTask SetPlayerStatusAsync(
         string playerCode,
         PlayerStatus playerStatus,
+        string? modifyUser = null,
         CancellationToken cancellationToken = default)
     {
         var requestContent = new StringContent(
             JsonSerializer.Serialize(playerStatus, _SerializerOptions),
             Encoding.UTF8,
             MediaTypeNames.Application.Json);
+
+        if (!string.IsNullOrWhiteSpace(modifyUser))
+            requestContent.Headers.Add("ModifyUser", modifyUser);
 
         var response = await _httpClient
             .PutAsync($"/player/status/{playerCode}", requestContent, cancellationToken)

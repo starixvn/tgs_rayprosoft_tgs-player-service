@@ -8,6 +8,8 @@ public interface IPlayerServiceClient
 
     ValueTask<int> CountCurrentDayRegisterPlayersAsync(Guid brandId, CancellationToken cancellationToken = default);
 
+    ValueTask<int> CountPlayerHistoriesAsync(GetPlayerHistoriesQueryConditions conditions, CancellationToken cancellationToken = default);
+
     ValueTask<int> CountReportDateRegisterPlayersAsync(Guid brandId, DateOnly reportDate, CancellationToken cancellationToken = default);
 
     ValueTask<string> CreatePlayerAsync(CreatePlayerData data, CancellationToken cancellationToken = default);
@@ -23,6 +25,14 @@ public interface IPlayerServiceClient
         CancellationToken cancellationToken = default);
 
     ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<PlayerHistoryInfo> GetPlayerHistoriesAsync(
+        GetPlayerHistoriesQueryConditions conditions,
+        int totalCount,
+        int skip = 0,
+        CancellationToken cancellationToken = default);
+
+    ValueTask<PlayerEventInfo?> GetPlayerHistoryAsync(Guid eventId, CancellationToken cancellationToken = default);
 
     ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode, CancellationToken cancellationToken = default);
 
@@ -74,9 +84,14 @@ public interface IPlayerServiceClient
     ValueTask SetPlayerPropertiesAsync(
         string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
+        string? modifyUser = null,
         CancellationToken cancellationToken = default);
 
-    ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus playerStatus, CancellationToken cancellationToken = default);
+    ValueTask SetPlayerStatusAsync(
+        string playerCode,
+        PlayerStatus playerStatus,
+        string? modifyUser = null,
+        CancellationToken cancellationToken = default);
 
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
 }
