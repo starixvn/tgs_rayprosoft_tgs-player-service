@@ -547,6 +547,30 @@ internal class PlayerServiceClient : IPlayerServiceClient
         _ = response.EnsureSuccessStatusCode();
     }
 
+    public async ValueTask SetPlayerPasswordAsync(
+        string playerCode,
+        string password,
+        string? modifyUsername,
+        string? modifyUserId,
+        CancellationToken cancellationToken = default)
+    {
+        var requestContent = new StringContent(
+            JsonSerializer.Serialize(password, _SerializerOptions),
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json);
+
+        if (!string.IsNullOrWhiteSpace(modifyUsername))
+            requestContent.Headers.Add("ModifyUsername", modifyUsername);
+        if (!string.IsNullOrWhiteSpace(modifyUserId))
+            requestContent.Headers.Add("ModifyUserId", modifyUserId);
+
+        var response = await _httpClient
+            .PatchAsync($"/player/password/{playerCode}", requestContent, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+    }
+
     public async ValueTask SetPlayerPropertiesAsync(
         string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,

@@ -81,6 +81,13 @@ public interface IPlayerServiceClient
 
     ValueTask RecordRegisterIpAsync(string playerCode, string ip, string? hostName, CancellationToken cancellationToken = default);
 
+    ValueTask SetPlayerPasswordAsync(
+        string playerCode,
+        string password,
+        string? modifyUsername,
+        string? modifyUserId,
+        CancellationToken cancellationToken = default);
+
     ValueTask SetPlayerPropertiesAsync(
         string playerCode,
         IImmutableDictionary<PlayerPropertyName, string?> properties,
