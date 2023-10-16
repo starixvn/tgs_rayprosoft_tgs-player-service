@@ -443,6 +443,19 @@ public class PlayerController : ControllerBase
             });
     }
 
+    [HttpPatch("password/{playerCode}", Name = "SetPlayerPassword")]
+    public ValueTask SetPlayerPasswordAsync(
+        [FromServices] ICommandService<SetPlayerPasswordCommand> commandService,
+        [FromHeader(Name = "ModifyUsername")] string? modifyUsername,
+        [FromHeader(Name = "ModifyUserId")] string? modifyUserId,
+        string playerCode,
+        [FromBody] string password)
+    {
+        var command = new SetPlayerPasswordCommand(playerCode, password, modifyUsername, modifyUserId);
+
+        return commandService.ExecuteAsync(command, HttpContext.RequestAborted);
+    }
+
     [HttpPost("prop/{playerCode}", Name = "SetPlayerProperties")]
     [SuccessStatusCode(200, "Set player properties success")]
     [FailStatusCode(400, "Input properties is empty")]

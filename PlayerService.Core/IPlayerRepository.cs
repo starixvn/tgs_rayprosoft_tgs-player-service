@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
-using Tgs.Paging;
 
 namespace Tgs.PlayerService;
 
@@ -124,6 +123,13 @@ public interface IPlayerRepository
         string ip,
         string? host,
         DateTime recordTime,
+        CancellationToken cancellationToken = default);
+
+    ValueTask SetPlayerPasswordAsync(
+        string playerCode,
+        byte[] password,
+        byte[] passwordSalt,
+        string? modifyUsername,
         CancellationToken cancellationToken = default);
 
     ValueTask SetPlayerPropertiesAsync(

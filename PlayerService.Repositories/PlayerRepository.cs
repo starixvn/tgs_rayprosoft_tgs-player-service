@@ -896,6 +896,34 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
     }
 
+    public async ValueTask SetPlayerPasswordAsync(
+        string playerCode,
+        byte[] password,
+        byte[] passwordSalt,
+        string? modifyUsername,
+        CancellationToken cancellationToken = default)
+    {
+        var player = await _dbContext.Players
+            .FindAsync(new object?[]
+            {
+                playerCode
+            }, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (player == null)
+            return;
+
+        player.Password = password;
+        player.Salt = passwordSalt;
+
+        player.UpdatedByUsername = modifyUsername;
+        player.UpdatedOn = DateTime.UtcNow;
+
+        _ = await _dbContext
+            .SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async ValueTask SetPlayerPropertiesAsync(
         Guid brandId,
         string playerCode,

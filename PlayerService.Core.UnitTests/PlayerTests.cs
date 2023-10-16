@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -816,5 +817,68 @@ public class PlayerTests
         _ = fakePlayerRepository
             .Received(1)
             .CurrentDayRegisterAsync(Arg.Is(brandId));
+    }
+
+    [Test]
+    public async Task 變更玩家密碼()
+    {
+        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+        var sut = new SetPlayerPasswordCommandService(
+            fakePasswordHandler,
+            fakePlayerRepository,
+            fakeSerialNumberGenerator);
+
+        var playerCode = "4ucmqplxb029";
+        var password = "123456";
+        var newPassword = Encoding.UTF8.GetBytes("123456");
+        var newSalt = Encoding.UTF8.GetBytes("456789");
+        var modifyUsername = "admin.enabled";
+        var modifyUserId = "50ce61eb-8c9d-4f84-3cf6-08d9262ce1a5";
+        var eventId = Guid.NewGuid();
+
+        _ = fakePasswordHandler
+            .GenerateCredential(password)
+            .Returns((newSalt, newPassword));
+
+        var playerInfo = new PlayerInfo(
+            playerCode,
+            BrandId: Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af"),
+            "4ucmqplxb029",
+            false,
+            false,
+            false,
+            false,
+            Guid.NewGuid(),
+            DateTime.Now.AddDays(-1));
+
+        _ = fakePlayerRepository
+            .GetPlayerInfoAsync(Arg.Is(playerCode))
+            .Returns(playerInfo);
+
+        _ = fakeSerialNumberGenerator
+            .GenerateAsync()
+            .Returns(eventId);
+
+        var command = new SetPlayerPasswordCommand(
+            playerCode,
+            password,
+            modifyUsername,
+            modifyUserId);
+
+        await sut.ExecuteAsync(command);
+
+        _ = fakePlayerRepository.Received(1)
+            .SetPlayerPasswordAsync(Arg.Is(playerCode), Arg.Is(newPassword), Arg.Is(newSalt), Arg.Is(modifyUsername));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CreatePlayerEventAsync(Arg.Is(eventId), Arg.Is(playerInfo.BrandId), Arg.Is(playerCode), Arg.Is(EventAction.Update), Arg.Any<JsonDocument>(), Arg.Is(modifyUserId));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .UpdatePlayerSnapshotAsync(Arg.Is(playerCode), Arg.Is(eventId), Arg.Any<DateTime>());
     }
 }

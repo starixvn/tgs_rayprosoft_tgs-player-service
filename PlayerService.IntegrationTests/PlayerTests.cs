@@ -1548,4 +1548,51 @@ public class PlayerTests
 
         Assert.AreEqual("test", playerRow.Remark);
     }
+
+    [Test]
+    public async Task 變更玩家密碼()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "4ucmqplxb029";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+        _ = await dbContext.SaveChangesAsync();
+
+        var password = "p12345678";
+        var modifyUsername = "admin.enabled";
+        var modifyUserId = "50ce61eb-8c9d-4f84-3cf6-08d9262ce1a5";
+
+        await sut.SetPlayerPasswordAsync(playerCode, password, modifyUsername, modifyUserId);
+
+        var actual = await dbContext.Players.FirstAsync(p => p.PlayerCode == playerCode);
+
+        Assert.AreNotEqual(Array.Empty<byte>(), actual.Password);
+        Assert.AreNotEqual(Array.Empty<byte>(), actual.Salt);
+        Assert.AreEqual(modifyUsername, actual.UpdatedByUsername);
+
+        var playerEvent = await dbContext.PlayerEventSources.FirstOrDefaultAsync(p => p.PlayerCode == playerCode);
+        Assert.NotNull(playerEvent);
+
+        Assert.AreEqual(playerEvent!.Id, actual.SnapshotEventId);
+    }
 }

@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
@@ -445,5 +446,52 @@ public class PlayerRepositoryTests
         var eventSoruce = await dbContext.PlayerEventSources.FirstAsync(x => x.Id == eventId);
 
         Assert.That(eventSoruce.Id, Is.EqualTo(eventId));
+    }
+
+    [Test]
+    public async Task 變更玩家密碼()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
+        _ = dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(
+                InMemoryEventId.TransactionIgnoredWarning));
+
+        var dbContext = new TgsContext(dbContextOptionsBuilder.Options);
+
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+        var sut = new PlayerRepository(dbContext, fakeSerialNumberGenerator);
+
+        var playerCode = "4ucmqplxb029";
+        var newPassword = Encoding.UTF8.GetBytes("123456");
+        var newSalt = Encoding.UTF8.GetBytes("456789");
+        var modifyUsername = "admin.enabled";
+
+        var player = new Player
+        {
+            PlayerCode = playerCode,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "4ucmqplxb029",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+        };
+
+        _ = await dbContext.Players.AddAsync(player);
+        _ = await dbContext.SaveChangesAsync();
+
+        await sut.SetPlayerPasswordAsync(playerCode, newPassword, newSalt, modifyUsername);
+
+        var actual = await dbContext.Players.FirstOrDefaultAsync(x => x.PlayerCode == playerCode);
+
+        Assert.That(actual, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(newPassword, Is.EqualTo(actual!.Password));
+            Assert.That(newSalt, Is.EqualTo(actual!.Salt));
+            Assert.That(modifyUsername, Is.EqualTo(actual.UpdatedByUsername));
+        });
     }
 }
