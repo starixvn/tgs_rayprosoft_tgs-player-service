@@ -449,6 +449,86 @@ public class PlayerRepositoryTests
     }
 
     [Test]
+    public async Task 檢查同Brand其他玩家有相同Email()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
+        _ = dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(
+                InMemoryEventId.TransactionIgnoredWarning));
+
+        var dbContext = new TgsContext(dbContextOptionsBuilder.Options);
+
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+        var sut = new PlayerRepository(dbContext, fakeSerialNumberGenerator);
+
+        var playerCode = "4ucmqplxb029";
+        var brandId = Guid.NewGuid();
+        var email = "test@test.com";
+
+        var player = new Player
+        {
+            PlayerCode = "playerCode",
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "4ucmqplxb029",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            BrandId = brandId,
+            Email = email
+        };
+
+        _ = await dbContext.Players.AddAsync(player);
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.CheckSameEmailByBrandAsync(brandId, playerCode, email);
+
+        Assert.That(actual, Is.True);
+    }
+
+    [Test]
+    public async Task 檢查同Brand其他玩家沒有相同Email()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();
+        _ = dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(
+                InMemoryEventId.TransactionIgnoredWarning));
+
+        var dbContext = new TgsContext(dbContextOptionsBuilder.Options);
+
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+        var sut = new PlayerRepository(dbContext, fakeSerialNumberGenerator);
+
+        var playerCode = "4ucmqplxb029";
+        var brandId = Guid.NewGuid();
+        var email = "test@test.com";
+
+        var player = new Player
+        {
+            PlayerCode = "playerCode",
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "4ucmqplxb029",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            BrandId = brandId,
+            Email = "abc@test.com"
+        };
+
+        _ = await dbContext.Players.AddAsync(player);
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.CheckSameEmailByBrandAsync(brandId, playerCode, email);
+
+        Assert.That(actual, Is.False);
+    }
+
+    [Test]
     public async Task 變更玩家密碼()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsContext>();

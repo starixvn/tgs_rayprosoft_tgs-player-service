@@ -46,6 +46,14 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    public async ValueTask<bool> CheckSameEmailByBrandAsync(Guid brandId, string playerCode, string email, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Players.AnyAsync(p
+            => p.BrandId == brandId
+            && p.PlayerCode != playerCode
+            && p.Email!.ToLower() == email.ToLower(), cancellationToken).ConfigureAwait(false);
+    }
+
     public async ValueTask<int> CountCurrentDayLoginAsync(Guid brandId, CancellationToken cancellationToken = default)
     {
         var currentDay = new DateTimeOffset(

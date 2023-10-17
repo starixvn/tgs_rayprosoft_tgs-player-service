@@ -27,6 +27,24 @@ internal class PlayerServiceClient : IPlayerServiceClient
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
 
+    public async ValueTask<bool> CheckSameEmailByBrandAsync(Guid brandId, string playerCode, string email, CancellationToken cancellationToken = default)
+    {
+        var queryStrings = HttpUtility.ParseQueryString(string.Empty);
+
+        queryStrings.Add("brandId", brandId.ToString());
+        queryStrings.Add("email", email);
+
+        var response = await _httpClient
+            .GetAsync($"/player/check-email/{playerCode}?{queryStrings}", cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+        return JsonSerializer.Deserialize<bool>(content, _SerializerOptions);
+    }
+
     public async ValueTask<int> CountCurrentDayLoginPlayersAsync(Guid brandId, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient

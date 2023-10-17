@@ -4,6 +4,8 @@ namespace Tgs.PlayerService.Client;
 
 public interface IPlayerServiceClient
 {
+    ValueTask<bool> CheckSameEmailByBrandAsync(Guid brandId, string playerCode, string email, CancellationToken cancellationToken = default);
+
     ValueTask<int> CountCurrentDayLoginPlayersAsync(Guid brandId, CancellationToken cancellationToken = default);
 
     ValueTask<int> CountCurrentDayRegisterPlayersAsync(Guid brandId, CancellationToken cancellationToken = default);

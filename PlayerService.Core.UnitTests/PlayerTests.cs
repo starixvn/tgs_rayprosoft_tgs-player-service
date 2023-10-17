@@ -820,6 +820,23 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task 檢查同Brand其他玩家是否有相同Email()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var sut = new CheckSameEmailByBrandQueryService(fakePlayerRepository);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "playerCode";
+        var email = "test@test.com";
+
+        _ = await sut.GetAsync(new CheckSameEmailByBrandQuery(brandId, playerCode, email));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CheckSameEmailByBrandAsync(Arg.Is(brandId), Arg.Is(playerCode), Arg.Is(email));
+    }
+
+    [Test]
     public async Task 變更玩家密碼()
     {
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();

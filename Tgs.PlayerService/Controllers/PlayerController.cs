@@ -17,6 +17,13 @@ namespace Tgs.PlayerService.Controllers;
 [ApiController]
 public class PlayerController : ControllerBase
 {
+    [HttpGet("check-email/{playerCode}")]
+    public ValueTask<bool> CheckSameEmailByBrandAsync(
+        [FromServices] IGetService<CheckSameEmailByBrandQuery, bool> getService,
+        string playerCode,
+        [FromQuery] CheckSameEmailQueryViewModel request)
+        => getService.GetAsync(new CheckSameEmailByBrandQuery(request.BrandId, playerCode, request.Email));
+
     [HttpGet("register/currentday/{brandId}", Name = "CountCurrentDayRegisterPlayers")]
     [SuccessStatusCode(200, "Count current day register players")]
     public ValueTask<int> CountCurrentDayRegisterPlayersAsync(

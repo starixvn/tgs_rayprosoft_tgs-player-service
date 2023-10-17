@@ -13,6 +13,12 @@ public interface IPlayerRepository
         string modifier,
         CancellationToken cancellationToken = default);
 
+    ValueTask<bool> CheckSameEmailByBrandAsync(
+        Guid brandId,
+        string playerCode,
+        string email,
+        CancellationToken cancellationToken = default);
+
     ValueTask<int> CountCurrentDayLoginAsync(Guid brandId, CancellationToken cancellationToken = default);
 
     ValueTask<int> CountPlayerEventAsync(PlayerEventQueryConditions conditions, CancellationToken cancellationToken = default);

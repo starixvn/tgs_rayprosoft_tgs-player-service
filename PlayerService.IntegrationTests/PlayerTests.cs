@@ -1550,6 +1550,42 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task 檢查同Brand其他玩家是否有相同Email()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "4ucmqplxb029";
+        var email = "test@test.com";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = "playerCode",
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Email = email,
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.CheckSameEmailByBrandAsync(brandId, playerCode, email);
+
+        Assert.True(actual);
+    }
+
+    [Test]
     public async Task 變更玩家密碼()
     {
         await using var web = new TestPlayerServiceApplication();
