@@ -19,4 +19,5 @@ public enum PlayerPropertyName
     Qq = 14,
     Wechat = 15,
     VipId = 16,
+    AgentId = 17,
 }

@@ -51,6 +51,10 @@ internal class PlayerDeleteDataCommand : DeleteDataCommand
                 modifyContext.Player.IdNumber = null;
                 break;
 
+            case nameof(PlayerPropertyName.AgentId):
+                modifyContext.Player.AgentId = null;
+                break;
+
             default:
                 if (modifyContext.PlayerProperties.TryGetValue(Name, out var prop))
                     _ = modifyContext.TgsContext.PlayerProperties.Remove(prop);
