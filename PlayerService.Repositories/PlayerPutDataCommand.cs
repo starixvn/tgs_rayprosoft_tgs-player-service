@@ -57,6 +57,10 @@ internal class PlayerPutDataCommand : PutDataCommand
                 modifyContext.Player.VipId = Guid.Parse(Value);
                 break;
 
+            case nameof(PlayerPropertyName.AgentId):
+                modifyContext.Player.AgentId = Guid.Parse(Value);
+                break;
+
             default:
                 if (modifyContext.PlayerProperties.TryGetValue(Name, out var value))
                     value.Value = Value;
