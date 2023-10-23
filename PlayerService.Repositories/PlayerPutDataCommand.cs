@@ -62,6 +62,16 @@ internal class PlayerPutDataCommand : PutDataCommand
                 break;
 
             default:
+                if(Name is nameof(PlayerPropertyName.Qq))
+                {
+                    modifyContext.Player.Qq = Value;
+                }
+
+                if (Name is nameof(PlayerPropertyName.Wechat))
+                {
+                    modifyContext.Player.Wechat = Value;
+                }
+
                 if (modifyContext.PlayerProperties.TryGetValue(Name, out var value))
                     value.Value = Value;
                 else
