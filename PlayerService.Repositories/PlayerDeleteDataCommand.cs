@@ -56,6 +56,11 @@ internal class PlayerDeleteDataCommand : DeleteDataCommand
                 break;
 
             default:
+                if (Name is nameof(PlayerPropertyName.Qq))
+                    modifyContext.Player.Qq = null;
+                if (Name is nameof(PlayerPropertyName.Wechat))
+                    modifyContext.Player.Wechat = null;
+
                 if (modifyContext.PlayerProperties.TryGetValue(Name, out var prop))
                     _ = modifyContext.TgsContext.PlayerProperties.Remove(prop);
                 break;
