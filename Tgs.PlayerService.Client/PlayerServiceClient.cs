@@ -177,8 +177,11 @@ internal class PlayerServiceClient : IPlayerServiceClient
         queryStrings.Add("from", conditions.From.ToString("o"));
         queryStrings.Add("to", conditions.To.ToString("o"));
 
+        var remainingCount = totalCount - skip;
+        var pages = (int)Math.Ceiling(remainingCount / 1000D);
+
         return AsyncEnumerableEx.Return(totalCount)
-            .SelectMany(count => AsyncEnumerable.Range(0, (int)Math.Ceiling(count / 1000D))
+            .SelectMany(count => AsyncEnumerable.Range(0, pages)
                 .SelectMany(idx => _httpClient.GetAsync($"/player/histories/{conditions.PlayerCode}?{queryStrings}&skip={skip + idx * 1000}")
                     .ToAsyncEnumerable()
                     .Do(response => response.EnsureSuccessStatusCode())
