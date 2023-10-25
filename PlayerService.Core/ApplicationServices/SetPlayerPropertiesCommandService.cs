@@ -43,6 +43,16 @@ internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerProp
 
         var patchOperations = Array.Empty<PatchOperation>();
 
+        var playerProperties = new string[]
+        {
+            nameof(PlayerPropertyName.Line),
+            nameof(PlayerPropertyName.Viber),
+            nameof(PlayerPropertyName.Telegram),
+            nameof(PlayerPropertyName.FacebookMessenger),
+            nameof(PlayerPropertyName.WhatsApp),
+            nameof(PlayerPropertyName.Qq),
+            nameof(PlayerPropertyName.Wechat),
+        };
         foreach (var (key, value) in command.Properties
             .Select(kv => (
                 KV: kv,
@@ -52,15 +62,20 @@ internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerProp
             .Where(g => g.RegularName is not null)
             .ToDictionary(g => g.RegularName!, g => g.KV.Value))
         {
+            var source = $"/{key}";
+
+            if (playerProperties.Contains(key))
+                source = $"/properties/{key}";
+
             if (value == null)
             {
                 dataCommands.Add(_dataCommandBuilder.CreateDeleteCommand(key));
-                patchOperations = patchOperations.Append(PatchOperation.Remove(JsonPointer.Parse($"/properties/{key}"))).ToArray();
+                patchOperations = patchOperations.Append(PatchOperation.Remove(JsonPointer.Parse(source))).ToArray();
             }
             else
             {
                 dataCommands.Add(_dataCommandBuilder.CreatePutCommand(key, value));
-                patchOperations = patchOperations.Append(PatchOperation.Replace(JsonPointer.Parse($"/properties/{key}"), value)).ToArray();
+                patchOperations = patchOperations.Append(PatchOperation.Replace(JsonPointer.Parse(source), value)).ToArray();
             }
         }
 
