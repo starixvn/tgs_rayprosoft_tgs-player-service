@@ -1,3 +1,3 @@
 ﻿namespace Tgs.PlayerService.ApplicationServices;
 
-public record CountCurrentDayLoginQuery(Guid brandId);
+public record CountCurrentDayLoginQuery(Guid BrandId);

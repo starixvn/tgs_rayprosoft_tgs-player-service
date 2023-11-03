@@ -52,14 +52,15 @@ builder.Services
         .UseNpgsql("name=Tgs"))
     .AddMemoryCache()
     .AddPlayerServiceCache()
-    .AddMarketingReportClient((options, sp) => 
-    { 
+    .AddMarketingReportClient((options, sp) =>
+    {
         var config = sp.GetRequiredService<IConfiguration>();
         options.BaseUrl = config.GetValue<Uri>("PlayerService:MarketingReportBaseUrl")!;
     });
 
 builder.Services
-    .AddOpenTelemetryTracing(tracingBuilder => tracingBuilder
+    .AddOpenTelemetry()
+    .WithTracing(tracingBuilder => tracingBuilder
         .SetResourceBuilder(ResourceBuilder.CreateDefault()
             .AddEnvironmentVariableDetector())
         .AddSource("Tgs.*")
@@ -68,13 +69,14 @@ builder.Services
         .AddAspNetCoreInstrumentation()
         .AddProfileViewExporter()
         .AddOtlpExporter())
-    .AddOpenTelemetryMetrics(meterBuiler => meterBuiler
+    .WithMetrics(meterBuiler => meterBuiler
         .SetResourceBuilder(ResourceBuilder.CreateDefault()
             .AddEnvironmentVariableDetector())
             .AddMeter("Tgs.PlayerBucket")
             .AddRuntimeInstrumentation()
             .AddAspNetCoreInstrumentation()
             .AddOtlpExporter())
+    .Services
     .AddProfileViewer()
     .Configure<AspNetCoreInstrumentationOptions>(options => options.Filter =
         httpContext => !httpContext.Request.Path.HasValue

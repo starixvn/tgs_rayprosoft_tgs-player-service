@@ -4,10 +4,10 @@ using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Web;
-using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Tgs.PlayerService.Client;
 
@@ -121,13 +121,10 @@ internal class PlayerServiceClient : IPlayerServiceClient
         IEnumerable<string> userNames,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var queryStrings = new QueryBuilder
-        {
-            { "names", string.Join(',', userNames) }
-        };
-
         var response = await _httpClient
-            .GetAsync($"/player/{brandId}:playercodes{queryStrings.ToQueryString().Value}", cancellationToken)
+            .GetAsync(
+                $"/player/{brandId}:playercodes?names={string.Join(',', userNames)}",
+                cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();
@@ -399,15 +396,9 @@ internal class PlayerServiceClient : IPlayerServiceClient
         Guid brandId,
         IEnumerable<string> userNames,
         CancellationToken cancellationToken = default)
-    {
-        var queryStrings = new QueryBuilder
-        {
-            { "names", string.Join(',', userNames) }
-        };
-
-        return _httpClient
+        => _httpClient
             .GetAsync(
-                $"/player/{brandId}:usernames{queryStrings.ToQueryString().Value}",
+                $"/player/{brandId}:usernames?names={string.Join(',', userNames)}",
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken)
             .ToAsyncEnumerable()
@@ -418,22 +409,18 @@ internal class PlayerServiceClient : IPlayerServiceClient
                     cancellationToken)
                 .ToAsyncEnumerable()
                 .SelectMany(arr => arr!));
-    }
 
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
-                Guid brandId,
+        Guid brandId,
         IEnumerable<string> playerCodes,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var queryStrings = new QueryBuilder
-        {
-            { "playercodes", string.Join(',', playerCodes) }
-        };
-
         _httpClient.DefaultRequestHeaders.Add("Basic", string.Empty);
 
         var response = await _httpClient
-            .GetAsync($"/player/{brandId}{queryStrings.ToQueryString().Value}", cancellationToken)
+            .GetAsync(
+                $"/player/{brandId}?playercodes={string.Join(',', playerCodes)}",
+                cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();
@@ -441,7 +428,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
         foreach (var item in await response.Content
                      .ReadFromJsonAsync<IEnumerable<PlayerInfo>>(_SerializerOptions, cancellationToken)
                      .ConfigureAwait(false) ?? Array.Empty<PlayerInfo>())
-            yield return item;
+            yield return item!;
     }
 
     public async IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
@@ -449,43 +436,64 @@ internal class PlayerServiceClient : IPlayerServiceClient
         PlayerListQuery query,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var queryStrings = new QueryBuilder();
+        var queryStrings = new List<KeyValuePair<string, string>>();
 
         if (query.Status is not null)
-            queryStrings.Add("status", query.Status.Value.ToString());
+            queryStrings.Add(
+                new KeyValuePair<string, string>("status", query.Status.Value.ToString()));
 
         if (query.ParentPlayerCode is not null)
-            queryStrings.Add("parentPlayerCode", query.ParentPlayerCode);
+            queryStrings.Add(
+                new KeyValuePair<string, string>("parentPlayerCode", query.ParentPlayerCode));
 
         if (query.RegisteredDomainName is not null)
-            queryStrings.Add("registeredDomainName", query.RegisteredDomainName.Trim());
+            queryStrings.Add(
+                new KeyValuePair<string, string>("registeredDomainName", query.RegisteredDomainName.Trim()));
 
         if (query.AgentId is not null)
-            queryStrings.Add("agentId", query.AgentId.Value.ToString());
+            queryStrings.Add(
+                new KeyValuePair<string, string>("agentId", query.AgentId.Value.ToString()));
 
         if (query.BeginRegisteredTime is not null)
-            queryStrings.Add("beginRegisteredTime", query.BeginRegisteredTime.Value.ToString("o"));
+            queryStrings.Add(
+                new KeyValuePair<string, string>(
+                    "beginRegisteredTime",
+                    query.BeginRegisteredTime.Value.ToString("o")));
 
         if (query.EndRegisteredTime is not null)
-            queryStrings.Add("endRegisteredTime", query.EndRegisteredTime.Value.ToString("o"));
+            queryStrings.Add(
+                new KeyValuePair<string, string>(
+                    "endRegisteredTime",
+                    query.EndRegisteredTime.Value.ToString("o")));
 
         if (query.Phone is not null)
-            queryStrings.Add("phone", query.Phone);
+            queryStrings.Add(
+                new KeyValuePair<string, string>("phone", query.Phone));
 
         if (query.RealName is not null)
-            queryStrings.Add("realName", query.RealName);
+            queryStrings.Add(
+                new KeyValuePair<string, string>("realName", query.RealName));
 
         if (query.UserName is not null)
-            queryStrings.Add("userName", query.UserName);
+            queryStrings.Add(
+                new KeyValuePair<string, string>("userName", query.UserName));
 
         if (query.VipId is not null)
-            queryStrings.Add("vipId", query.VipId.Value.ToString());
+            queryStrings.Add(
+                new KeyValuePair<string, string>("vipId", query.VipId.Value.ToString()));
 
         foreach (var playerCode in query.PlayerCodes)
-            queryStrings.Add("playerCode", playerCode);
+            queryStrings.Add(
+                new KeyValuePair<string, string>("playerCode", playerCode));
+
+        var queryStringText = string.Join(
+            '&',
+            queryStrings.Select(
+                kv => $"{kv.Key}={UrlEncoder.Default.Encode(kv.Value)}"));
 
         var response = await _httpClient
-            .GetAsync($"/player/{brandId}{queryStrings.ToQueryString().Value}", cancellationToken)
+            .GetAsync(
+                $"/player/{brandId}?{queryStringText}", cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();

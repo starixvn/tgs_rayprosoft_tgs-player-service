@@ -12,5 +12,5 @@ internal class CountCurrentDayLoginQueryService : IGetService<CountCurrentDayLog
     }
 
     public ValueTask<int> GetAsync(CountCurrentDayLoginQuery query, CancellationToken cancellationToken = default)
-        => _playerRepository.CountCurrentDayLoginAsync(query.brandId, cancellationToken);
+        => _playerRepository.CountCurrentDayLoginAsync(query.BrandId, cancellationToken);
 }
