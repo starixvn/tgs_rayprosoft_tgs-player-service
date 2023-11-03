@@ -208,14 +208,12 @@ public class PlayerTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeSystemClock = Substitute.For<ISystemClock>();
         var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
-        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
         var sut = new CreatePlayerCommandService(
             fakePlayerRepository,
             fakePasswordHandler,
             fakeSystemClock,
-            fakeSerialNumberGenerator,
-            jsonOptionsAccessor);
+            fakeSerialNumberGenerator);
 
         var brandId = Guid.NewGuid();
         var agentId = Guid.NewGuid();

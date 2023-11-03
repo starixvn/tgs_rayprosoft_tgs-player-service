@@ -99,8 +99,9 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
     }
 
-    public async ValueTask<string> CreatePlayerAsync(CreatePlayerData data,
-            CancellationToken cancellationToken = default)
+    public async ValueTask<string> CreatePlayerAsync(
+        CreatePlayerData data,
+        CancellationToken cancellationToken = default)
     {
         var username = data.UserName;
         var walletId = await _serialNumberGenerator.GenerateAsync(cancellationToken);
