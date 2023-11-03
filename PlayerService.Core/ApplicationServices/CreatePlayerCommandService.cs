@@ -10,18 +10,18 @@ namespace Tgs.PlayerService.ApplicationServices;
 
 internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, string>
 {
-    private readonly IPasswordHandler _passwordHandler;
-    private readonly IPlayerRepository _playerRepository;
-    private readonly ISerialNumberGenerator _serialNumberGenerator;
-    private readonly ISystemClock _systemClock;
-
-    private readonly IReadOnlyDictionary<RegisterSiteType, PlayerTagType> _tagMapper =
+    private static readonly IReadOnlyDictionary<RegisterSiteType, PlayerTagType> _TagMapper =
         new Dictionary<RegisterSiteType, PlayerTagType>
         {
             [RegisterSiteType.Player] = PlayerTagType.PlayerCreated,
             [RegisterSiteType.Agent] = PlayerTagType.AgentCreated,
             [RegisterSiteType.BackendOffice] = PlayerTagType.BackendOfficeCreated
         }.AsReadOnly();
+
+    private readonly IPasswordHandler _passwordHandler;
+    private readonly IPlayerRepository _playerRepository;
+    private readonly ISerialNumberGenerator _serialNumberGenerator;
+    private readonly ISystemClock _systemClock;
 
     public CreatePlayerCommandService(
         IPlayerRepository playerRepository,
@@ -61,7 +61,7 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
 
         await _playerRepository.CreatePlayerTagAsync(
             playerCode,
-            _tagMapper[command.RegisterSiteType].ToString(),
+            _TagMapper[command.RegisterSiteType].ToString(),
             cancellationToken).ConfigureAwait(false);
 
         var currentTime = _systemClock.UtcNow.UtcDateTime;

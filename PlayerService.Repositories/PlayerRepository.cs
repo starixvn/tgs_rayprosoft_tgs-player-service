@@ -128,20 +128,7 @@ internal class PlayerRepository : IPlayerRepository
             UpdatedOn = createdOn,
             VipId = data.VipId
         };
-
-        var wallet = new Wallet
-        {
-            Id = walletId,
-            PlayerCode = playerCode,
-            CurrencyCode = data.CurrencyCode,
-            ExternalCurrencyCode = data.CurrencyCode,
-            Balance = 0,
-            CreatedOn = createdOn,
-            UpdatedOn = createdOn
-        };
-
         _ = await _dbContext.Players.AddAsync(player, cancellationToken);
-        _ = await _dbContext.Wallets.AddAsync(wallet, cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(data.UpperPlayerCode))
             _ = await _dbContext.PlayerParents.AddAsync(new PlayerParent
