@@ -42,21 +42,21 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
         var eventId = await _serialNumberGenerator.GenerateAsync(
             cancellationToken).ConfigureAwait(false);
 
+        var createData = new CreatePlayerData(
+            command.BrandId,
+            command.Username,
+            command.CurrencyCode,
+            command.BetLimitId,
+            PlayerStatus.RegisterUndone,
+            command.PlayerType,
+            command.VipId,
+            command.AgentId,
+            command.UpperPlayerCode,
+            password,
+            salt);
+
         var playerCode = await _playerRepository.CreatePlayerAsync(
-            new CreatePlayerData
-            {
-                BrandId = command.BrandId,
-                AgentId = command.AgentId,
-                VipId = command.VipId,
-                UserName = command.Username,
-                Salt = salt,
-                Password = password,
-                CurrencyCode = command.CurrencyCode,
-                BetLimitId = command.BetLimitId,
-                Type = command.PlayerType,
-                PlayerStatus = PlayerStatus.RegisterUndone,
-                UpperPlayerCode = command.UpperPlayerCode
-            },
+            createData,
             cancellationToken).ConfigureAwait(false);
 
         await _playerRepository.CreatePlayerTagAsync(
@@ -68,14 +68,14 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
 
         var createMainSnapshot = new
         {
-            command.BrandId,
-            command.AgentId,
-            command.VipId,
-            command.Username,
-            command.CurrencyCode,
-            command.BetLimitId,
-            Type = command.PlayerType,
-            Status = PlayerStatus.RegisterUndone,
+            createData.BrandId,
+            createData.AgentId,
+            createData.VipId,
+            createData.UserName,
+            createData.CurrencyCode,
+            createData.BetLimitId,
+            createData.Type,
+            Status = createData.PlayerStatus,
         };
 
         var patchOperations = Array.Empty<PatchOperation>();
