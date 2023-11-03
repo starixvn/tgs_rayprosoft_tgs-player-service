@@ -33,4 +33,12 @@
     </ProjectReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\Users\Phoenix\source\repos\tgs-player-service\PlayerService.IntegrationTests\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="D:\Users\Phoenix\source\repos\tgs-player-service\PlayerService.IntegrationTests\.editorconfig" />
+  </ItemGroup>
+
 </Project>

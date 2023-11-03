@@ -1,9 +1,11 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json;
+using DocumentFormat.OpenXml.Office2010.CustomUI;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using Tgs.CashService.Client;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.MarketingReport.Client;
 using Tgs.PlayerService.ApplicationServices;
@@ -199,72 +201,6 @@ public class PlayerTests
                 Arg.Is(eventId),
                 Arg.Any<DateTime>(),
                 Arg.Any<CancellationToken>());
-    }
-
-    [Test]
-    public async Task Create_Player()
-    {
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeSystemClock = Substitute.For<ISystemClock>();
-        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
-        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
-
-        var sut = new CreatePlayerCommandService(
-            fakePlayerRepository,
-            fakePasswordHandler,
-            fakeSystemClock,
-            fakeSerialNumberGenerator,
-            jsonOptionsAccessor);
-
-        var brandId = Guid.NewGuid();
-        var agentId = Guid.NewGuid();
-        var vipId = Guid.NewGuid();
-        var betLimitId = 1;
-        var currencyCode = "currencyCode";
-        var username = "username";
-        var password = "password";
-        var agentName = "agentName";
-        var eventId = Guid.NewGuid();
-
-        _ = fakeSerialNumberGenerator.GenerateAsync()
-            .Returns(eventId);
-
-        var query = new CreatePlayerCommand(
-            brandId,
-            agentId,
-            vipId,
-            currencyCode,
-            username,
-            password,
-            null,
-            betLimitId,
-            PlayerType.RealPlayer,
-            RegisterSiteType.Agent,
-            agentName);
-
-        _ = await sut.GetAsync(query);
-
-        _ = fakePlayerRepository.Received(1)
-            .CreatePlayerAsync(Arg.Any<CreatePlayerData>());
-
-        _ = fakePlayerRepository.Received(1)
-            .CreatePlayerTagAsync(Arg.Any<string>(), Arg.Any<string>());
-
-        _ = fakePlayerRepository.Received(1)
-            .CreatePlayerEventAsync(
-                Arg.Is(eventId),
-                Arg.Is(brandId),
-                Arg.Any<string>(),
-                Arg.Is(EventAction.Create),
-                Arg.Any<JsonDocument>(),
-                Arg.Any<string?>());
-
-        _ = fakePlayerRepository.Received(1)
-            .UpdatePlayerSnapshotAsync(
-                Arg.Any<string>(),
-                Arg.Is(eventId),
-                Arg.Any<DateTime>());
     }
 
     [Test]
@@ -651,6 +587,89 @@ public class PlayerTests
             .GetPlayerInfosByUserNamesAsync(
                 Arg.Is(query.BrandId),
                 Arg.Is<IEnumerable<string>>(x => x.SequenceEqual(query.UserNames)));
+    }
+
+    [Test]
+    public async Task 建立玩家()
+    {
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+        var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+
+        var sut = new CreatePlayerCommandService(
+            fakePlayerRepository,
+            fakePasswordHandler,
+            fakeSystemClock,
+            fakeSerialNumberGenerator,
+            fakeCashServiceClient,
+            fakeDataCommandBuilder);
+
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var vipId = Guid.NewGuid();
+        var betLimitId = 1;
+        var currencyCode = "currencyCode";
+        var username = "username";
+        var password = "password";
+        var agentName = "agentName";
+
+        var command = new CreatePlayerCommand(
+            brandId,
+            agentId,
+            vipId,
+            currencyCode,
+            username,
+            password,
+            null,
+            betLimitId,
+            PlayerType.RealPlayer,
+            RegisterSiteType.Agent,
+            agentName);
+
+        var eventId = Guid.NewGuid();
+
+        _ = fakeSerialNumberGenerator.GenerateAsync()
+            .Returns(eventId);
+
+        _ = fakePasswordHandler.GenerateCredential(Arg.Is(password))
+            .Returns((Array.Empty<byte>(), Array.Empty<byte>()));
+
+        _ = await sut.GetAsync(command);
+
+        _ = fakePlayerRepository.Received(1)
+            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data == new CreatePlayerData(
+                brandId,
+                username,
+                currencyCode,
+                betLimitId,
+                PlayerStatus.RegisterUndone,
+                command.PlayerType,
+                vipId,
+                agentId,
+                command.UpperPlayerCode,
+                Array.Empty<byte>(),
+                Array.Empty<byte>())));
+
+        _ = fakePlayerRepository.Received(1)
+            .CreatePlayerTagAsync(Arg.Any<string>(), Arg.Any<string>());
+
+        _ = fakePlayerRepository.Received(1)
+            .CreatePlayerEventAsync(
+                Arg.Is(eventId),
+                Arg.Is(brandId),
+                Arg.Any<string>(),
+                Arg.Is(EventAction.Create),
+                Arg.Any<JsonDocument>(),
+                Arg.Any<string?>());
+
+        _ = fakePlayerRepository.Received(1)
+            .UpdatePlayerSnapshotAsync(
+                Arg.Any<string>(),
+                Arg.Is(eventId),
+                Arg.Any<DateTime>());
     }
 
     [Test]
