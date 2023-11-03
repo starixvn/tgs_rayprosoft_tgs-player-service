@@ -48,7 +48,7 @@ spec:
                   name: tgs-connections
                   key: tgs
           volumeMounts:
-            - mountPath: /config/appsettings.json
+            - mountPath: /app/appsettings.Production.json
               name: appsettings
               readOnly: true
               subPath: appsettings.json
@@ -71,7 +71,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: monitor
-          image: otel/opentelemetry-collector:0.62.1
+          image: otel/opentelemetry-collector:0.88.0
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --config=/etc/otel/config.yaml

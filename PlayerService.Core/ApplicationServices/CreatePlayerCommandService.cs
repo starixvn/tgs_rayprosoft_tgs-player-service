@@ -2,6 +2,7 @@
 using System.Text.Json.Nodes;
 using Json.Patch;
 using Json.Pointer;
+using Tgs.CashService.Client;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.SerialNumberGenerator;
 using Tgs.ServiceUtility;
@@ -21,18 +22,24 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
     private readonly IPasswordHandler _passwordHandler;
     private readonly IPlayerRepository _playerRepository;
     private readonly ISerialNumberGenerator _serialNumberGenerator;
+    private readonly ICashServiceClient _cashServiceClient;
+    private readonly IDataCommandBuilder _dataCommandBuilder;
     private readonly ISystemClock _systemClock;
 
     public CreatePlayerCommandService(
         IPlayerRepository playerRepository,
         IPasswordHandler passwordHandler,
         ISystemClock systemClock,
-        ISerialNumberGenerator serialNumberGenerator)
+        ISerialNumberGenerator serialNumberGenerator,
+        ICashServiceClient cashServiceClient,
+        IDataCommandBuilder dataCommandBuilder)
     {
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
         _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+        _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+        _dataCommandBuilder = dataCommandBuilder ?? throw new ArgumentNullException(nameof(dataCommandBuilder));
     }
 
     public async ValueTask<string> GetAsync(CreatePlayerCommand command, CancellationToken cancellationToken = default)
@@ -64,6 +71,21 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
             _TagMapper[command.RegisterSiteType].ToString(),
             cancellationToken).ConfigureAwait(false);
 
+        var createWalletId = await _cashServiceClient.CreateNewCashAsync(
+            playerCode,
+            createData.CurrencyCode,
+            cancellationToken).ConfigureAwait(false);
+
+        await _playerRepository.SetPlayerPropertiesAsync(
+            createData.BrandId,
+            playerCode,
+            new[] {
+                _dataCommandBuilder.CreatePutCommand(
+                    nameof(PlayerPropertyName.DefaultWalletId),
+                    createWalletId.ToString())
+            },
+            cancellationToken).ConfigureAwait(false);
+
         var currentTime = _systemClock.UtcNow.UtcDateTime;
 
         var createMainSnapshot = new
@@ -76,6 +98,7 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
             createData.BetLimitId,
             createData.Type,
             Status = createData.PlayerStatus,
+            DefaultWalletId = createWalletId
         };
 
         var patchOperations = Array.Empty<PatchOperation>();

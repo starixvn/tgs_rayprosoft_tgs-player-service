@@ -4,11 +4,11 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.CashService.Client;
 using Tgs.MarketingReport.Client;
 using Tgs.PlayerService.Client;
 using Tgs.PlayerService.Repositories.Entities;
@@ -22,7 +22,11 @@ public class PlayerTests
     [Test]
     public async Task Create_Player()
     {
-        await using var web = new TestPlayerServiceApplication();
+        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+
+        await using var web = new TestPlayerServiceApplication(hostBuilder => hostBuilder
+            .ConfigureServices(services => services
+                .AddSingleton(fakeCashServiceClient)));
 
         var httpClient = web.CreateClient();
 
@@ -36,6 +40,14 @@ public class PlayerTests
         var username = "username";
         var password = "password";
         var agentName = "agentName";
+
+        var walletId = Guid.NewGuid();
+
+        _ = fakeCashServiceClient.CreateNewCashAsync(
+            Arg.Any<string>(),
+            Arg.Is(currencyCode),
+            Arg.Any<CancellationToken>())
+            .Returns(walletId);
 
         var dbContext = web.Services.GetRequiredService<TgsContext>();
 
@@ -58,7 +70,14 @@ public class PlayerTests
         Assert.IsNotNull(player);
         Assert.IsNotNull(player.AgentId == agentId);
         Assert.IsNotNull(playerCode);
+        Assert.AreEqual(player.PlayerCode, playerCode);
+        Assert.AreEqual(walletId, player.DefaultWalletId);
         Assert.IsNotNull(tag);
+        _ = fakeCashServiceClient.Received(1)
+            .CreateNewCashAsync(
+                Arg.Is(playerCode),
+                Arg.Is(currencyCode),
+                Arg.Any<CancellationToken>());
     }
 
     [Test]

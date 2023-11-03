@@ -12,10 +12,6 @@ using Tgs.PlayerService.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration
-    .AddJsonFile("/config/appsettings.json", true)
-    .AddEnvironmentVariables();
-
 builder.Logging
     .AddOpenTelemetry(options =>
     {
@@ -52,11 +48,10 @@ builder.Services
         .UseNpgsql("name=Tgs"))
     .AddMemoryCache()
     .AddPlayerServiceCache()
-    .AddMarketingReportClient((options, sp) =>
-    {
-        var config = sp.GetRequiredService<IConfiguration>();
-        options.BaseUrl = config.GetValue<Uri>("PlayerService:MarketingReportBaseUrl")!;
-    });
+    .AddMarketingReportClient((options, _) => options.BaseUrl =
+        builder.Configuration.GetValue<Uri>("PlayerService:MarketingReportBaseUrl")!)
+    .AddCashServiceClient((options, _) => options.BaseUrl =
+        builder.Configuration.GetValue<Uri>("PlayerService:CashServiceBaseUrl")!);
 
 builder.Services
     .AddOpenTelemetry()
@@ -65,6 +60,7 @@ builder.Services
             .AddEnvironmentVariableDetector())
         .AddSource("Tgs.*")
         .AddSource("TGS.*")
+        .AddSource("Valhalla.*")
         .AddNpgsql()
         .AddAspNetCoreInstrumentation()
         .AddProfileViewExporter()
@@ -72,7 +68,6 @@ builder.Services
     .WithMetrics(meterBuiler => meterBuiler
         .SetResourceBuilder(ResourceBuilder.CreateDefault()
             .AddEnvironmentVariableDetector())
-            .AddMeter("Tgs.PlayerBucket")
             .AddRuntimeInstrumentation()
             .AddAspNetCoreInstrumentation()
             .AddOtlpExporter())
@@ -117,7 +112,8 @@ builder.Services.AddSwaggerGen(options =>
     options.ApplyDisplayNameSchemaId();
 });
 
-builder.Services.AddHealthChecks();
+builder.Services
+    .AddHealthChecks();
 
 var app = builder.Build();
 

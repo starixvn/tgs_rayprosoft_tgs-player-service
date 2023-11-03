@@ -14,7 +14,8 @@ data:
         }
       },
       "PlayerService": {
-        "MarketingReportBaseUrl": "http://marketing-report-api"
+        "MarketingReportBaseUrl": "http://marketing-report-api",
+        "CashServiceBaseUrl": "http://cashservice-api"
       }
     }
   otel-collector-config.yaml: |

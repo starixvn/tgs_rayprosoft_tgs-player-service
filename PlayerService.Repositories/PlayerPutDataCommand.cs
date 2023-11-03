@@ -61,8 +61,12 @@ internal class PlayerPutDataCommand : PutDataCommand
                 modifyContext.Player.AgentId = Guid.Parse(Value);
                 break;
 
+            case nameof(PlayerPropertyName.DefaultWalletId):
+                modifyContext.Player.DefaultWalletId = Guid.Parse(Value);
+                break;
+
             default:
-                if(Name is nameof(PlayerPropertyName.Qq))
+                if (Name is nameof(PlayerPropertyName.Qq))
                 {
                     modifyContext.Player.Qq = Value;
                 }
