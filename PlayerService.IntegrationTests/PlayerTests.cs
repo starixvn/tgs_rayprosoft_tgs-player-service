@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.CashService;
 using Tgs.CashService.Client;
 using Tgs.MarketingReport.Client;
 using Tgs.PlayerService.Client;
@@ -44,8 +45,10 @@ public class PlayerTests
         var walletId = Guid.NewGuid();
 
         _ = fakeCashServiceClient.CreateNewCashAsync(
+            Arg.Is(brandId),
             Arg.Any<string>(),
             Arg.Is(currencyCode),
+            Arg.Is(CashType.Player),
             Arg.Any<CancellationToken>())
             .Returns(walletId);
 
@@ -75,8 +78,10 @@ public class PlayerTests
         Assert.IsNotNull(tag);
         _ = fakeCashServiceClient.Received(1)
             .CreateNewCashAsync(
+                Arg.Is(brandId),
                 Arg.Is(playerCode),
                 Arg.Is(currencyCode),
+                Arg.Is(CashType.Player),
                 Arg.Any<CancellationToken>());
     }
 

@@ -2,6 +2,7 @@
 using System.Text.Json.Nodes;
 using Json.Patch;
 using Json.Pointer;
+using Tgs.CashService;
 using Tgs.CashService.Client;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.SerialNumberGenerator;
@@ -72,8 +73,10 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
             cancellationToken).ConfigureAwait(false);
 
         var createWalletId = await _cashServiceClient.CreateNewCashAsync(
+            command.BrandId,
             playerCode,
             createData.CurrencyCode,
+            CashType.Player,
             cancellationToken).ConfigureAwait(false);
 
         await _playerRepository.SetPlayerPropertiesAsync(
