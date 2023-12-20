@@ -832,6 +832,43 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task 設定玩家狀態為註冊未完成()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = "player1";
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = Guid.NewGuid(),
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "player1",
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Status = (short)PlayerStatus.RegisterUndone
+        };
+
+        _ = await dbContext.Players
+            .AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        await sut.SetPlayerStatusAsync(playerCode, Client.PlayerStatus.RegisterUndone, null);
+
+        Assert.AreEqual((short)Client.PlayerStatus.RegisterUndone, playerRow.Status);
+    }
+
+    [Test]
     public async Task Set_PlayerProperties_After_Get_By_Cache_Should_Correct()
     {
         await using var web = new TestPlayerServiceApplication();
