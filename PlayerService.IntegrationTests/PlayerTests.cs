@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -832,43 +833,6 @@ public class PlayerTests
     }
 
     [Test]
-    public async Task 設定玩家狀態為註冊未完成()
-    {
-        await using var web = new TestPlayerServiceApplication();
-
-        var httpClient = web.CreateClient();
-
-        var sut = new PlayerServiceClient(httpClient);
-
-        var dbContext = web.Services.GetRequiredService<TgsContext>();
-
-        var playerCode = "player1";
-
-        var playerRow = new Player
-        {
-            PlayerCode = playerCode,
-            BrandId = Guid.NewGuid(),
-            DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
-            Username = "player1",
-            RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
-            Status = (short)PlayerStatus.RegisterUndone
-        };
-
-        _ = await dbContext.Players
-            .AddAsync(playerRow);
-
-        _ = await dbContext.SaveChangesAsync();
-
-        await sut.SetPlayerStatusAsync(playerCode, Client.PlayerStatus.RegisterUndone, null);
-
-        Assert.AreEqual((short)Client.PlayerStatus.RegisterUndone, playerRow.Status);
-    }
-
-    [Test]
     public async Task Set_PlayerProperties_After_Get_By_Cache_Should_Correct()
     {
         await using var web = new TestPlayerServiceApplication();
@@ -1146,6 +1110,54 @@ public class PlayerTests
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
         Assert.IsNull(playerRow.RealName);
+    }
+
+    [Test]
+    public async Task 不能清除玩家首存時間()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            FirstDepositOn = DateTime.UtcNow
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var depositOn = DateTime.Now;
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.FirstDepositOn] = null
+        };
+
+        _ = Assert.ThrowsAsync<HttpRequestException>(
+            async () => await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary()));
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.NotNull(playerRow.FirstDepositOn);
     }
 
     [Test]
@@ -1563,6 +1575,89 @@ public class PlayerTests
         var actual = await sut.CountCurrentDayRegisterPlayersAsync(brandId);
 
         Assert.AreEqual(1, actual);
+    }
+
+    [Test]
+    public async Task 設定玩家狀態為註冊未完成()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerCode = "player1";
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = Guid.NewGuid(),
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "player1",
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>(),
+            Status = (short)PlayerStatus.RegisterUndone
+        };
+
+        _ = await dbContext.Players
+            .AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        await sut.SetPlayerStatusAsync(playerCode, Client.PlayerStatus.RegisterUndone, null);
+
+        Assert.AreEqual((short)Client.PlayerStatus.RegisterUndone, playerRow.Status);
+    }
+
+    [Test]
+    public async Task 設定玩家首存時間()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var depositOn = DateTime.Now;
+        var playerProperties = new Dictionary<Client.PlayerPropertyName, string?>
+        {
+            [Client.PlayerPropertyName.FirstDepositOn] = depositOn.ToString("o")
+        };
+
+        await sut.SetPlayerPropertiesAsync(playerCode, playerProperties.ToImmutableDictionary());
+
+        var actual = await dbContext.PlayerProperties
+            .Where(x => x.PlayerCode == playerCode)
+            .ToDictionaryAsync(x => x.Name, x => x.Value);
+
+        Assert.AreEqual(depositOn.ToUniversalTime(), playerRow.FirstDepositOn);
     }
 
     [Test]

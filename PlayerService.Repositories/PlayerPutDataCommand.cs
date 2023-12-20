@@ -65,6 +65,11 @@ internal class PlayerPutDataCommand : PutDataCommand
                 modifyContext.Player.DefaultWalletId = Guid.Parse(Value);
                 break;
 
+            case nameof(PlayerPropertyName.FirstDepositOn):
+                if (modifyContext.Player.FirstDepositOn is null && DateTime.TryParse(Value, out var time))
+                    modifyContext.Player.FirstDepositOn = time.ToUniversalTime();
+                break;
+
             default:
                 if (Name is nameof(PlayerPropertyName.Qq))
                 {
