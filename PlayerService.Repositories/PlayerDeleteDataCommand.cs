@@ -58,6 +58,9 @@ internal class PlayerDeleteDataCommand : DeleteDataCommand
             case nameof(PlayerPropertyName.DefaultWalletId):
                 throw new InvalidOperationException();
 
+            case nameof(PlayerPropertyName.FirstDepositOn):
+                throw new InvalidOperationException();
+
             default:
                 if (Name is nameof(PlayerPropertyName.Qq))
                     modifyContext.Player.Qq = null;
