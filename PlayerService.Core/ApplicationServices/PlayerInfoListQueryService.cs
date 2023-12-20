@@ -2,15 +2,10 @@
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class PlayerInfoListQueryService : IQueryService<PlayerInfoListQuery, PlayerInfo>
+internal class PlayerInfoListQueryService(
+    IPlayerRepository playerRepository) : IQueryService<PlayerInfoListQuery, PlayerInfo>
 {
-    private readonly IPlayerRepository _playerRepository;
-
-    public PlayerInfoListQueryService(
-        IPlayerRepository playerRepository)
-    {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-    }
+    private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
 
     public IAsyncEnumerable<PlayerInfo> QueryAsync(
         PlayerInfoListQuery query,

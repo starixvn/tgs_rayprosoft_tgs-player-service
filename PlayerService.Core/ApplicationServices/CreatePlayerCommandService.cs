@@ -10,7 +10,13 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, string>
+internal class CreatePlayerCommandService(
+    IPlayerRepository playerRepository,
+    IPasswordHandler passwordHandler,
+    ISystemClock systemClock,
+    ISerialNumberGenerator serialNumberGenerator,
+    ICashServiceClient cashServiceClient,
+    IDataCommandBuilder dataCommandBuilder) : IGetService<CreatePlayerCommand, string>
 {
     private static readonly IReadOnlyDictionary<RegisterSiteType, PlayerTagType> _TagMapper =
         new Dictionary<RegisterSiteType, PlayerTagType>
@@ -20,28 +26,12 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
             [RegisterSiteType.BackendOffice] = PlayerTagType.BackendOfficeCreated
         }.AsReadOnly();
 
-    private readonly IPasswordHandler _passwordHandler;
-    private readonly IPlayerRepository _playerRepository;
-    private readonly ISerialNumberGenerator _serialNumberGenerator;
-    private readonly ICashServiceClient _cashServiceClient;
-    private readonly IDataCommandBuilder _dataCommandBuilder;
-    private readonly ISystemClock _systemClock;
-
-    public CreatePlayerCommandService(
-        IPlayerRepository playerRepository,
-        IPasswordHandler passwordHandler,
-        ISystemClock systemClock,
-        ISerialNumberGenerator serialNumberGenerator,
-        ICashServiceClient cashServiceClient,
-        IDataCommandBuilder dataCommandBuilder)
-    {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-        _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-        _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-        _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-        _dataCommandBuilder = dataCommandBuilder ?? throw new ArgumentNullException(nameof(dataCommandBuilder));
-    }
+    private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+    private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+    private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+    private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+    private readonly IDataCommandBuilder _dataCommandBuilder = dataCommandBuilder ?? throw new ArgumentNullException(nameof(dataCommandBuilder));
+    private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
     public async ValueTask<string> GetAsync(CreatePlayerCommand command, CancellationToken cancellationToken = default)
     {
@@ -106,16 +96,22 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, str
 
         var patchOperations = Array.Empty<PatchOperation>();
 
-        patchOperations = patchOperations.Append(PatchOperation.Add(
-            JsonPointer.Parse(""),
-            JsonNode.Parse(JsonSerializer.Serialize(
-                createMainSnapshot,
-                PlayerUtility.SerializerOptions)))).ToArray();
+        patchOperations = [
+            .. patchOperations,
+            PatchOperation.Add(
+                JsonPointer.Parse(""),
+                JsonNode.Parse(JsonSerializer.Serialize(
+                    createMainSnapshot,
+                    PlayerUtility.SerializerOptions))),
+        ];
 
         if (!string.IsNullOrWhiteSpace(command.UpperPlayerCode))
-            patchOperations = patchOperations.Append(PatchOperation.Replace(
-                JsonPointer.Parse("/parentPlayerCode"),
-                command.UpperPlayerCode)).ToArray();
+            patchOperations = [
+                .. patchOperations,
+                PatchOperation.Replace(
+                    JsonPointer.Parse("/parentPlayerCode"),
+                    command.UpperPlayerCode),
+            ];
 
         var changeSets = new JsonPatch(patchOperations);
 

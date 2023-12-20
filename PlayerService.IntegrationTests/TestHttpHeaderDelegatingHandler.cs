@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace Tgs.PlayerService.IntegrationTests;
 
-internal class TestHttpHeaderDelegatingHandler : DelegatingHandler
+internal class TestHttpHeaderDelegatingHandler(string headerName) : DelegatingHandler
 {
-    private readonly string _headerName;
-
-    public TestHttpHeaderDelegatingHandler(string headerName)
-    {
-        _headerName = headerName ?? throw new ArgumentNullException(nameof(headerName));
-    }
+    private readonly string _headerName = headerName ?? throw new ArgumentNullException(nameof(headerName));
 
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {

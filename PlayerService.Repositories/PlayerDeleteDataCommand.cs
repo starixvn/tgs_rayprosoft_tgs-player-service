@@ -1,11 +1,7 @@
 ﻿namespace Tgs.PlayerService.Repositories;
 
-internal class PlayerDeleteDataCommand : DeleteDataCommand
+internal class PlayerDeleteDataCommand(string name) : DeleteDataCommand(name)
 {
-    public PlayerDeleteDataCommand(string name) : base(name)
-    {
-    }
-
     public override ValueTask ExecuteAsync(IDataCommandContext context, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

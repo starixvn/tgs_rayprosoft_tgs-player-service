@@ -9,17 +9,11 @@ using Tgs.SerialNumberGenerator;
 
 namespace Tgs.PlayerService.Repositories;
 
-internal class PlayerRepository : IPlayerRepository
+internal class PlayerRepository(TgsContext context, ISerialNumberGenerator serialNumberGenerator) : IPlayerRepository
 {
-    private readonly TgsContext _dbContext;
-    private readonly ISerialNumberGenerator _serialNumberGenerator;
-
-    public PlayerRepository(TgsContext context, ISerialNumberGenerator serialNumberGenerator)
-    {
-        _dbContext = context ?? throw new ArgumentNullException(nameof(context));
-        _serialNumberGenerator =
+    private readonly TgsContext _dbContext = context ?? throw new ArgumentNullException(nameof(context));
+    private readonly ISerialNumberGenerator _serialNumberGenerator =
             serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-    }
 
     public async ValueTask AddPlayerAuditLogAsync(
         Guid createId,
@@ -114,8 +108,8 @@ internal class PlayerRepository : IPlayerRepository
             Username = username,
             Password = data.Password,
             Salt = data.Salt,
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             BrandId = data.BrandId,
             DefaultWalletId = walletId,
             DefaultWalletCurrencyCode = data.CurrencyCode,
@@ -216,10 +210,7 @@ internal class PlayerRepository : IPlayerRepository
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[]
-            {
-                playerCode
-            }, cancellationToken)
+            .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
         return player?.AccumulatedDeposit ?? 0;
@@ -245,10 +236,7 @@ internal class PlayerRepository : IPlayerRepository
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[]
-            {
-                playerCode
-            }, cancellationToken)
+            .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
         return player == null
@@ -265,6 +253,7 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
     public async ValueTask<PlayerInfo?> GetPlayerInfoByEmailAsync(
         Guid brandId,
         string email,
@@ -314,6 +303,7 @@ internal class PlayerRepository : IPlayerRepository
                 player.RegisteredOn);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
     public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName,
         CancellationToken cancellationToken = default)
     {
@@ -397,10 +387,7 @@ internal class PlayerRepository : IPlayerRepository
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[]
-            {
-                playerCode
-            }, cancellationToken)
+            .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
         var properties = new Dictionary<string, string>();
@@ -551,6 +538,7 @@ internal class PlayerRepository : IPlayerRepository
                 p.VipId,
                 p.RegisteredOn));
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
             Guid brandId,
         PlayerStatus? status = null,
@@ -638,6 +626,7 @@ internal class PlayerRepository : IPlayerRepository
             .ToAsyncEnumerable();
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListByPlayersAsync(
         Guid brandId,
         IEnumerable<string> playerCodes,
@@ -832,10 +821,7 @@ internal class PlayerRepository : IPlayerRepository
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[]
-            {
-                playerCode
-            }, cancellationToken)
+            .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
         if (player is null)
@@ -892,10 +878,7 @@ internal class PlayerRepository : IPlayerRepository
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[]
-            {
-                playerCode
-            }, cancellationToken)
+            .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
         if (player == null)
@@ -919,10 +902,7 @@ internal class PlayerRepository : IPlayerRepository
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[]
-            {
-                playerCode
-            }, cancellationToken)
+            .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
         if (player == null)
@@ -952,10 +932,7 @@ internal class PlayerRepository : IPlayerRepository
         CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
-            .FindAsync(new object?[]
-            {
-                playerCode
-            }, cancellationToken)
+            .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
         if (player == null)
@@ -972,7 +949,7 @@ internal class PlayerRepository : IPlayerRepository
     public async ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players.FindAsync(
-            new object?[] { playerCode },
+            [playerCode],
             cancellationToken: cancellationToken).ConfigureAwait(false);
 
         if (player is null)
@@ -989,7 +966,7 @@ internal class PlayerRepository : IPlayerRepository
     public async ValueTask UpdatePlayerSnapshotAsync(string playerCode, Guid snapshotId, DateTime updatedOn, CancellationToken cancellationToken = default)
     {
         var dbSnapshot = await _dbContext.Players
-            .FindAsync(new object?[] { playerCode }, cancellationToken: cancellationToken)
+            .FindAsync([playerCode], cancellationToken: cancellationToken)
             .ConfigureAwait(false)
             ?? (await _dbContext.Players.AddAsync(new Player
             {
@@ -1005,6 +982,7 @@ internal class PlayerRepository : IPlayerRepository
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
     private IQueryable<Player> InternalQueryPlayerList(
         Guid brandId,
         PlayerStatus? status = null,

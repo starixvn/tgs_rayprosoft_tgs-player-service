@@ -5,18 +5,12 @@ using Tgs.ServiceUtility;
 
 namespace PlayerService.Core.Cache;
 
-internal class GetCachedPlayerPropertiesQueryService : IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>>
+internal class GetCachedPlayerPropertiesQueryService(
+    IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>> sourceService,
+    IMemoryCache memoryCache) : IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>>
 {
-    private readonly IMemoryCache _memoryCache;
-    private readonly IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>> _sourceService;
-
-    public GetCachedPlayerPropertiesQueryService(
-        IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>> sourceService,
-        IMemoryCache memoryCache)
-    {
-        _sourceService = sourceService ?? throw new ArgumentNullException(nameof(sourceService));
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-    }
+    private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+    private readonly IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>> _sourceService = sourceService ?? throw new ArgumentNullException(nameof(sourceService));
 
     public async ValueTask<IImmutableDictionary<string, string>> GetAsync(
         GetPlayerPropertiesQuery query,

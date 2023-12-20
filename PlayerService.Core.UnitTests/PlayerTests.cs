@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Office2010.CustomUI;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using NUnit.Framework.Legacy;
 using Tgs.CashService.Client;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.MarketingReport.Client;
@@ -576,9 +577,10 @@ public class PlayerTests
 
         var sut = new GetPlayerCodesByUserNamesQueryService(fakePlayerRepository);
 
+        var userNames = new[] { "player1", "player2" };
         var query = new GetPlayerCodesByUserNamesQuery(
             Guid.NewGuid(),
-            new[] { "player1", "player2" });
+            userNames);
 
         _ = await sut.QueryAsync(query).ToArrayAsync();
 
@@ -639,6 +641,7 @@ public class PlayerTests
 
         _ = await sut.GetAsync(command);
 
+        var emptyBytes = Array.Empty<byte>();
         _ = fakePlayerRepository.Received(1)
             .CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data == new CreatePlayerData(
                 brandId,
@@ -650,8 +653,8 @@ public class PlayerTests
                 vipId,
                 agentId,
                 command.UpperPlayerCode,
-                Array.Empty<byte>(),
-                Array.Empty<byte>())));
+                emptyBytes,
+                emptyBytes)));
 
         _ = fakePlayerRepository.Received(1)
             .CreatePlayerTagAsync(Arg.Any<string>(), Arg.Any<string>());
@@ -701,7 +704,7 @@ public class PlayerTests
 
         var actual = await sut.GetAsync(new CountReportDateRegisterQuery(brandId, reportDate));
 
-        Assert.AreEqual(9, actual);
+        ClassicAssert.AreEqual(9, actual);
     }
 
     [Test]
@@ -726,7 +729,7 @@ public class PlayerTests
 
         var actual = await sut.GetAsync(new CountReportDateRegisterQuery(brandId, reportDate));
 
-        Assert.AreEqual(6, actual);
+        ClassicAssert.AreEqual(6, actual);
     }
 
     [Test]
@@ -750,7 +753,7 @@ public class PlayerTests
 
         var actual = await sut.GetAsync(new CountReportDateRegisterQuery(brandId, reportDate));
 
-        Assert.AreEqual(3, actual);
+        ClassicAssert.AreEqual(3, actual);
     }
 
     [Test]

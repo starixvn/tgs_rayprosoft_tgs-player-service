@@ -3,16 +3,10 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class TopUpAccumulatedDepositCommandService : ICommandService<TopUpAccumulatedDepositCommand>
+internal class TopUpAccumulatedDepositCommandService(IPlayerRepository playerRepository, ISerialNumberGenerator serialNumberGenerator) : ICommandService<TopUpAccumulatedDepositCommand>
 {
-    private readonly IPlayerRepository _playerRepository;
-    private readonly ISerialNumberGenerator _serialNumberGenerator;
-
-    public TopUpAccumulatedDepositCommandService(IPlayerRepository playerRepository, ISerialNumberGenerator serialNumberGenerator)
-    {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-        _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-    }
+    private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+    private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 
     public async ValueTask ExecuteAsync(TopUpAccumulatedDepositCommand command, CancellationToken cancellationToken = default)
     {

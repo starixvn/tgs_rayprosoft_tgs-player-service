@@ -16,15 +16,8 @@ namespace Tgs.PlayerService.IntegrationTests;
 
 extern alias PlayerSvc;
 
-internal class TestPlayerServiceApplication : WebApplicationFactory<PlayerSvc.Program>
+internal class TestPlayerServiceApplication(Action<IWebHostBuilder>? webHostConfigure = null) : WebApplicationFactory<PlayerSvc.Program>
 {
-    private readonly Action<IWebHostBuilder>? _webHostConfigure;
-
-    public TestPlayerServiceApplication(Action<IWebHostBuilder>? webHostConfigure = null)
-    {
-        _webHostConfigure = webHostConfigure;
-    }
-
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
@@ -53,6 +46,6 @@ internal class TestPlayerServiceApplication : WebApplicationFactory<PlayerSvc.Pr
                     return new TgsContext(dbContextOptionsBuilder.Options);
                 })));
 
-        _webHostConfigure?.Invoke(builder);
+        webHostConfigure?.Invoke(builder);
     }
 }

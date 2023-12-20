@@ -53,6 +53,7 @@ builder.Services
     .AddCashServiceClient((options, _) => options.BaseUrl =
         builder.Configuration.GetValue<Uri>("PlayerService:CashServiceBaseUrl")!);
 
+var excludeExtensions = new[] { "html", "ico", "png", "jpg" };
 builder.Services
     .AddOpenTelemetry()
     .WithTracing(tracingBuilder => tracingBuilder
@@ -62,7 +63,14 @@ builder.Services
         .AddSource("TGS.*")
         .AddSource("Valhalla.*")
         .AddNpgsql()
-        .AddAspNetCoreInstrumentation()
+        .AddAspNetCoreInstrumentation(options => options.Filter =
+            httpContext => !httpContext.Request.Path.HasValue
+                || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                && !httpContext.Request.Path.StartsWithSegments("/healthz")
+                && !httpContext.Request.Path.StartsWithSegments("/metrics")
+                && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                && !excludeExtensions.Any(
+                    ext => httpContext.Request.Path.Value.EndsWith($".{ext}")))
         .AddProfileViewExporter()
         .AddOtlpExporter())
     .WithMetrics(meterBuiler => meterBuiler
@@ -72,15 +80,7 @@ builder.Services
             .AddAspNetCoreInstrumentation()
             .AddOtlpExporter())
     .Services
-    .AddProfileViewer()
-    .Configure<AspNetCoreInstrumentationOptions>(options => options.Filter =
-        httpContext => !httpContext.Request.Path.HasValue
-            || !httpContext.Request.Path.StartsWithSegments("/swagger")
-            && !httpContext.Request.Path.StartsWithSegments("/healthz")
-            && !httpContext.Request.Path.StartsWithSegments("/metrics")
-            && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-            && !new[] { "html", "ico", "png", "jpg" }.Any(
-                ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
+    .AddProfileViewer();
 
 builder.Services.AddSwaggerGen(options =>
 {

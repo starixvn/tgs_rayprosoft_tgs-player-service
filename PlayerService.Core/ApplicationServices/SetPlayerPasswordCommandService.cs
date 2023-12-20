@@ -7,21 +7,14 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class SetPlayerPasswordCommandService : ICommandService<SetPlayerPasswordCommand>
+internal class SetPlayerPasswordCommandService(
+    IPasswordHandler passwordHandler,
+    IPlayerRepository playerRepository,
+    ISerialNumberGenerator serialNumberGenerator) : ICommandService<SetPlayerPasswordCommand>
 {
-    private readonly IPasswordHandler _passwordHandler;
-    private readonly IPlayerRepository _playerRepository;
-    private readonly ISerialNumberGenerator _serialNumberGenerator;
-
-    public SetPlayerPasswordCommandService(
-        IPasswordHandler passwordHandler,
-        IPlayerRepository playerRepository,
-        ISerialNumberGenerator serialNumberGenerator)
-    {
-        _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-        _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-    }
+    private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+    private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+    private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 
     public async ValueTask ExecuteAsync(SetPlayerPasswordCommand command, CancellationToken cancellationToken = default)
     {
@@ -32,9 +25,10 @@ internal class SetPlayerPasswordCommandService : ICommandService<SetPlayerPasswo
             .ConfigureAwait(false);
 
         var patchOperations = Array.Empty<PatchOperation>();
-        patchOperations = patchOperations
-            .Append(PatchOperation.Replace(JsonPointer.Parse($"/password"), ""))
-            .ToArray();
+        patchOperations = [
+            .. patchOperations,
+            PatchOperation.Replace(JsonPointer.Parse($"/password"), "")
+        ];
 
         var changeSets = new JsonPatch(patchOperations);
         var eventId = await _serialNumberGenerator

@@ -3,15 +3,10 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class GetPlayerPropertiesQueryService : IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>>
+internal class GetPlayerPropertiesQueryService(
+    IPlayerRepository playerRepository) : IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>>
 {
-    private readonly IPlayerRepository _playerRepository;
-
-    public GetPlayerPropertiesQueryService(
-        IPlayerRepository playerRepository)
-    {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-    }
+    private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
 
     public ValueTask<IImmutableDictionary<string, string>> GetAsync(
         GetPlayerPropertiesQuery query,

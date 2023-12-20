@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Tgs.PlayerService</RootNamespace>
@@ -9,13 +9,13 @@
 
   <ItemGroup>
     <PackageReference Include="JsonPatch.Net" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.7.30">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Interactive.Async" Version="6.0.1" />
-    <PackageReference Include="Tgs.CashService.Client" Version="0.2.7" />
+    <PackageReference Include="Tgs.CashService.Client" Version="0.2.9" />
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.2" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
     <PackageReference Include="Tgs.MarketingReport.Client" Version="0.0.9" />
