@@ -22,7 +22,7 @@ build-code:
 
 unit-test:
   variables:
-    Framework: net6.0
+    Framework: net7.0
   extends: .unit-test-template
 
 push-nuget:
