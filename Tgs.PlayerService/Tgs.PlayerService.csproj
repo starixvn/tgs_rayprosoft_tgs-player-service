@@ -7,6 +7,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <UserSecretsId>0323e457-f31b-4a28-ae5d-37c780c3b49f</UserSecretsId>
     <DockerfileTag Condition="$(DockerfileTag) == ''">player-api</DockerfileTag>
+    <ContainerRepository>player-api</ContainerRepository>
   </PropertyGroup>
 
   <ItemGroup>
