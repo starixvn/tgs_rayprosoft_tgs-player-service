@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.CashService;
 using Tgs.CashService.Client;
 using Tgs.MarketingReport.Client;
@@ -71,12 +72,12 @@ public class PlayerTests
         var player = dbContext.Players.First(x => x.Username == username);
         var tag = dbContext.PlayerTags.First(x => x.PlayerCode == playerCode);
 
-        Assert.IsNotNull(player);
-        Assert.IsNotNull(player.AgentId == agentId);
-        Assert.IsNotNull(playerCode);
-        Assert.AreEqual(player.PlayerCode, playerCode);
-        Assert.AreEqual(walletId, player.DefaultWalletId);
-        Assert.IsNotNull(tag);
+        ClassicAssert.IsNotNull(player);
+        ClassicAssert.IsNotNull(player.AgentId == agentId);
+        ClassicAssert.IsNotNull(playerCode);
+        ClassicAssert.AreEqual(player.PlayerCode, playerCode);
+        ClassicAssert.AreEqual(walletId, player.DefaultWalletId);
+        ClassicAssert.IsNotNull(tag);
         _ = fakeCashServiceClient.Received(1)
             .CreateNewCashAsync(
                 Arg.Is(brandId),
@@ -111,13 +112,13 @@ public class PlayerTests
         {
             PlayerCode = playerCode,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = "player",
             RealName = "player1",
             DefaultWalletId = walletId,
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         });
 
         _ = await dbContext.SaveChangesAsync();
@@ -142,20 +143,20 @@ public class PlayerTests
         {
             PlayerCode = "player1",
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = "player",
             RealName = "player1",
             AccumulatedDeposit = 1000M,
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         });
 
         _ = await dbContext.SaveChangesAsync();
 
         var actual = await sut.GetPlayerDepositedAmountAsync("player1");
 
-        Assert.AreEqual(actual, 1000M);
+        ClassicAssert.AreEqual(actual, 1000M);
     }
 
     [Test]
@@ -177,13 +178,13 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
             AgentId = Guid.NewGuid(),
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         };
 
         _ = await dbContext.Players.AddAsync(playerRow);
@@ -192,7 +193,7 @@ public class PlayerTests
 
         var actual = await sut.GetPlayerPropertiesAsync(playerCode);
 
-        Assert.AreEqual(playerRow.AgentId.ToString(), actual["AgentId"]);
+        ClassicAssert.AreEqual(playerRow.AgentId.ToString(), actual["AgentId"]);
     }
 
     [Test]
@@ -226,12 +227,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             RegisteredOn = expected.RegisteredOn
         });
 
@@ -240,7 +241,7 @@ public class PlayerTests
         var actual = await sut.GetPlayerInfoAsync(playerCode)
             .ConfigureAwait(false);
 
-        Assert.AreEqual(expected, actual);
+        ClassicAssert.AreEqual(expected, actual);
     }
 
     [Test]
@@ -257,7 +258,7 @@ public class PlayerTests
         var actual = await sut.GetPlayerInfoAsync(playerCode)
             .ConfigureAwait(false);
 
-        Assert.IsNull(actual);
+        ClassicAssert.IsNull(actual);
     }
 
     [Test]
@@ -280,12 +281,12 @@ public class PlayerTests
             PlayerCode = "player1",
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             DefaultWalletId = defaultWalletId
         });
 
@@ -329,12 +330,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = Guid.NewGuid(),
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Status = (short)PlayerStatus.RegisterUndone
         });
 
@@ -342,7 +343,7 @@ public class PlayerTests
 
         var actual = await sut.GetPlayerStatusAsync(playerCode);
 
-        Assert.AreEqual(Client.PlayerStatus.RegisterUndone, actual);
+        ClassicAssert.AreEqual(Client.PlayerStatus.RegisterUndone, actual);
     }
 
     [Test]
@@ -378,12 +379,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Email = mail,
             RegisteredOn = expected.RegisteredOn
         });
@@ -393,7 +394,7 @@ public class PlayerTests
         var actual = await sut.GetPlayerInfoByEmailAsync(brandId, mail)
             .ConfigureAwait(false);
 
-        Assert.AreEqual(expected, actual);
+        ClassicAssert.AreEqual(expected, actual);
     }
 
     [Test]
@@ -429,12 +430,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Phone = phone,
             AreaCode = areaCode,
             RegisteredOn = expected.RegisteredOn
@@ -445,7 +446,7 @@ public class PlayerTests
         var actual = await sut.GetPlayerInfoByPhoneAsync(brandId, areaCode, phone)
             .ConfigureAwait(false);
 
-        Assert.AreEqual(expected, actual);
+        ClassicAssert.AreEqual(expected, actual);
     }
 
     [Test]
@@ -482,12 +483,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = userName,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Phone = phone,
             AreaCode = areaCode,
             RegisteredOn = expected.RegisteredOn
@@ -498,7 +499,7 @@ public class PlayerTests
         var actual = await sut.GetPlayerInfoByUserNameAsync(brandId, userName)
             .ConfigureAwait(false);
 
-        Assert.AreEqual(expected, actual);
+        ClassicAssert.AreEqual(expected, actual);
     }
 
     [Test]
@@ -520,12 +521,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         };
 
         _ = await dbContext.Players.AddAsync(playerRow);
@@ -545,9 +546,9 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.AreEqual("123", playerRow.AreaCode);
-        Assert.AreEqual("12345678", playerRow.Phone);
-        Assert.IsTrue(playerRow.PhoneAuthentication);
+        ClassicAssert.AreEqual("123", playerRow.AreaCode);
+        ClassicAssert.AreEqual("12345678", playerRow.Phone);
+        ClassicAssert.IsTrue(playerRow.PhoneAuthentication);
     }
 
     [Test]
@@ -569,12 +570,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         };
 
         _ = await dbContext.Players.AddAsync(playerRow);
@@ -592,7 +593,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.AreEqual("tester@test.com", playerRow.Email);
+        ClassicAssert.AreEqual("tester@test.com", playerRow.Email);
     }
 
     [Test]
@@ -614,12 +615,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             IdNumber = "oldIdNumber"
         };
 
@@ -638,7 +639,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.AreEqual("newIdNumber", playerRow.IdNumber);
+        ClassicAssert.AreEqual("newIdNumber", playerRow.IdNumber);
     }
 
     [Test]
@@ -660,12 +661,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             IdentityAuthentication = false
         };
 
@@ -684,7 +685,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.True(playerRow.IdentityAuthentication);
+        ClassicAssert.True(playerRow.IdentityAuthentication);
     }
 
     [Test]
@@ -706,12 +707,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         });
 
         await dbContext.PlayerProperties.AddRangeAsync(
@@ -745,9 +746,9 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.AreEqual(2, dbContext.PlayerProperties.Count());
-        Assert.AreEqual("NewLineId", actual["Line"]);
-        Assert.AreEqual("TelegramId", actual["Telegram"]);
+        ClassicAssert.AreEqual(2, dbContext.PlayerProperties.Count());
+        ClassicAssert.AreEqual("NewLineId", actual["Line"]);
+        ClassicAssert.AreEqual("TelegramId", actual["Telegram"]);
     }
 
     [Test]
@@ -769,12 +770,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         };
 
         _ = await dbContext.Players.AddAsync(playerRow);
@@ -792,7 +793,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.AreEqual("RealName", playerRow.RealName);
+        ClassicAssert.AreEqual("RealName", playerRow.RealName);
     }
 
     [Test]
@@ -813,12 +814,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = Guid.NewGuid(),
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = "player1",
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Status = (short)PlayerStatus.RegisterUndone
         };
 
@@ -829,7 +830,7 @@ public class PlayerTests
 
         await sut.SetPlayerStatusAsync(playerCode, Client.PlayerStatus.Enabled);
 
-        Assert.AreEqual((short)Client.PlayerStatus.Enabled, playerRow.Status);
+        ClassicAssert.AreEqual((short)Client.PlayerStatus.Enabled, playerRow.Status);
     }
 
     [Test]
@@ -851,12 +852,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         });
 
         _ = await dbContext.SaveChangesAsync();
@@ -872,8 +873,8 @@ public class PlayerTests
 
         var actual = await sut.GetPlayerPropertiesAsync(playerCode);
 
-        Assert.AreEqual(3, actual.Count);
-        Assert.AreEqual("NewLineId", actual[nameof(Client.PlayerPropertyName.Line)]);
+        ClassicAssert.AreEqual(3, actual.Count);
+        ClassicAssert.AreEqual("NewLineId", actual[nameof(Client.PlayerPropertyName.Line)]);
     }
 
     [Test]
@@ -895,12 +896,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             AreaCode = "123",
             Phone = "12345678",
             PhoneAuthentication = true
@@ -923,9 +924,9 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.IsNull(playerRow.AreaCode);
-        Assert.IsNull(playerRow.Phone);
-        Assert.IsFalse(playerRow.PhoneAuthentication);
+        ClassicAssert.IsNull(playerRow.AreaCode);
+        ClassicAssert.IsNull(playerRow.Phone);
+        ClassicAssert.IsFalse(playerRow.PhoneAuthentication);
     }
 
     [Test]
@@ -947,12 +948,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Email = "tester@test.com"
         };
 
@@ -971,7 +972,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.IsNull(playerRow.Email);
+        ClassicAssert.IsNull(playerRow.Email);
     }
 
     [Test]
@@ -993,12 +994,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             IdNumber = "oldIdNumber"
         };
 
@@ -1017,7 +1018,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.IsNull(playerRow.IdNumber);
+        ClassicAssert.IsNull(playerRow.IdNumber);
     }
 
     [Test]
@@ -1039,12 +1040,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             IdentityAuthentication = true
         };
 
@@ -1063,7 +1064,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.False(playerRow.IdentityAuthentication);
+        ClassicAssert.False(playerRow.IdentityAuthentication);
     }
 
     [Test]
@@ -1085,12 +1086,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Email = "tester@test.com"
         };
 
@@ -1109,7 +1110,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.IsNull(playerRow.RealName);
+        ClassicAssert.IsNull(playerRow.RealName);
     }
 
     [Test]
@@ -1131,12 +1132,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             FirstDepositOn = DateTime.UtcNow
         };
 
@@ -1157,7 +1158,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.NotNull(playerRow.FirstDepositOn);
+        ClassicAssert.NotNull(playerRow.FirstDepositOn);
     }
 
     [Test]
@@ -1179,12 +1180,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Email = "tester@test.com",
             Remark = "test"
         };
@@ -1204,7 +1205,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.IsNull(playerRow.Remark);
+        ClassicAssert.IsNull(playerRow.Remark);
     }
 
     [Test]
@@ -1240,12 +1241,12 @@ public class PlayerTests
                 PlayerCode = playerCode,
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = playerCode,
                 RealName = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = expected.RegisteredOn
             },
             new Player
@@ -1253,12 +1254,12 @@ public class PlayerTests
                 PlayerCode = parentCode,
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "parent1",
                 RealName = "parent1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = expected.RegisteredOn
             });
 
@@ -1273,7 +1274,7 @@ public class PlayerTests
         var actual = await sut.GetParentPlayerInfoAsync(playerCode)
             .ConfigureAwait(false);
 
-        Assert.AreEqual(expected, actual);
+        ClassicAssert.AreEqual(expected, actual);
     }
 
     [Test]
@@ -1295,12 +1296,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Email = "tester@test.com",
             Remark = "test"
         };
@@ -1311,7 +1312,7 @@ public class PlayerTests
 
         var actual = await sut.GetPlayerPropertiesAsync(playerCode);
 
-        Assert.AreEqual("test", actual.GetValueOrDefault("Remark"));
+        ClassicAssert.AreEqual("test", actual.GetValueOrDefault("Remark"));
     }
 
     [Test]
@@ -1346,7 +1347,7 @@ public class PlayerTests
 
         var actual = await sut.CountReportDateRegisterPlayersAsync(brandId, reportDate);
 
-        Assert.AreEqual(4, actual);
+        ClassicAssert.AreEqual(4, actual);
     }
 
     [Test]
@@ -1375,12 +1376,12 @@ public class PlayerTests
             BrandId = brandId,
             RegisteredOn = now.AddDays(-1).DateTime,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = "playerCode",
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Status = (short)PlayerStatus.RegisterUndone,
         });
 
@@ -1388,7 +1389,7 @@ public class PlayerTests
 
         var actual = await sut.CountReportDateRegisterPlayersAsync(brandId, reportDate);
 
-        Assert.AreEqual(1, actual);
+        ClassicAssert.AreEqual(1, actual);
     }
 
     [Test]
@@ -1417,12 +1418,12 @@ public class PlayerTests
             BrandId = brandId,
             RegisteredOn = now.DateTime,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = "playerCode",
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Status = (short)PlayerStatus.RegisterUndone,
         });
 
@@ -1430,7 +1431,7 @@ public class PlayerTests
 
         var actual = await sut.CountReportDateRegisterPlayersAsync(brandId, reportDate);
 
-        Assert.AreEqual(1, actual);
+        ClassicAssert.AreEqual(1, actual);
     }
 
     [Test]
@@ -1464,8 +1465,8 @@ public class PlayerTests
 
         var actual = await sut.GetPlayerHistoryAsync(eventId);
 
-        Assert.NotNull(actual);
-        Assert.AreEqual(Client.EventAction.Create, actual!.Action);
+        ClassicAssert.NotNull(actual);
+        ClassicAssert.AreEqual(Client.EventAction.Create, actual!.Action);
     }
 
     [Test]
@@ -1501,9 +1502,9 @@ public class PlayerTests
 
         var actual = await sut.GetPlayerHistoriesAsync(conditions, 10, 0).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.Length);
-        Assert.AreEqual(Client.EventAction.Create, actual[0].Action);
-        Assert.AreEqual(eventId, actual[0].EventId);
+        ClassicAssert.AreEqual(1, actual.Length);
+        ClassicAssert.AreEqual(Client.EventAction.Create, actual[0].Action);
+        ClassicAssert.AreEqual(eventId, actual[0].EventId);
     }
 
     [Test]
@@ -1539,7 +1540,7 @@ public class PlayerTests
 
         var actual = await sut.CountPlayerHistoriesAsync(conditions);
 
-        Assert.AreEqual(1, actual);
+        ClassicAssert.AreEqual(1, actual);
     }
 
     [Test]
@@ -1561,12 +1562,12 @@ public class PlayerTests
             BrandId = brandId,
             RegisteredOn = DateTime.UtcNow,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = "playerCode",
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Status = (short)PlayerStatus.RegisterUndone,
         });
 
@@ -1574,7 +1575,7 @@ public class PlayerTests
 
         var actual = await sut.CountCurrentDayRegisterPlayersAsync(brandId);
 
-        Assert.AreEqual(1, actual);
+        ClassicAssert.AreEqual(1, actual);
     }
 
     [Test]
@@ -1595,12 +1596,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = Guid.NewGuid(),
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = "player1",
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             Status = (short)PlayerStatus.RegisterUndone
         };
 
@@ -1611,7 +1612,7 @@ public class PlayerTests
 
         await sut.SetPlayerStatusAsync(playerCode, Client.PlayerStatus.RegisterUndone, null);
 
-        Assert.AreEqual((short)Client.PlayerStatus.RegisterUndone, playerRow.Status);
+        ClassicAssert.AreEqual((short)Client.PlayerStatus.RegisterUndone, playerRow.Status);
     }
 
     [Test]
@@ -1633,12 +1634,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         };
 
         _ = await dbContext.Players.AddAsync(playerRow);
@@ -1657,7 +1658,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.AreEqual(depositOn.ToUniversalTime(), playerRow.FirstDepositOn);
+        ClassicAssert.AreEqual(depositOn.ToUniversalTime(), playerRow.FirstDepositOn);
     }
 
     [Test]
@@ -1679,12 +1680,12 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
             RealName = "player1",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         };
 
         _ = await dbContext.Players.AddAsync(playerRow);
@@ -1702,7 +1703,7 @@ public class PlayerTests
             .Where(x => x.PlayerCode == playerCode)
             .ToDictionaryAsync(x => x.Name, x => x.Value);
 
-        Assert.AreEqual("test", playerRow.Remark);
+        ClassicAssert.AreEqual("test", playerRow.Remark);
     }
 
     [Test]
@@ -1724,11 +1725,11 @@ public class PlayerTests
             PlayerCode = playerCode,
             BrandId = brandId,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = playerCode,
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            WithdrawPassword = [],
+            WithdrawSalt = []
         };
 
         _ = await dbContext.Players.AddAsync(playerRow);
@@ -1742,13 +1743,13 @@ public class PlayerTests
 
         var actual = await dbContext.Players.FirstAsync(p => p.PlayerCode == playerCode);
 
-        Assert.AreNotEqual(Array.Empty<byte>(), actual.Password);
-        Assert.AreNotEqual(Array.Empty<byte>(), actual.Salt);
-        Assert.AreEqual(modifyUsername, actual.UpdatedByUsername);
+        ClassicAssert.AreNotEqual(Array.Empty<byte>(), actual.Password);
+        ClassicAssert.AreNotEqual(Array.Empty<byte>(), actual.Salt);
+        ClassicAssert.AreEqual(modifyUsername, actual.UpdatedByUsername);
 
         var playerEvent = await dbContext.PlayerEventSources.FirstOrDefaultAsync(p => p.PlayerCode == playerCode);
-        Assert.NotNull(playerEvent);
+        ClassicAssert.NotNull(playerEvent);
 
-        Assert.AreEqual(playerEvent!.Id, actual.SnapshotEventId);
+        ClassicAssert.AreEqual(playerEvent!.Id, actual.SnapshotEventId);
     }
 }

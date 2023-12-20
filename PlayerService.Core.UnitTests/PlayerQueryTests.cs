@@ -27,7 +27,8 @@ public class PlayerQueryTests
 
         var sut = new PlayerListQueryService(fakePlayerRepository);
 
-        var query = new PlayerListQuery(Guid.NewGuid(), new[] { "player1", "player2" });
+        var playerCodes = new[] { "player1", "player2" };
+        var query = new PlayerListQuery(Guid.NewGuid(), playerCodes);
 
         _ = await sut.QueryAsync(query).ToArrayAsync();
 
@@ -44,9 +45,10 @@ public class PlayerQueryTests
 
         var sut = new ListPlayerInfosByUserNamesQueryService(fakePlayerRepository);
 
+        var userNames = new[] { "player1", "player2" };
         var query = new ListPlayerInfosByUserNamesQuery(
             Guid.NewGuid(),
-            new[] { "player1", "player2" });
+            userNames);
 
         _ = await sut.QueryAsync(query).ToArrayAsync();
 
@@ -95,7 +97,8 @@ public class PlayerQueryTests
 
         var sut = new PlayerInfoListQueryService(fakePlayerRepository);
 
-        var query = new PlayerInfoListQuery(Guid.NewGuid(), new[] { "player1", "player2" });
+        var playerCodes = new[] { "player1", "player2" };
+        var query = new PlayerInfoListQuery(Guid.NewGuid(), playerCodes);
 
         _ = await sut.QueryAsync(query).ToArrayAsync();
 

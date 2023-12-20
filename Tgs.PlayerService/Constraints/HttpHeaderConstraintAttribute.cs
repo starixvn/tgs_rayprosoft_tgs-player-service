@@ -3,20 +3,15 @@
 namespace Tgs.PlayerService.Constraints;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-public class HttpHeaderConstraintAttribute : Attribute, IActionConstraint
+public class HttpHeaderConstraintAttribute(string headerName) : Attribute, IActionConstraint
 {
-    public string Header { get; set; } = default!;
+    public string Header { get; set; } = headerName;
 
     public int Order => 0;
 
     public string? Value { get; set; }
 
     internal bool AllowEmpty => string.IsNullOrEmpty(Value);
-
-    public HttpHeaderConstraintAttribute(string headerName)
-    {
-        Header = headerName;
-    }
 
     public bool Accept(ActionConstraintContext context)
     {

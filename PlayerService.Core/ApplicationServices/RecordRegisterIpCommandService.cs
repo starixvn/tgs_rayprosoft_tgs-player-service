@@ -2,14 +2,9 @@
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class RecordRegisterIpCommandService : ICommandService<RecordRegisterIpCommand>
+internal class RecordRegisterIpCommandService(IPlayerRepository playerRepository) : ICommandService<RecordRegisterIpCommand>
 {
-    private readonly IPlayerRepository _playerRepository;
-
-    public RecordRegisterIpCommandService(IPlayerRepository playerRepository)
-    {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-    }
+    private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
 
     public ValueTask ExecuteAsync(RecordRegisterIpCommand command, CancellationToken cancellationToken = default)
         => _playerRepository.SaveRegisterIpAsync(

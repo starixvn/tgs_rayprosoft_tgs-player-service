@@ -1,16 +1,10 @@
 ﻿namespace Tgs.PlayerService;
 
-public abstract class PutDataCommand : IDataCommand
+public abstract class PutDataCommand(string name, string value) : IDataCommand
 {
-    public string Name { get; }
+    public string Name { get; } = name;
 
-    public string Value { get; }
-
-    public PutDataCommand(string name, string value)
-    {
-        Name = name;
-        Value = value;
-    }
+    public string Value { get; } = value;
 
     public abstract ValueTask ExecuteAsync(IDataCommandContext context, CancellationToken cancellationToken = default);
 }

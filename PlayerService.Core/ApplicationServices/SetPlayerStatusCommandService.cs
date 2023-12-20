@@ -6,21 +6,14 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class SetPlayerStatusCommandService : ICommandService<SetPlayerStatusCommand>
+internal class SetPlayerStatusCommandService(
+    IPlayerRepository playerRepository,
+    ISystemClock systemClock,
+    ISerialNumberGenerator serialNumberGenerator) : ICommandService<SetPlayerStatusCommand>
 {
-    private readonly IPlayerRepository _playerRepository;
-    private readonly ISerialNumberGenerator _serialNumberGenerator;
-    private readonly ISystemClock _systemClock;
-
-    public SetPlayerStatusCommandService(
-        IPlayerRepository playerRepository,
-        ISystemClock systemClock,
-        ISerialNumberGenerator serialNumberGenerator)
-    {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-        _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-    }
+    private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+    private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+    private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
     public async ValueTask ExecuteAsync(SetPlayerStatusCommand command, CancellationToken cancellationToken = default)
     {
@@ -31,7 +24,7 @@ internal class SetPlayerStatusCommandService : ICommandService<SetPlayerStatusCo
 
         var patchOperations = Array.Empty<PatchOperation>();
 
-        patchOperations = patchOperations.Append(PatchOperation.Replace(JsonPointer.Parse("/status"), command.Status.ToString())).ToArray();
+        patchOperations = [.. patchOperations, PatchOperation.Replace(JsonPointer.Parse("/status"), command.Status.ToString())];
 
         var changeSets = new JsonPatch(patchOperations);
 

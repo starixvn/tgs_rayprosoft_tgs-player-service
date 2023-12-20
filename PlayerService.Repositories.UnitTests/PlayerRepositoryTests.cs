@@ -33,11 +33,11 @@ public class PlayerRepositoryTests
         {
             PlayerCode = playerCode,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = "username",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
             SnapshotEventId = Guid.Parse("01852e47-a6ee-0000-0001-07e6af979b15")
         };
 
@@ -198,10 +198,10 @@ public class PlayerRepositoryTests
                 BrandId = brandId,
                 Username = "username1",
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.UtcNow.AddDays(-1)
             },
             new Player
@@ -210,10 +210,10 @@ public class PlayerRepositoryTests
                 BrandId = brandId,
                 Username = "username2",
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.UtcNow.AddDays(-1)
             });
 
@@ -271,10 +271,10 @@ public class PlayerRepositoryTests
                 BrandId = brandId,
                 Username = "username1",
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                Password = [],
+                Salt = [],
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
@@ -282,10 +282,10 @@ public class PlayerRepositoryTests
                 BrandId = brandId,
                 Username = "username2",
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                Password = [],
+                Salt = [],
+                WithdrawPassword = [],
+                WithdrawSalt = []
             });
 
         _ = await dbContext.SaveChangesAsync();
@@ -340,10 +340,10 @@ public class PlayerRepositoryTests
                 BrandId = brandId,
                 Username = "username1",
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                Password = [],
+                Salt = [],
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
@@ -351,10 +351,10 @@ public class PlayerRepositoryTests
                 BrandId = brandId,
                 Username = "username2",
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                Password = [],
+                Salt = [],
+                WithdrawPassword = [],
+                WithdrawSalt = []
             });
 
         _ = await dbContext.SaveChangesAsync();
@@ -391,10 +391,10 @@ public class PlayerRepositoryTests
                 BrandId = brandId,
                 Username = "username1",
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.UtcNow
             },
             new Player
@@ -403,10 +403,10 @@ public class PlayerRepositoryTests
                 BrandId = brandId,
                 Username = "username2",
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.UtcNow
             });
 
@@ -472,11 +472,11 @@ public class PlayerRepositoryTests
         {
             PlayerCode = playerCode,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
+            Password = [],
+            Salt = [],
             Username = "4ucmqplxb029",
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
+            WithdrawPassword = [],
+            WithdrawSalt = [],
         };
 
         _ = await dbContext.Players.AddAsync(player);

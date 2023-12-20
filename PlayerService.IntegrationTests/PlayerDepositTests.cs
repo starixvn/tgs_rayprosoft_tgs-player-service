@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.PlayerService.Client;
 using Tgs.PlayerService.Repositories.Entities;
 
@@ -29,10 +30,10 @@ public class PlayerDepositTests
             Username = "tester",
             AccumulatedDeposit = 0M,
             DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>()
+            Password = [],
+            Salt = [],
+            WithdrawPassword = [],
+            WithdrawSalt = []
         };
 
         _ = await dbContext.Players.AddAsync(playerRow);
@@ -41,6 +42,6 @@ public class PlayerDepositTests
 
         await sut.TopUpAccumulatedDepositAsync(playerCode, amount);
 
-        Assert.AreEqual(amount, playerRow.AccumulatedDeposit);
+        ClassicAssert.AreEqual(amount, playerRow.AccumulatedDeposit);
     }
 }

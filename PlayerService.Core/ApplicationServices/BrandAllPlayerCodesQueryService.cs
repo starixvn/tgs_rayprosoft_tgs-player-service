@@ -2,14 +2,9 @@
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class BrandAllPlayerCodesQueryService : IQueryService<BrandAllPlayerCodesQuery, string>
+internal class BrandAllPlayerCodesQueryService(IPlayerRepository playerRepository) : IQueryService<BrandAllPlayerCodesQuery, string>
 {
-    private readonly IPlayerRepository _playerRepository;
-
-    public BrandAllPlayerCodesQueryService(IPlayerRepository playerRepository)
-    {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-    }
+    private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
 
     public IAsyncEnumerable<string> QueryAsync(BrandAllPlayerCodesQuery query, CancellationToken cancellationToken = default)
     {

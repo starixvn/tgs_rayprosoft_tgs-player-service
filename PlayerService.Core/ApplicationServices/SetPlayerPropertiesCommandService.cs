@@ -8,24 +8,16 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerPropertiesCommand>
+internal class SetPlayerPropertiesCommandService(
+    IPlayerRepository playerRepository,
+    IDataCommandBuilder dataCommandBuilder,
+    ISerialNumberGenerator serialNumberGenerator,
+    IOptions<JsonOptions> jsonOptionsAccessor) : ICommandService<SetPlayerPropertiesCommand>
 {
-    private readonly IDataCommandBuilder _dataCommandBuilder;
-    private readonly IPlayerRepository _playerRepository;
-    private readonly JsonSerializerOptions _serializerOptions;
-    private readonly ISerialNumberGenerator _serialNumberGenerator;
-
-    public SetPlayerPropertiesCommandService(
-        IPlayerRepository playerRepository,
-        IDataCommandBuilder dataCommandBuilder,
-        ISerialNumberGenerator serialNumberGenerator,
-        IOptions<JsonOptions> jsonOptionsAccessor)
-    {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-        _dataCommandBuilder = dataCommandBuilder ?? throw new ArgumentNullException(nameof(dataCommandBuilder));
-        _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-        _serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
-    }
+    private readonly IDataCommandBuilder _dataCommandBuilder = dataCommandBuilder ?? throw new ArgumentNullException(nameof(dataCommandBuilder));
+    private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+    private readonly JsonSerializerOptions _serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
+    private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 
     public async ValueTask ExecuteAsync(
         SetPlayerPropertiesCommand command,
@@ -70,12 +62,12 @@ internal class SetPlayerPropertiesCommandService : ICommandService<SetPlayerProp
             if (value == null)
             {
                 dataCommands.Add(_dataCommandBuilder.CreateDeleteCommand(key));
-                patchOperations = patchOperations.Append(PatchOperation.Remove(JsonPointer.Parse(source))).ToArray();
+                patchOperations = [.. patchOperations, PatchOperation.Remove(JsonPointer.Parse(source))];
             }
             else
             {
                 dataCommands.Add(_dataCommandBuilder.CreatePutCommand(key, value));
-                patchOperations = patchOperations.Append(PatchOperation.Replace(JsonPointer.Parse(source), value)).ToArray();
+                patchOperations = [.. patchOperations, PatchOperation.Replace(JsonPointer.Parse(source), value)];
             }
         }
 

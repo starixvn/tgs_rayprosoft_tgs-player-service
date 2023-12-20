@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Tgs.PlayerService.Client;
 using Tgs.PlayerService.Repositories.Entities;
 
@@ -39,36 +40,36 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
                 AgentId = agentId,
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
                 AgentId = agentId,
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
                 AgentId = agentId2,
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             });
 
         _ = await dbContext.SaveChangesAsync();
@@ -77,7 +78,7 @@ public class PlayerQueryTests
 
         var actualPlayerCount = actual.Sum(x => x.PlayerCount);
 
-        Assert.AreEqual(3, actualPlayerCount);
+        ClassicAssert.AreEqual(3, actualPlayerCount);
     }
 
     [Test]
@@ -103,19 +104,19 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
                 AgentId = agentId,
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             });
 
         _ = await dbContext.SaveChangesAsync();
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(agentId, actual.First().AgentId);
+        ClassicAssert.AreEqual(agentId, actual.First().AgentId);
     }
 
     [Test]
@@ -139,40 +140,40 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
                 PlayerCode = "player3",
                 BrandId = Guid.NewGuid(),
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             });
 
         _ = await dbContext.SaveChangesAsync();
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(2, actual.Length);
+        ClassicAssert.AreEqual(2, actual.Length);
     }
 
     [Test]
@@ -199,40 +200,40 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             });
 
         _ = await dbContext.SaveChangesAsync();
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(2, actual.Length);
+        ClassicAssert.AreEqual(2, actual.Length);
     }
 
     [Test]
@@ -254,33 +255,33 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
                 PlayerCode = "player3",
                 BrandId = Guid.NewGuid(),
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             });
 
         _ = await dbContext.SaveChangesAsync();
@@ -292,7 +293,7 @@ public class PlayerQueryTests
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.Length);
+        ClassicAssert.AreEqual(1, actual.Length);
     }
 
     [Test]
@@ -314,22 +315,22 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 Status = (short)Client.PlayerStatus.RegisterUndone
             },
             new Player
@@ -337,11 +338,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
@@ -354,7 +355,7 @@ public class PlayerQueryTests
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.Length);
+        ClassicAssert.AreEqual(1, actual.Length);
     }
 
     [Test]
@@ -377,11 +378,11 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 AgentId = agentId
             },
             new Player
@@ -389,22 +390,22 @@ public class PlayerQueryTests
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
                 PlayerCode = "player3",
                 BrandId = Guid.NewGuid(),
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             });
 
         _ = await dbContext.SaveChangesAsync();
@@ -416,7 +417,7 @@ public class PlayerQueryTests
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.Length);
+        ClassicAssert.AreEqual(1, actual.Length);
     }
 
     [Test]
@@ -439,22 +440,22 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 Phone = "123456"
             },
             new Player
@@ -462,11 +463,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
@@ -485,7 +486,7 @@ public class PlayerQueryTests
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.Length);
+        ClassicAssert.AreEqual(1, actual.Length);
     }
 
     [Test]
@@ -507,22 +508,22 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 Phone = "123456"
             },
             new Player
@@ -530,11 +531,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
@@ -547,7 +548,7 @@ public class PlayerQueryTests
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.Length);
+        ClassicAssert.AreEqual(1, actual.Length);
     }
 
     [Test]
@@ -569,11 +570,11 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RealName = "real name"
             },
             new Player
@@ -581,11 +582,11 @@ public class PlayerQueryTests
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 Phone = "123456"
             },
             new Player
@@ -593,11 +594,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
@@ -610,7 +611,7 @@ public class PlayerQueryTests
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.Length);
+        ClassicAssert.AreEqual(1, actual.Length);
     }
 
     [Test]
@@ -632,22 +633,22 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 Phone = "123456"
             },
             new Player
@@ -655,11 +656,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
@@ -680,7 +681,7 @@ public class PlayerQueryTests
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.Length);
+        ClassicAssert.AreEqual(1, actual.Length);
     }
 
     [Test]
@@ -702,11 +703,11 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-4")
             },
             new Player
@@ -714,11 +715,11 @@ public class PlayerQueryTests
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-1")
             },
             new Player
@@ -726,11 +727,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2")
             },
             new Player
@@ -738,11 +739,11 @@ public class PlayerQueryTests
                 PlayerCode = "player4",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player4",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-3")
             },
             new Player
@@ -750,11 +751,11 @@ public class PlayerQueryTests
                 PlayerCode = "player5",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player5",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             });
 
         _ = await dbContext.SaveChangesAsync();
@@ -767,7 +768,7 @@ public class PlayerQueryTests
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(3, actual.Length);
+        ClassicAssert.AreEqual(3, actual.Length);
     }
 
     [Test]
@@ -790,22 +791,22 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 Phone = "123456"
             },
             new Player
@@ -813,11 +814,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2"),
                 VipId = vipId
             });
@@ -831,7 +832,7 @@ public class PlayerQueryTests
 
         var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.Length);
+        ClassicAssert.AreEqual(1, actual.Length);
     }
 
     [Test]
@@ -853,22 +854,22 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 Phone = "123456"
             },
             new Player
@@ -876,11 +877,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
@@ -893,7 +894,7 @@ public class PlayerQueryTests
         var actual = await sut.GetPlayerCodesByUserNamesAsync(brandId, userNames)
             .ToArrayAsync();
 
-        Assert.AreEqual(expected, actual);
+        ClassicAssert.AreEqual(expected, actual);
     }
 
     [Test]
@@ -915,22 +916,22 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 Phone = "123456"
             },
             new Player
@@ -938,11 +939,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
@@ -959,7 +960,7 @@ public class PlayerQueryTests
             brandId,
             userNames).ToArrayAsync();
 
-        Assert.AreEqual(expected, actual);
+        ClassicAssert.AreEqual(expected, actual);
     }
 
     [Test]
@@ -984,22 +985,22 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 Phone = "123456"
             },
             new Player
@@ -1007,11 +1008,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "aaa3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
@@ -1026,7 +1027,7 @@ public class PlayerQueryTests
             brandId,
             usernamePrefix).ToArrayAsync();
 
-        Assert.AreEqual(expected, actual);
+        ClassicAssert.AreEqual(expected, actual);
     }
 
     [Test]
@@ -1050,32 +1051,32 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
                 AgentId = Guid.NewGuid(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = Guid.NewGuid(),
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "player1",
                 AgentId = Guid.NewGuid(),
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawPassword = [],
+                WithdrawSalt = []
             });
 
         _ = await dbContext.SaveChangesAsync();
 
         var actual = await sut.ListPlayerCodesByBrandIdAsync(brandId).ToArrayAsync();
 
-        Assert.AreEqual(1, actual.Length);
-        Assert.AreEqual("player1", actual[0]);
+        ClassicAssert.AreEqual(1, actual.Length);
+        ClassicAssert.AreEqual("player1", actual[0]);
     }
 
     [Test]
@@ -1098,22 +1099,22 @@ public class PlayerQueryTests
                 PlayerCode = "player1",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName1",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
             },
             new Player
             {
                 PlayerCode = "player2",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName2",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 Phone = "123456"
             },
             new Player
@@ -1121,11 +1122,11 @@ public class PlayerQueryTests
                 PlayerCode = "player3",
                 BrandId = brandId,
                 DefaultWalletCurrencyCode = "CNY",
-                Password = Array.Empty<byte>(),
-                Salt = Array.Empty<byte>(),
+                Password = [],
+                Salt = [],
                 Username = "userName3",
-                WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>(),
+                WithdrawPassword = [],
+                WithdrawSalt = [],
                 RegisteredOn = DateTime.Parse("2022-7-2")
             });
 
@@ -1136,6 +1137,6 @@ public class PlayerQueryTests
         var actual = await sut.QueryPlayerInfoListAsync(brandId, playerCodes)
             .ToArrayAsync();
 
-        Assert.AreEqual(2, actual.Length);
+        ClassicAssert.AreEqual(2, actual.Length);
     }
 }

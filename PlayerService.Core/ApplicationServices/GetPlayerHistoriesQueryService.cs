@@ -2,15 +2,10 @@
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class GetPlayerHistoriesQueryService
-    : IQueryService<GetPlayerHistoriesQuery, PlayerHistoryInfo>, IGetService<GetPlayerHistoriesQuery, int>
+internal class GetPlayerHistoriesQueryService(IPlayerRepository repository)
+        : IQueryService<GetPlayerHistoriesQuery, PlayerHistoryInfo>, IGetService<GetPlayerHistoriesQuery, int>
 {
-    private readonly IPlayerRepository _repository;
-
-    public GetPlayerHistoriesQueryService(IPlayerRepository repository)
-    {
-        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-    }
+    private readonly IPlayerRepository _repository = repository ?? throw new ArgumentNullException(nameof(repository));
 
     public ValueTask<int> GetAsync(GetPlayerHistoriesQuery query, CancellationToken cancellationToken = default)
         => _repository.CountPlayerEventAsync(new PlayerEventQueryConditions(query.PlayerCode, query.From, query.To), cancellationToken);

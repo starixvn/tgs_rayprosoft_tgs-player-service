@@ -38,7 +38,7 @@ public class PlayerController : ControllerBase
             .GetAsync(query, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        HttpContext.Response.Headers.Add("Tgs-Return", count.ToString());
+        HttpContext.Response.Headers.Append("Tgs-Return", count.ToString());
 
         return NoContent();
     }

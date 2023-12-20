@@ -4,21 +4,13 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class CountReportDateRegisterQueryService : IGetService<CountReportDateRegisterQuery, int>
+internal class CountReportDateRegisterQueryService(
+    ISystemClock systemClock,
+    IPlayerRepository playerRepository,
+    IMarketingReportClient marketingReportClient) : IGetService<CountReportDateRegisterQuery, int>
 {
-    private readonly IMarketingReportClient _marketingReportClient;
-    private readonly IPlayerRepository _playerRepository;
-    private readonly ISystemClock _systemClock;
-
-    public CountReportDateRegisterQueryService(
-        ISystemClock systemClock,
-        IPlayerRepository playerRepository,
-        IMarketingReportClient marketingReportClient)
-    {
-        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-        _playerRepository = playerRepository;
-        _marketingReportClient = marketingReportClient ?? throw new ArgumentNullException(nameof(marketingReportClient));
-    }
+    private readonly IMarketingReportClient _marketingReportClient = marketingReportClient ?? throw new ArgumentNullException(nameof(marketingReportClient));
+    private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
     public async ValueTask<int> GetAsync(CountReportDateRegisterQuery query, CancellationToken cancellationToken = default)
     {
@@ -30,7 +22,7 @@ internal class CountReportDateRegisterQueryService : IGetService<CountReportDate
 
         if (query.ReportDate == currentDate)
         {
-            var currenyDayRegisterCount = await _playerRepository
+            var currenyDayRegisterCount = await playerRepository
                 .CurrentDayRegisterAsync(query.BrandId, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -39,7 +31,7 @@ internal class CountReportDateRegisterQueryService : IGetService<CountReportDate
 
         if (query.ReportDate == yesterday && now < scheduleTime)
         {
-            var yesterDayRegisterCount = await _playerRepository
+            var yesterDayRegisterCount = await playerRepository
                 .CountYesterdayReigsterAsync(query.BrandId, cancellationToken)
                 .ConfigureAwait(false);
 

@@ -2,20 +2,13 @@
 
 namespace Tgs.PlayerService.ApplicationServices;
 
-internal class GetPlayerCodesByUserNamesQueryService : IQueryService<GetPlayerCodesByUserNamesQuery, string>
+internal class GetPlayerCodesByUserNamesQueryService(
+    IPlayerRepository playerRepository) : IQueryService<GetPlayerCodesByUserNamesQuery, string>
 {
-    private readonly IPlayerRepository _playerRepository;
-
-    public GetPlayerCodesByUserNamesQueryService(
-        IPlayerRepository playerRepository)
-    {
-        _playerRepository = playerRepository;
-    }
-
     public IAsyncEnumerable<string> QueryAsync(
         GetPlayerCodesByUserNamesQuery query,
         CancellationToken cancellationToken = default)
-        => _playerRepository.GetPlayerInfosByUserNamesAsync(
+        => playerRepository.GetPlayerInfosByUserNamesAsync(
             query.BrandId,
             query.UserNames,
             cancellationToken)

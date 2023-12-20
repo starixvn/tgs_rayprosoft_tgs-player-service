@@ -2,12 +2,8 @@
 
 namespace Tgs.PlayerService.Repositories;
 
-internal class PlayerPutDataCommand : PutDataCommand
+internal class PlayerPutDataCommand(string name, string value) : PutDataCommand(name, value)
 {
-    public PlayerPutDataCommand(string name, string value) : base(name, value)
-    {
-    }
-
     public override async ValueTask ExecuteAsync(IDataCommandContext context, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
