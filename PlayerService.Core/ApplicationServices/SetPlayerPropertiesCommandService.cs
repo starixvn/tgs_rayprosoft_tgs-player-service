@@ -44,6 +44,7 @@ internal class SetPlayerPropertiesCommandService(
             nameof(PlayerPropertyName.WhatsApp),
             nameof(PlayerPropertyName.Qq),
             nameof(PlayerPropertyName.Wechat),
+            nameof(PlayerPropertyName.Zalo),
         };
         foreach (var (key, value) in command.Properties
             .Select(kv => (

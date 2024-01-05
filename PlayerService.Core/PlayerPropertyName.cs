@@ -20,6 +20,7 @@ public enum PlayerPropertyName
     Wechat = 15,
     VipId = 16,
     AgentId = 17,
-    DefaultWalletId,
-    FirstDepositOn
+    DefaultWalletId = 18,
+    FirstDepositOn = 19,
+    Zalo = 20,
 }
