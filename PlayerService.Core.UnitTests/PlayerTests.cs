@@ -903,4 +903,67 @@ public class PlayerTests
             .Received(1)
             .UpdatePlayerSnapshotAsync(Arg.Is(playerCode), Arg.Is(eventId), Arg.Any<DateTime>());
     }
+
+    [Test]
+    public async Task Can_Set_Player_Zalo()
+    {
+        var brandId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var playerInfo = new PlayerInfo(
+            playerCode,
+            brandId,
+            playerCode,
+            false,
+            false,
+            false,
+            false,
+            null,
+            DateTime.Parse("2022/05/17 00:00:00"));
+
+        var playerProperties = new Dictionary<string, string?>
+        {
+            ["Zalo"] = "testZalo"
+        };
+
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeDataCommandBuilder = Substitute.For<IDataCommandBuilder>();
+        var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+        var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+
+        var sut = new SetPlayerPropertiesCommandService(fakePlayerRepository, fakeDataCommandBuilder, fakeSerialNumberGenerator, jsonOptionsAccessor);
+
+        var command = new SetPlayerPropertiesCommand(playerCode, playerProperties.ToImmutableDictionary(), "50ce61eb-8c9d-4f84-3cf6-08d9262ce1a5");
+
+        _ = fakePlayerRepository.GetPlayerInfoAsync(playerCode)
+            .Returns(playerInfo);
+
+        var eventId = Guid.NewGuid();
+        _ = fakeSerialNumberGenerator
+            .GenerateAsync()
+            .Returns(eventId);
+
+        await sut.ExecuteAsync(command).ConfigureAwait(false);
+
+        _ = fakeDataCommandBuilder.Received(1)
+            .CreatePutCommand(Arg.Is(nameof(PlayerPropertyName.Zalo)), Arg.Is("testZalo"));
+
+        _ = fakePlayerRepository.Received(1)
+            .SetPlayerPropertiesAsync(
+                playerInfo.BrandId,
+                playerInfo.PlayerCode,
+                Arg.Is<IEnumerable<IDataCommand>>(commands => commands.Count() == 1));
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .CreatePlayerEventAsync(Arg.Is(eventId), Arg.Is(brandId), Arg.Is(playerCode), Arg.Is(EventAction.Update), Arg.Any<JsonDocument>(), Arg.Any<string?>());
+
+        _ = fakePlayerRepository
+            .Received(1)
+            .UpdatePlayerSnapshotAsync(
+                playerCode: Arg.Is(playerCode),
+                Arg.Is(eventId),
+                Arg.Any<DateTime>(),
+                Arg.Any<CancellationToken>());
+    }
 }
