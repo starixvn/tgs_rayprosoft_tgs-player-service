@@ -1,73 +1,81 @@
 ﻿{
-  "CodeGenerationMode": 2,
-  "ContextClassName": "TgsContext",
-  "ContextNamespace": "Entities",
-  "DefaultDacpacSchema": null,
-  "FilterSchemas": true,
-  "IncludeConnectionString": false,
-  "ModelNamespace": "Entities",
-  "OutputContextPath": "Entities\/Tgs",
-  "OutputPath": "Entities\/Tgs\/Models",
-  "PreserveCasingWithRegex": true,
-  "ProjectRootNamespace": "Tgs.PlayerService.Repositories",
-  "Schemas": [
-    {
-      "Name": "dbo"
-    }
-  ],
-  "SelectedHandlebarsLanguage": 0,
-  "SelectedToBeGenerated": 0,
-  "Tables": [
-    {
-      "Name": "dbo.player_audit_logs",
-      "ObjectType": 0
-    },
-    {
-      "Name": "dbo.player_event_source",
-      "ObjectType": 0
-    },
-    {
-      "Name": "dbo.player_ip_records",
-      "ObjectType": 0
-    },
-    {
-      "Name": "dbo.player_parents",
-      "ObjectType": 0
-    },
-    {
-      "Name": "dbo.player_properties",
-      "ObjectType": 0
-    },
-    {
-      "Name": "dbo.player_tags",
-      "ObjectType": 0
-    },
-    {
-      "Name": "dbo.players",
-      "ObjectType": 0
-    },
-    {
-      "Name": "dbo.wallets",
-      "ObjectType": 0
-    }
-  ],
-  "UiHint": "tgs-local",
-  "UncountableWords": null,
-  "UseBoolPropertiesWithoutDefaultSql": true,
-  "UseDatabaseNames": false,
-  "UseDateOnlyTimeOnly": false,
-  "UseDbContextSplitting": true,
-  "UseFluentApiOnly": true,
-  "UseHandleBars": false,
-  "UseHierarchyId": false,
-  "UseInflector": true,
-  "UseLegacyPluralizer": false,
-  "UseManyToManyEntity": true,
-  "UseNoDefaultConstructor": true,
-  "UseNoObjectFilter": false,
-  "UseNodaTime": false,
-  "UseNullableReferences": true,
-  "UseSchemaFolders": true,  
-  "UseSpatial": false,
-  "UseT4": false
+   "CodeGenerationMode": 4,
+   "ContextClassName": "TgsContext",
+   "ContextNamespace": "Entities",
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": true,
+   "IncludeConnectionString": false,
+   "ModelNamespace": "Entities",
+   "OutputContextPath": "Entities\/Tgs",
+   "OutputPath": "Entities\/Tgs\/Models",
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "Tgs.PlayerService.Repositories",
+   "Schemas": [
+      {
+         "Name": "dbo"
+      }
+   ],
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "T4TemplatePath": null,
+   "Tables": [
+      {
+         "Name": "dbo.player_audit_logs",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.player_event_source",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.player_ip_records",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.player_login_records",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.player_parents",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.player_properties",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.player_tags",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.players",
+         "ObjectType": 0
+      },
+      {
+         "Name": "dbo.wallets",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": ".tgs",
+   "UncountableWords": null,
+   "UseBoolPropertiesWithoutDefaultSql": true,
+   "UseDatabaseNames": false,
+   "UseDateOnlyTimeOnly": false,
+   "UseDbContextSplitting": true,
+   "UseDecimalDataAnnotationForSprocResult": true,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": true,
+   "UseNoDefaultConstructor": true,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": true,
+   "UseSchemaFolders": true,
+   "UseSchemaNamespaces": false,
+   "UseSpatial": false,
+   "UseT4": false
 }

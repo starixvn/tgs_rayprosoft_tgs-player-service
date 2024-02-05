@@ -13,5 +13,6 @@ public static class ServiceCollectionExtensions
         => services
             .AddDbContext<TgsContext>(dbContextConfigure)
             .AddTransient<IPlayerRepository, PlayerRepository>()
+            .AddTransient<IPlayerLoginRecordRepository, PlayerLoginRecordRepository>()
             .AddSingleton<IDataCommandBuilder, PlayerDataCommandBuilder>();
 }

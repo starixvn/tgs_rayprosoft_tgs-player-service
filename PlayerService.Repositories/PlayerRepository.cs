@@ -1,6 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.Paging;
@@ -436,6 +438,15 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             .Select(player => (short?)player.Status)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false) ?? 1);
+    public IAsyncEnumerable<string> QueryPlayerBirthdayAsync(DateOnly birthday, int offset = 0, int limit = 100, CancellationToken cancellationToken = default)
+    => context.Players
+        .Where(predicate: pl => pl.Birthdate.HasValue && pl.Birthdate.Value.Month == birthday.Month && pl.Birthdate.Value.Day == birthday.Day)
+        .GroupBy(keySelector: plr => plr.PlayerCode)
+        .OrderBy(keySelector: plr => plr.Key)
+        .Select(selector: plr => plr.Key)
+        .Skip(offset * limit)
+        .Take(limit)
+        .ToAsyncEnumerable();
 
     public IAsyncEnumerable<PlayerHistoryInfo> QueryPlayerEventAsync(
         PlayerEventQueryConditions conditions,

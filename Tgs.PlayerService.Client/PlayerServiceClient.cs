@@ -409,6 +409,30 @@ internal class PlayerServiceClient : IPlayerServiceClient
                     cancellationToken)
                 .ToAsyncEnumerable()
                 .SelectMany(arr => arr!));
+    public async IAsyncEnumerable<string> QueryPlayerBirthdayAsync(DateOnly birthday, int page = 1, int rows = 100, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var queryStrings = new List<KeyValuePair<string, string>>
+        {
+            new KeyValuePair<string, string>("Birthday", birthday.ToShortDateString()),
+            new KeyValuePair<string, string>("Page", page.ToString()),
+            new KeyValuePair<string, string>("Rows", rows.ToString())
+        };
+        var queryStringText = string.Join(
+            separator: '&',
+            values: queryStrings.Select(kv => $"{kv.Key}={UrlEncoder.Default.Encode(kv.Value)}"));
+        var response = await _httpClient
+            .GetAsync(
+                $"/player/player-birthday?{queryStringText}",
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        foreach (var item in await response.Content
+                     .ReadFromJsonAsync<IEnumerable<string>>(_SerializerOptions, cancellationToken)
+                     .ConfigureAwait(false) ?? Array.Empty<string>())
+            yield return item!;
+    }
 
     public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,
@@ -502,6 +526,32 @@ internal class PlayerServiceClient : IPlayerServiceClient
             .ReadFromJsonAsync<IEnumerable<PlayerListItem>>(_SerializerOptions, cancellationToken)
             .ConfigureAwait(false) ?? Array.Empty<PlayerListItem>())
             yield return item;
+    }
+
+    public async IAsyncEnumerable<string> QueryPlayerLoginRecordGroupPlayerAsync(DateTimeOffset startOn, DateTimeOffset endOn, int page = 1, int rows = 100, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var queryStrings = new List<KeyValuePair<string, string>>
+        {
+            new KeyValuePair<string, string>("StartOn", startOn.ToString("O")),
+            new KeyValuePair<string, string>("EndOn", endOn.ToString("O")),
+            new KeyValuePair<string, string>("Page", page.ToString()),
+            new KeyValuePair<string, string>("Rows", rows.ToString())
+        };
+        var queryStringText = string.Join(
+            separator: '&',
+            values: queryStrings.Select(kv => $"{kv.Key}={UrlEncoder.Default.Encode(kv.Value)}"));
+        var response = await _httpClient
+            .GetAsync(
+                $"/playerloginrecord/group-player?{queryStringText}",
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        foreach (var item in await response.Content
+                     .ReadFromJsonAsync<IEnumerable<string>>(_SerializerOptions, cancellationToken)
+                     .ConfigureAwait(false) ?? Array.Empty<string>())
+            yield return item!;
     }
 
     public async ValueTask RecordLoginIpAsync(
