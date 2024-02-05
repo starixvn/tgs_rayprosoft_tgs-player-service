@@ -1752,4 +1752,42 @@ public class PlayerTests
 
         ClassicAssert.AreEqual(playerEvent!.Id, actual.SnapshotEventId);
     }
+
+    [Test]
+    public async Task Query_Player_Birthday()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var birthday = DateOnly.Parse("2024-02-05");
+        var page = 1;
+        var rows = 2;
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = "test",
+            BrandId = Guid.NewGuid(),
+            DefaultWalletCurrencyCode = "CNY",
+            Password = [],
+            Salt = [],
+            Username = "test",
+            RealName = "player1",
+            WithdrawPassword = [],
+            WithdrawSalt = [],
+            Status = (short)PlayerStatus.Enabled,
+            Birthdate = DateOnly.Parse("2024-02-05"),
+            Birthday = "0205"
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.QueryPlayerBirthdayAsync(birthday, page, rows).ToArrayAsync();
+
+        ClassicAssert.AreEqual("test", actual.FirstOrDefault());
+    }
 }

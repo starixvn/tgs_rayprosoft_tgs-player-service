@@ -1,5 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Tgs.PlayerService;
 
@@ -147,4 +149,6 @@ public interface IPlayerRepository
         Guid snapshotId,
         DateTime updatedOn,
         CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<string> QueryPlayerBirthdayAsync(DateOnly birthday, int offset = 0, int limit = 100, CancellationToken cancellationToken = default);
 }

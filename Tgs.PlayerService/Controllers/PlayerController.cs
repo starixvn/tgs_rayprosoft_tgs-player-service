@@ -489,4 +489,11 @@ public class PlayerController : ControllerBase
 
         return setService.ExecuteAsync(command, HttpContext.RequestAborted);
     }
+
+    [HttpGet("player-birthday", Name = "QueryPlayerBirthday")]
+    [SuccessStatusCode(200, "PlayerCodes returns")]
+    public IAsyncEnumerable<string> QueryPlayerBirthdayAsync(
+        [FromServices] IPlayerRepository repository,
+        [FromQuery] PlayerQueryPlayerBirthdayViewModel source)
+        => repository.QueryPlayerBirthdayAsync(source.Birthday, source.Page - 1, source.Rows, HttpContext.RequestAborted);
 }
