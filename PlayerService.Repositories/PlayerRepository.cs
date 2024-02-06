@@ -438,9 +438,9 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             .Select(player => (short?)player.Status)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false) ?? 1);
-    public IAsyncEnumerable<string> QueryPlayerBirthdayAsync(DateOnly birthday, int offset = 0, int limit = 100, CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int offset = 0, int limit = 100, CancellationToken cancellationToken = default)
     => context.Players
-        .Where(predicate: pl => pl.Birthdate.HasValue && pl.Birthdate.Value.Month == birthday.Month && pl.Birthdate.Value.Day == birthday.Day)
+        .Where(predicate: pl => pl.BrandId == brandId && pl.Birthdate.HasValue && pl.Birthdate.Value.Month == birthday.Month && pl.Birthdate.Value.Day == birthday.Day)
         .GroupBy(keySelector: plr => plr.PlayerCode)
         .OrderBy(keySelector: plr => plr.Key)
         .Select(selector: plr => plr.Key)

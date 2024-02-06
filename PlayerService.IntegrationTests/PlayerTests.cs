@@ -1762,6 +1762,7 @@ public class PlayerTests
 
         var sut = new PlayerServiceClient(httpClient);
 
+        var brandId = Guid.NewGuid();
         var birthday = DateOnly.Parse("2024-02-05");
         var page = 1;
         var rows = 2;
@@ -1771,6 +1772,21 @@ public class PlayerTests
         _ = await dbContext.Players.AddAsync(new Player
         {
             PlayerCode = "test",
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = [],
+            Salt = [],
+            Username = "test",
+            RealName = "player1",
+            WithdrawPassword = [],
+            WithdrawSalt = [],
+            Status = (short)PlayerStatus.Enabled,
+            Birthdate = DateOnly.Parse("2024-02-05"),
+            Birthday = "0205"
+        });
+        _ = await dbContext.Players.AddAsync(new Player
+        {
+            PlayerCode = Guid.NewGuid().ToString("N"),
             BrandId = Guid.NewGuid(),
             DefaultWalletCurrencyCode = "CNY",
             Password = [],
@@ -1786,7 +1802,7 @@ public class PlayerTests
 
         _ = await dbContext.SaveChangesAsync();
 
-        var actual = await sut.QueryPlayerBirthdayAsync(birthday, page, rows).ToArrayAsync();
+        var actual = await sut.QueryPlayerBirthdayAsync(brandId, birthday, page, rows).ToArrayAsync();
 
         ClassicAssert.AreEqual("test", actual.FirstOrDefault());
     }

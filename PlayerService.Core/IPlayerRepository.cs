@@ -150,5 +150,5 @@ public interface IPlayerRepository
         DateTime updatedOn,
         CancellationToken cancellationToken = default);
 
-    IAsyncEnumerable<string> QueryPlayerBirthdayAsync(DateOnly birthday, int offset = 0, int limit = 100, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int offset = 0, int limit = 100, CancellationToken cancellationToken = default);
 }
