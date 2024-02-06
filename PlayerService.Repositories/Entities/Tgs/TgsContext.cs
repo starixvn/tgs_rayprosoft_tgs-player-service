@@ -16,6 +16,8 @@ public partial class TgsContext : DbContext
 
     public virtual DbSet<Player> Players { get; set; }
 
+    public virtual DbSet<PlayerAgentRelation> PlayerAgentRelations { get; set; }
+
     public virtual DbSet<PlayerAuditLog> PlayerAuditLogs { get; set; }
 
     public virtual DbSet<PlayerEventSource> PlayerEventSources { get; set; }
@@ -36,12 +38,11 @@ public partial class TgsContext : DbContext
     {
         modelBuilder
             .HasPostgresExtension("ltree")
-            .HasPostgresExtension("pageinspect")
-            .HasPostgresExtension("pg_stat_statements")
             .HasPostgresExtension("pg_trgm")
             .HasPostgresExtension("uuid-ossp");
 
         modelBuilder.ApplyConfiguration(new Configurations.PlayerConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.PlayerAgentRelationConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PlayerAuditLogConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PlayerEventSourceConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PlayerIpRecordConfiguration());

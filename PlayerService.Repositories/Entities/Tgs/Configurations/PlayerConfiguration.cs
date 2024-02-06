@@ -17,8 +17,6 @@ namespace Tgs.PlayerService.Repositories.Entities.Configurations
 
             entity.ToTable("players", "dbo");
 
-            entity.HasIndex(e => new { e.BrandId, e.AreaCode, e.Phone }, "ix_all_brand_phone");
-
             entity.HasIndex(e => e.AgentId, "ix_players_agent_id");
 
             entity.HasIndex(e => e.BetLimitId, "ix_players_bet_limit_id");
@@ -31,115 +29,7 @@ namespace Tgs.PlayerService.Repositories.Entities.Configurations
             .HasMethod("gin")
             .HasOperators(new[] { "gin_trgm_ops" });
 
-            entity.HasIndex(e => e.Username, "players_username_index");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_bin")
-            .IsUnique()
-            .HasFilter("(brand_id = '48cf5556-de38-4b64-86cb-a96ed65a0e49'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi3")
-            .IsUnique()
-            .HasFilter("(brand_id = 'a752c0e5-537e-4353-987a-6f544c019a7c'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_eur")
-            .IsUnique()
-            .HasFilter("(brand_id = '924dd987-c266-4b1f-b75b-3dec114d663a'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_gbp")
-            .IsUnique()
-            .HasFilter("(brand_id = 'e5f12c91-883e-447b-ae85-315ce7b57cb4'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_hkd")
-            .IsUnique()
-            .HasFilter("(brand_id = '9f1ecf19-38cd-474f-b0d2-93638dc07d21'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_idr")
-            .IsUnique()
-            .HasFilter("(brand_id = 'aab94b77-b99a-4454-a965-b0281c83ed60'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_idr_1000")
-            .IsUnique()
-            .HasFilter("(brand_id = 'f006bf29-77e3-4874-80c3-eb935c076c29'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_inr")
-            .IsUnique()
-            .HasFilter("(brand_id = 'da0ff933-34dd-4235-adcd-9d87aec9a797'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_jpy")
-            .IsUnique()
-            .HasFilter("(brand_id = '8e1d2452-32b6-4688-9be0-b9f3c9bc4da7'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_krw")
-            .IsUnique()
-            .HasFilter("(brand_id = '10b135d8-8859-412d-b146-ba22d0ec0647'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_myr")
-            .IsUnique()
-            .HasFilter("(brand_id = '9be4277d-f30a-435a-9bbf-3d79cce6d3c0'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_php")
-            .IsUnique()
-            .HasFilter("(brand_id = '5dea25ae-431d-4514-aa36-81ab9d81b1dc'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_sgd")
-            .IsUnique()
-            .HasFilter("(brand_id = 'b2d4e582-babc-492b-b9b4-ee8f8fab55bd'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_thb")
-            .IsUnique()
-            .HasFilter("(brand_id = '4d5d1f56-2471-483a-9309-e26aa968089a'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_vnd")
-            .IsUnique()
-            .HasFilter("(brand_id = '7fe50756-221e-4244-8c97-3529bd02ef0c'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_gpi_vnd_1000")
-            .IsUnique()
-            .HasFilter("(brand_id = 'be9dc404-e959-415c-b8fb-43c62fb7c069'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_temp2")
-            .IsUnique()
-            .HasFilter("(brand_id = 'ec53b68c-8e5f-4bc3-8436-3a77f5c60e59'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_test")
-            .IsUnique()
-            .HasFilter("(brand_id = '3b48202a-38f5-4342-b5fe-5128feca4d76'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_test1")
-            .IsUnique()
-            .HasFilter("(brand_id = 'dc6540e7-685d-4022-aef4-37ff1b7e3a99'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_test123")
-            .IsUnique()
-            .HasFilter("(brand_id = 'c0e1b447-cb16-41b4-b5dc-7935a46c2350'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_tgs")
-            .IsUnique()
-            .HasFilter("(brand_id = 'd71ac5ed-b7d9-49f2-a129-8709fa4cc02a'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_tgs1112")
-            .IsUnique()
-            .HasFilter("(brand_id = '210a79bb-76a9-4e6a-94b3-5ba26b9a63f0'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_tgs1169")
-            .IsUnique()
-            .HasFilter("(brand_id = '86f8579a-ee13-4f1b-b788-908a4121f9bb'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_tgs503")
-            .IsUnique()
-            .HasFilter("(brand_id = '421a9655-8183-4e80-b783-82eb23939138'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_tt2")
-            .IsUnique()
-            .HasFilter("(brand_id = 'c0affb22-5fd9-4817-94d0-98753eed01e3'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_ufa01")
-            .IsUnique()
-            .HasFilter("(brand_id = '9d29867f-9f42-483d-a824-920aca72a054'::uuid)");
-
-            entity.HasIndex(e => new { e.AreaCode, e.Phone, e.BrandId }, "ux_phone_wlg")
-            .IsUnique()
-            .HasFilter("(brand_id = 'efff542a-e791-4413-9d73-e57e26e711be'::uuid)");
+            entity.HasIndex(e => new { e.BrandId, e.AreaCode, e.Phone }, "ux_players_brand_phone").IsUnique();
 
             entity.Property(e => e.PlayerCode)
             .HasMaxLength(16)

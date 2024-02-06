@@ -75,6 +75,8 @@ public partial class Player
 
     public Guid? SnapshotEventId { get; set; }
 
+    public virtual PlayerAgentRelation? PlayerAgentRelation { get; set; }
+
     public virtual ICollection<PlayerIpRecord> PlayerIpRecords { get; set; } = new List<PlayerIpRecord>();
 
     public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; } = new List<PlayerLoginRecord>();

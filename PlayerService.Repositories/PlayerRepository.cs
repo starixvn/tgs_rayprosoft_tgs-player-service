@@ -448,6 +448,16 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         .Take(limit)
         .ToAsyncEnumerable();
 
+    public async ValueTask<Guid?> GetAgentIdForPlayerUpgradedAsync(string playerCode,
+        CancellationToken cancellationToken = default)
+    {
+        var playerAgent = await _dbContext.PlayerAgentRelations
+            .FirstOrDefaultAsync(x => x.PlayerCode == playerCode, cancellationToken)
+            .ConfigureAwait(false);
+
+        return playerAgent?.AgentId;
+    }
+
     public IAsyncEnumerable<PlayerHistoryInfo> QueryPlayerEventAsync(
         PlayerEventQueryConditions conditions,
         int skip = 0,
@@ -991,6 +1001,24 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         }
 
         _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public async ValueTask CreatePlayerAgentRelationAsync(Guid brandId,
+        Guid agentId,
+        string playerCode,
+        CancellationToken cancellationToken = default)
+    {
+        _ = await _dbContext.PlayerAgentRelations.AddAsync(new PlayerAgentRelation
+            {
+                BrandId = brandId,
+                AgentId = agentId,
+                PlayerCode = playerCode
+            },
+            cancellationToken);
+
+        _ = await _dbContext
+            .SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]

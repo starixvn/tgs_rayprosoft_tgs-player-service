@@ -104,4 +104,13 @@ public interface IPlayerServiceClient
 
     IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int page = 1, int rows = 100, CancellationToken cancellationToken = default);
     IAsyncEnumerable<string> QueryPlayerLoginRecordGroupPlayerAsync(Guid brandId, DateTimeOffset startOn, DateTimeOffset endOn, int page = 1, int rows = 100, CancellationToken cancellationToken = default);
+    
+    ValueTask UpgradePlayerToAgentAsync(
+        Guid brandId,
+        Guid agentId,
+        string playerCode,
+        string? modifyUser = null,
+        CancellationToken cancellationToken = default);
+
+    ValueTask<Guid?> GetAgentIdForPlayerUpgradedAsync(string playerCode, CancellationToken cancellationToken = default);
 }
