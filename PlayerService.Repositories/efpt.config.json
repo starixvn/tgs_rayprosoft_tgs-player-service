@@ -20,6 +20,10 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "dbo.player_agent_relations",
+         "ObjectType": 0
+      },
+      {
          "Name": "dbo.player_audit_logs",
          "ObjectType": 0
       },
@@ -56,7 +60,7 @@
          "ObjectType": 0
       }
    ],
-   "UiHint": ".tgs",
+   "UiHint": "tgs",
    "UncountableWords": null,
    "UseBoolPropertiesWithoutDefaultSql": true,
    "UseDatabaseNames": false,

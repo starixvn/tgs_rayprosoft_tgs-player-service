@@ -554,6 +554,43 @@ internal class PlayerServiceClient : IPlayerServiceClient
             yield return item!;
     }
 
+    public async ValueTask UpgradePlayerToAgentAsync(Guid brandId,
+        Guid agentId,
+        string playerCode,
+        string? modifyUser = null,
+        CancellationToken cancellationToken = default)
+    {
+        var requestContent = new StringContent(
+            JsonSerializer.Serialize(new
+            {
+                brandId,
+                agentId,
+                playerCode,
+                CreateByUsername = modifyUser
+            }, _SerializerOptions),
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json);
+
+        var response = await _httpClient
+            .PostAsync($"/player/upgrade-to-agent", requestContent, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+    }
+
+    public async ValueTask<Guid?> GetAgentIdForPlayerUpgradedAsync(string playerCode, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient
+            .GetAsync($"/player/agent-id-for-player-upgraded/{playerCode}", cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+        return string.IsNullOrEmpty(content) ? null : JsonSerializer.Deserialize<Guid?>(content, _SerializerOptions);
+    }
+
     public async ValueTask RecordLoginIpAsync(
         string playerCode,
         string ip,

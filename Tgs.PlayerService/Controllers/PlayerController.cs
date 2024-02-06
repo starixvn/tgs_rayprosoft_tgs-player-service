@@ -497,4 +497,25 @@ public class PlayerController : ControllerBase
         Guid brandId,
         [FromQuery] PlayerQueryPlayerBirthdayViewModel source)
         => repository.QueryPlayerBirthdayAsync(brandId, source.Birthday, source.Page - 1, source.Rows, HttpContext.RequestAborted);
+
+    [HttpPost("upgrade-to-agent", Name = "UpgradePlayerToAgent")]
+    public ValueTask UpgradePlayerToAgentAsync(
+        [FromServices] ICommandService<UpgradeToAgentCommand> commandService,
+        [FromBody] UpdatePlayerToAgentViewRequest request)
+    {
+        var command = new UpgradeToAgentCommand(request.BrandId,
+            request.AgentId,
+            request.PlayerCode,
+            request.CreateByUsername);
+
+        return commandService.ExecuteAsync(command, HttpContext.RequestAborted);
+    }
+
+    [HttpGet("agent-id-for-player-upgraded/{playerCode}", Name = "GetAgentIdForPlayerUpgraded")]
+    public ValueTask<Guid?> GetAgentIdForPlayerUpgradedAsync(
+        [FromServices] IGetService<GetAgentIdForPlayerUpgradedQuery, Guid?> getService,
+        string playerCode)
+    {
+        return getService.GetAsync(new GetAgentIdForPlayerUpgradedQuery(playerCode), HttpContext.RequestAborted);
+    }
 }

@@ -1806,4 +1806,91 @@ public class PlayerTests
 
         ClassicAssert.AreEqual("test", actual.FirstOrDefault());
     }
+
+    [Test]
+    public async Task Upgrade_Player_To_Agent()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        var playerRow = new Player
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            DefaultWalletCurrencyCode = "CNY",
+            Password = [],
+            Salt = [],
+            Username = playerCode,
+            RealName = "player1",
+            WithdrawPassword = [],
+            WithdrawSalt = []
+        };
+
+        _ = await dbContext.Players.AddAsync(playerRow);
+
+        _ = await dbContext.SaveChangesAsync();
+
+        await sut.UpgradePlayerToAgentAsync(brandId, agentId, playerCode, "editorUsername");
+
+        var actual = await dbContext.PlayerAgentRelations
+            .FirstOrDefaultAsync(x => x.PlayerCode == playerCode);
+
+        ClassicAssert.AreEqual(actual!.AgentId, agentId);
+    }
+
+    [Test]
+    public async Task Get_Agent_Id_For_Player_Upgraded()
+    {
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var playerCode = "player1";
+
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        _ = await dbContext.PlayerAgentRelations.AddAsync(new PlayerAgentRelation
+        {
+            PlayerCode = playerCode,
+            BrandId = brandId,
+            AgentId = agentId
+        });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetAgentIdForPlayerUpgradedAsync(playerCode)
+            .ConfigureAwait(false);
+
+        ClassicAssert.AreEqual(agentId, actual);
+    }
+
+    [Test]
+    public async Task Cannot_Get_Agent_Id_When_Just_Player()
+    {
+        var playerCode = "player1";
+
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var actual = await sut.GetAgentIdForPlayerUpgradedAsync(playerCode)
+            .ConfigureAwait(false);
+
+        ClassicAssert.AreEqual(null, actual);
+    }
 }

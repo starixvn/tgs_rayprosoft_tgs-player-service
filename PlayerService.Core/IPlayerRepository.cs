@@ -65,6 +65,8 @@ public interface IPlayerRepository
 
     ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode, CancellationToken cancellationToken = default);
 
+    ValueTask<Guid?> GetAgentIdForPlayerUpgradedAsync(string playerCode, CancellationToken cancellationToken = default);
+
     IAsyncEnumerable<PlayerHistoryInfo> QueryPlayerEventAsync(
         PlayerEventQueryConditions conditions,
         int skip = 0,
@@ -148,6 +150,11 @@ public interface IPlayerRepository
         string playerCode,
         Guid snapshotId,
         DateTime updatedOn,
+        CancellationToken cancellationToken = default);
+
+    ValueTask CreatePlayerAgentRelationAsync(Guid brandId,
+        Guid agentId,
+        string playerCode,
         CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int offset = 0, int limit = 100, CancellationToken cancellationToken = default);
