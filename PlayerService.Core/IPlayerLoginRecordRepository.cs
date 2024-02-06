@@ -8,5 +8,5 @@ namespace Tgs.PlayerService;
 
 public interface IPlayerLoginRecordRepository
 {
-    IAsyncEnumerable<string> QueryGroupPlayerAsync(DateTimeOffset startOn, DateTimeOffset endOn, int offset = 0, int limit = 100, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<string> QueryGroupPlayerAsync(Guid brandId,DateTimeOffset startOn, DateTimeOffset endOn, int offset = 0, int limit = 100, CancellationToken cancellationToken = default);
 }

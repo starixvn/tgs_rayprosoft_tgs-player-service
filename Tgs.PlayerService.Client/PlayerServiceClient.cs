@@ -409,20 +409,20 @@ internal class PlayerServiceClient : IPlayerServiceClient
                     cancellationToken)
                 .ToAsyncEnumerable()
                 .SelectMany(arr => arr!));
-    public async IAsyncEnumerable<string> QueryPlayerBirthdayAsync(DateOnly birthday, int page = 1, int rows = 100, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int page = 1, int rows = 100, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var queryStrings = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("Birthday", birthday.ToShortDateString()),
-            new KeyValuePair<string, string>("Page", page.ToString()),
-            new KeyValuePair<string, string>("Rows", rows.ToString())
+            new("Birthday", birthday.ToShortDateString()),
+            new("Page", page.ToString()),
+            new("Rows", rows.ToString())
         };
         var queryStringText = string.Join(
             separator: '&',
             values: queryStrings.Select(kv => $"{kv.Key}={UrlEncoder.Default.Encode(kv.Value)}"));
         var response = await _httpClient
             .GetAsync(
-                $"/player/player-birthday?{queryStringText}",
+                $"/player/{brandId}/player-birthday?{queryStringText}",
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -528,21 +528,21 @@ internal class PlayerServiceClient : IPlayerServiceClient
             yield return item;
     }
 
-    public async IAsyncEnumerable<string> QueryPlayerLoginRecordGroupPlayerAsync(DateTimeOffset startOn, DateTimeOffset endOn, int page = 1, int rows = 100, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<string> QueryPlayerLoginRecordGroupPlayerAsync(Guid brandId, DateTimeOffset startOn, DateTimeOffset endOn, int page = 1, int rows = 100, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var queryStrings = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("StartOn", startOn.ToString("O")),
-            new KeyValuePair<string, string>("EndOn", endOn.ToString("O")),
-            new KeyValuePair<string, string>("Page", page.ToString()),
-            new KeyValuePair<string, string>("Rows", rows.ToString())
+            new("StartOn", startOn.ToString("O")),
+            new("EndOn", endOn.ToString("O")),
+            new("Page", page.ToString()),
+            new("Rows", rows.ToString())
         };
         var queryStringText = string.Join(
             separator: '&',
             values: queryStrings.Select(kv => $"{kv.Key}={UrlEncoder.Default.Encode(kv.Value)}"));
         var response = await _httpClient
             .GetAsync(
-                $"/playerloginrecord/group-player?{queryStringText}",
+                $"/playerloginrecord/{brandId}/group-player?{queryStringText}",
                 cancellationToken)
             .ConfigureAwait(false);
 

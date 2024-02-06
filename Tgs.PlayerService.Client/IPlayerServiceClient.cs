@@ -102,6 +102,6 @@ public interface IPlayerServiceClient
 
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
 
-    IAsyncEnumerable<string> QueryPlayerBirthdayAsync(DateOnly birthday, int page = 1, int rows = 100, CancellationToken cancellationToken = default);
-    IAsyncEnumerable<string> QueryPlayerLoginRecordGroupPlayerAsync(DateTimeOffset startOn, DateTimeOffset endOn, int page = 1, int rows = 100, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int page = 1, int rows = 100, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<string> QueryPlayerLoginRecordGroupPlayerAsync(Guid brandId, DateTimeOffset startOn, DateTimeOffset endOn, int page = 1, int rows = 100, CancellationToken cancellationToken = default);
 }

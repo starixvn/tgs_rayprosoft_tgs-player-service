@@ -23,6 +23,7 @@ public class PlayerLoginRecordTest
 
         var sut = new PlayerServiceClient(httpClient);
 
+        var brandId = Guid.NewGuid();
         var startOn = new DateTimeOffset(2024, 2, 1, 0, 0, 0, TimeSpan.Zero);
         var endOn = new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero);
         var page = 1;
@@ -34,6 +35,17 @@ public class PlayerLoginRecordTest
         {
             Id = Guid.NewGuid(),
             PlayerCode = "test",
+            BrandId = brandId,
+            Status = 0,
+            PlatformType = 1,
+            IpAddress = "127.0.0.1",
+            CreatedOn = new DateTimeOffset(2024, 2, 5, 17, 24, 33, TimeSpan.Zero).DateTime,
+            ExpiredOn = new DateTimeOffset(2024, 2, 6, 17, 24, 33, TimeSpan.Zero).DateTime
+        });
+        _ = await dbContext.PlayerLoginRecords.AddAsync(new PlayerLoginRecord
+        {
+            Id = Guid.NewGuid(),
+            PlayerCode = Guid.NewGuid().ToString("N"),
             BrandId = Guid.NewGuid(),
             Status = 0,
             PlatformType = 1,
@@ -44,7 +56,7 @@ public class PlayerLoginRecordTest
 
         _ = await dbContext.SaveChangesAsync();
 
-        var actual = await sut.QueryPlayerLoginRecordGroupPlayerAsync(startOn, endOn, page, rows).ToArrayAsync();
+        var actual = await sut.QueryPlayerLoginRecordGroupPlayerAsync(brandId, startOn, endOn, page, rows).ToArrayAsync();
 
         ClassicAssert.AreEqual("test", actual.FirstOrDefault());
     }
