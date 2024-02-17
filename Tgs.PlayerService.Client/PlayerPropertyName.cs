@@ -22,4 +22,5 @@ public enum PlayerPropertyName
     AgentId = 17,
     FirstDepositOn,
     Zalo,
+    VipLevelAutoState
 }
