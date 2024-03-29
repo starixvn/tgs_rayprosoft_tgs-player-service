@@ -189,7 +189,7 @@ public class PlayerQueryTests
 
         var query = new PlayerListQuery
         {
-            PlayerCodes = new[] { "player1", "player2" }
+            PlayerCodes = ["player1", "player2"]
         };
 
         var dbContext = web.Services.GetRequiredService<TgsContext>();

@@ -12,7 +12,7 @@ public class PlayerQueryTests
 
         var sut = new PlayerListQueryService(fakePlayerRepository);
 
-        var query = new PlayerListQuery(Guid.NewGuid(), Array.Empty<string>());
+        var query = new PlayerListQuery(Guid.NewGuid(), []);
 
         _ = await sut.QueryAsync(query).ToArrayAsync();
 

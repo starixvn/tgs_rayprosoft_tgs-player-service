@@ -26,11 +26,11 @@ internal class CreatePlayerCommandService(
             [RegisterSiteType.BackendOffice] = PlayerTagType.BackendOfficeCreated
         }.AsReadOnly();
 
+    private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+    private readonly IDataCommandBuilder _dataCommandBuilder = dataCommandBuilder ?? throw new ArgumentNullException(nameof(dataCommandBuilder));
     private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
     private readonly IPlayerRepository _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
     private readonly ISerialNumberGenerator _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-    private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-    private readonly IDataCommandBuilder _dataCommandBuilder = dataCommandBuilder ?? throw new ArgumentNullException(nameof(dataCommandBuilder));
     private readonly ISystemClock _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
 
     public async ValueTask<string> GetAsync(CreatePlayerCommand command, CancellationToken cancellationToken = default)
@@ -72,11 +72,11 @@ internal class CreatePlayerCommandService(
         await _playerRepository.SetPlayerPropertiesAsync(
             createData.BrandId,
             playerCode,
-            new[] {
+            [
                 _dataCommandBuilder.CreatePutCommand(
                     nameof(PlayerPropertyName.DefaultWalletId),
                     createWalletId.ToString())
-            },
+            ],
             cancellationToken).ConfigureAwait(false);
 
         var currentTime = _systemClock.UtcNow.UtcDateTime;

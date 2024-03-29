@@ -2,7 +2,7 @@
 
 public class PlayerCodesQueryViewModel : IParsable<PlayerCodesQueryViewModel>
 {
-    public IEnumerable<string> UserNames { get; init; } = Array.Empty<string>();
+    public IEnumerable<string> UserNames { get; init; } = [];
 
     public static PlayerCodesQueryViewModel Parse(string s, IFormatProvider? provider) 
         => !TryParse(s, provider, out var result)
@@ -15,7 +15,7 @@ public class PlayerCodesQueryViewModel : IParsable<PlayerCodesQueryViewModel>
         {
             result = new PlayerCodesQueryViewModel
             {
-                UserNames = Array.Empty<string>()
+                UserNames = []
             };
 
             return false;
