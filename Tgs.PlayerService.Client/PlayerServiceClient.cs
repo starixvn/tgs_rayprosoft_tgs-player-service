@@ -442,8 +442,60 @@ internal class PlayerServiceClient : IPlayerServiceClient
     {
         _httpClient.DefaultRequestHeaders.Add("Basic", string.Empty);
 
+        var queryStrings = new List<KeyValuePair<string, string>>();
+
+        if (conditions.Status is not null)
+            queryStrings.Add(
+                new KeyValuePair<string, string>("status", conditions.Status.Value.ToString()));
+
+        if (conditions.ParentPlayerCode is not null)
+            queryStrings.Add(
+                new KeyValuePair<string, string>("parentPlayerCode", conditions.ParentPlayerCode));
+
+        if (conditions.AgentId is not null)
+            queryStrings.Add(
+                new KeyValuePair<string, string>("agentId", conditions.AgentId.Value.ToString()));
+
+        if (conditions.BeginRegisteredTime is not null)
+            queryStrings.Add(
+                new KeyValuePair<string, string>(
+                    "beginRegisteredTime",
+                    conditions.BeginRegisteredTime.Value.ToString("o")));
+
+        if (conditions.EndRegisteredTime is not null)
+            queryStrings.Add(
+                new KeyValuePair<string, string>(
+                    "endRegisteredTime",
+                    conditions.EndRegisteredTime.Value.ToString("o")));
+
+        if (conditions.Phone is not null)
+            queryStrings.Add(
+                new KeyValuePair<string, string>("phone", conditions.Phone));
+
+        if (conditions.RealName is not null)
+            queryStrings.Add(
+                new KeyValuePair<string, string>("realName", conditions.RealName));
+
+        if (conditions.UserName is not null)
+            queryStrings.Add(
+                new KeyValuePair<string, string>("userName", conditions.UserName));
+
+        if (conditions.VipId is not null)
+            queryStrings.Add(
+                new KeyValuePair<string, string>("vipId", conditions.VipId.Value.ToString()));
+
+        if (conditions.PlayerCodes.Any())
+            queryStrings.Add(new KeyValuePair<string, string>(
+                "playerCodes",
+                string.Join(",", conditions.PlayerCodes)));
+
+        var queryStringText = string.Join(
+            '&',
+            queryStrings.Select(
+                kv => $"{kv.Key}={UrlEncoder.Default.Encode(kv.Value)}"));
+
         return _httpClient.GetAsync(
-            $"/player/{brandId}?PlayerCodes={string.Join(',', conditions.PlayerCodes)}",
+            $"/player/{brandId}?{queryStringText}",
             cancellationToken)
             .ToAsyncEnumerable()
             .Take(1)

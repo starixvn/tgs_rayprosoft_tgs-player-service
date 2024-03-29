@@ -91,7 +91,7 @@ public class PlayerQueryTests
     }
 
     [Test]
-    public async Task 查詢多位玩家的PlayerInfo()
+    public async Task PlayerInfoListQueryService_指定PlayerCode查詢PlayerInfoList()
     {
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 
@@ -102,11 +102,17 @@ public class PlayerQueryTests
 
         _ = await sut.QueryAsync(query).ToArrayAsync();
 
-        _ = fakePlayerRepository
-            .Received(1)
+        _ = fakePlayerRepository.Received(1)
             .QueryPlayerInfoListAsync(
                 Arg.Is(query.BrandId),
                 Arg.Is<IEnumerable<string>>(players => players.SequenceEqual(query.PlayerCodes)),
+                Arg.Is(default(PlayerStatus?)),
+                Arg.Is(default(Guid?)),
+                Arg.Is(default(string)),
+                Arg.Is(default(Guid?)),
+                Arg.Is(default(string)),
+                Arg.Is(default(DateTime?)),
+                Arg.Is(default(DateTime?)),
                 Arg.Any<CancellationToken>());
     }
 }

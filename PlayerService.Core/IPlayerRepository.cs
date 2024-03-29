@@ -75,6 +75,13 @@ public interface IPlayerRepository
     IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,
         IEnumerable<string> playerCodes,
+        PlayerStatus? status = null,
+        Guid? vipId = null,
+        string? userName = null,
+        Guid? agentId = null,
+        string? parentPlayerCode = null,
+        DateTime? beginRegisterTime = null,
+        DateTime? endRegisterTime = null,
         CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<PlayerInfo> QueryPlayerInfosByUserNameAsync(

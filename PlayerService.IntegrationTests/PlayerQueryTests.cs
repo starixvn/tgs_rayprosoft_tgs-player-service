@@ -301,7 +301,7 @@ public class PlayerQueryTests
     {
         await using var web = new TestPlayerServiceApplication();
 
-        var httpClient = web.CreateClient();
+        var httpClient = web.CreateDefaultClient([new TestHttpHeaderDelegatingHandler("Basic")]);
 
         var sut = new PlayerServiceClient(httpClient);
 
@@ -348,15 +348,15 @@ public class PlayerQueryTests
 
         _ = await dbContext.SaveChangesAsync();
 
-        var query = new PlayerListQuery
+        var condition = QueryPlayerListConditions.Empty with
         {
             Status = Client.PlayerStatus.RegisterUndone
         };
 
-        var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
+        var actual = await sut.QueryPlayerInfoListAsync(brandId, condition).ToArrayAsync();
 
-        ClassicAssert.AreEqual(1, actual.Length);
-        Assert.Fail();
+        Assert.That(actual.Length, Is.EqualTo(1));
+        Assert.That(actual[0].PlayerCode, Is.EqualTo("player2"));
     }
 
     [Test]

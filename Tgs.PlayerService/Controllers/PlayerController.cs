@@ -375,7 +375,16 @@ public class PlayerController : ControllerBase
     {
         var query = new PlayerInfoListQuery(
             brandId,
-            viewModel.PlayerCodes);
+            viewModel.PlayerCodes,
+            viewModel.Status,
+            viewModel.VipId,
+            viewModel.UserName,
+            viewModel.AgentId,
+            viewModel.ParentPlayerCode,
+            viewModel.Phone,
+            viewModel.RealName,
+            viewModel.BeginRegisteredTime,
+            viewModel.EndRegisteredTime);
 
         return queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Select(info => new PlayerInfoViewModel

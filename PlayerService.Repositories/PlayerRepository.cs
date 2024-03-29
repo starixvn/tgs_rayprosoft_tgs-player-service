@@ -1,8 +1,5 @@
 ﻿using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.Paging;
@@ -11,13 +8,11 @@ using Tgs.SerialNumberGenerator;
 
 namespace Tgs.PlayerService.Repositories;
 
-internal class PlayerRepository(TgsContext context, ISerialNumberGenerator serialNumberGenerator) : IPlayerRepository
+internal class PlayerRepository(
+    TgsContext dbContext,
+    ISerialNumberGenerator serialNumberGenerator)
+    : IPlayerRepository
 {
-    private readonly TgsContext _dbContext = context ?? throw new ArgumentNullException(nameof(context));
-
-    private readonly ISerialNumberGenerator _serialNumberGenerator =
-            serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
-
     public async ValueTask AddPlayerAuditLogAsync(
         Guid createId,
         string userName,
@@ -36,11 +31,11 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             Username = userName
         };
 
-        _ = await _dbContext.PlayerAuditLogs
+        _ = await dbContext.PlayerAuditLogs
             .AddAsync(auditLog, cancellationToken)
             .ConfigureAwait(false);
 
-        _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _ = await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async ValueTask<int> CountCurrentDayLoginAsync(Guid brandId, CancellationToken cancellationToken = default)
@@ -50,9 +45,9 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             TimeSpan.FromHours(8D))
             .UtcDateTime;
 
-        var query = from player in _dbContext.Players.AsQueryable()
+        var query = from player in dbContext.Players.AsQueryable()
                     where player.BrandId == brandId
-                    join ipRecord in _dbContext.PlayerIpRecords
+                    join ipRecord in dbContext.PlayerIpRecords
                         on new
                         {
                             player.PlayerCode,
@@ -88,7 +83,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
 
         var yesterday = currentDay.AddDays(-1);
 
-        return await _dbContext.Players
+        return await dbContext.Players
             .Where(p => p.BrandId == brandId
                 && p.RegisteredOn >= yesterday
                 && p.RegisteredOn < currentDay)
@@ -101,7 +96,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         CancellationToken cancellationToken = default)
     {
         var username = data.UserName;
-        var walletId = await _serialNumberGenerator.GenerateAsync(cancellationToken);
+        var walletId = await serialNumberGenerator.GenerateAsync(cancellationToken);
         var createdOn = DateTime.UtcNow;
         var playerCode = PlayerCodeGenerator.NewId();
 
@@ -125,16 +120,18 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             UpdatedOn = createdOn,
             VipId = data.VipId
         };
-        _ = await _dbContext.Players.AddAsync(player, cancellationToken);
+        _ = await dbContext.Players.AddAsync(player, cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(data.UpperPlayerCode))
-            _ = await _dbContext.PlayerParents.AddAsync(new PlayerParent
+        {
+            _ = await dbContext.PlayerParents.AddAsync(new PlayerParent
             {
                 PlayerCode = playerCode,
                 ParentPlayerCode = data.UpperPlayerCode
             }, cancellationToken).ConfigureAwait(false);
+        }
 
-        _ = await _dbContext.SaveChangesAsync(cancellationToken);
+        _ = await dbContext.SaveChangesAsync(cancellationToken);
 
         return playerCode;
     }
@@ -148,7 +145,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         string? modifier,
         CancellationToken cancellationToken = default)
     {
-        _ = await _dbContext.PlayerEventSources.AddAsync(
+        _ = await dbContext.PlayerEventSources.AddAsync(
             new PlayerEventSource
             {
                 Id = eventId,
@@ -161,7 +158,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             },
             cancellationToken).ConfigureAwait(false);
 
-        _ = await _dbContext
+        _ = await dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
     }
@@ -175,9 +172,9 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             Tag = tag
         };
 
-        _ = await _dbContext.PlayerTags.AddAsync(playerTag, cancellationToken);
+        _ = await dbContext.PlayerTags.AddAsync(playerTag, cancellationToken);
 
-        _ = await _dbContext.SaveChangesAsync(cancellationToken);
+        _ = await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async ValueTask<int> CurrentDayRegisterAsync(Guid brandId, CancellationToken cancellationToken = default)
@@ -187,7 +184,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             TimeSpan.FromHours(8D))
             .UtcDateTime;
 
-        return await _dbContext.Players
+        return await dbContext.Players
             .Where(p => p.BrandId == brandId && p.RegisteredOn >= currentDay)
             .CountAsync(cancellationToken: cancellationToken)
             .ConfigureAwait(false);
@@ -196,23 +193,20 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
     public async ValueTask<string?> GetParentPlayerCodeAsync(
         string playerCode,
         CancellationToken cancellationToken = default)
-        => await _dbContext.PlayerParents
+        => await dbContext.PlayerParents
             .Where(pp => pp.PlayerCode == playerCode)
             .Select(pp => pp.ParentPlayerCode)
             .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
     public IAsyncEnumerable<PlayerCountInfo> GetPlayerCountByBrandIdAsync(Guid brandId,
-        CancellationToken cancellationToken)
-    {
-        return _dbContext.Players.Where(x => x.BrandId == brandId)
+        CancellationToken cancellationToken) => dbContext.Players.Where(x => x.BrandId == brandId)
             .GroupBy(x => x.AgentId, (agentId, list) => new PlayerCountInfo(agentId, list.Count())).ToAsyncEnumerable();
-    }
 
     public async ValueTask<decimal> GetPlayerDepositedAmountAsync(
         string playerCode,
         CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players
+        var player = await dbContext.Players
             .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
@@ -221,7 +215,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
 
     public async ValueTask<EventInfo?> GetPlayerEventAsync(Guid eventId, CancellationToken cancellationToken = default)
     {
-        var eventSource = await _dbContext.PlayerEventSources
+        var eventSource = await dbContext.PlayerEventSources
             .FirstOrDefaultAsync(p => p.Id == eventId, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
@@ -238,7 +232,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         string playerCode,
         CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players
+        var player = await dbContext.Players
             .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
@@ -263,7 +257,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         string email,
         CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players.AsQueryable()
+        var player = await dbContext.Players.AsQueryable()
             .Where(player => player.BrandId == brandId
                 && player.Email!.ToLower() == email.ToLower())
             .FirstOrDefaultAsync(cancellationToken)
@@ -287,7 +281,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
     public async ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone,
         CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players.AsQueryable()
+        var player = await dbContext.Players.AsQueryable()
             .Where(player => player.BrandId == brandId
                 && player.AreaCode == areaCode
                 && player.Phone == phone)
@@ -313,7 +307,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
     public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName,
         CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players.AsQueryable()
+        var player = await dbContext.Players.AsQueryable()
             .Where(player => player.BrandId == brandId
                 && player.Username!.ToLower() == userName.ToLower())
             .FirstOrDefaultAsync(cancellationToken)
@@ -338,7 +332,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         Guid brandId,
         IEnumerable<string> userNames,
         CancellationToken cancellationToken = default)
-        => _dbContext.Players.AsQueryable()
+        => dbContext.Players.AsQueryable()
             .Where(p => userNames.Contains(p.Username))
             .Select(p => new
             {
@@ -369,7 +363,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
     public async ValueTask<PlayerLoginInfo?> GetPlayerLoginInfoAsync(string playerCode,
         CancellationToken cancellationToken = default)
     {
-        var records = await _dbContext.PlayerIpRecords
+        var records = await dbContext.PlayerIpRecords
             .Where(record => record.PlayerCode == playerCode)
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -395,7 +389,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         string playerCode,
         CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players
+        var player = await dbContext.Players
             .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
@@ -429,25 +423,27 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         if (player.AgentId is not null)
             properties["AgentId"] = player.AgentId.Value.ToString();
 
-        foreach (var prop in await _dbContext.PlayerProperties.AsQueryable()
+        foreach (var prop in await dbContext.PlayerProperties.AsQueryable()
             .Where(pp => pp.BrandId == brandId && pp.PlayerCode == playerCode)
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false))
+        {
             properties[prop.Name] = prop.Value;
+        }
 
         return properties.ToImmutableDictionary();
     }
 
     public async ValueTask<PlayerStatus> GetPlayerStatusAsync(string playerCode,
         CancellationToken cancellationToken = default)
-        => (PlayerStatus)(await _dbContext.Players
+        => (PlayerStatus)(await dbContext.Players
             .Where(player => player.PlayerCode == playerCode)
             .Select(player => (short?)player.Status)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false) ?? 1);
 
     public IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int offset = 0, int limit = 100, CancellationToken cancellationToken = default)
-    => context.Players
+    => dbContext.Players
         .Where(predicate: pl => pl.BrandId == brandId && pl.Birthdate.HasValue && pl.Birthdate.Value.Month == birthday.Month && pl.Birthdate.Value.Day == birthday.Day)
         .GroupBy(keySelector: plr => plr.PlayerCode)
         .OrderBy(keySelector: plr => plr.Key)
@@ -459,7 +455,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
     public async ValueTask<Guid?> GetAgentIdForPlayerUpgradedAsync(string playerCode,
         CancellationToken cancellationToken = default)
     {
-        var playerAgent = await _dbContext.PlayerAgentRelations
+        var playerAgent = await dbContext.PlayerAgentRelations
             .FirstOrDefaultAsync(x => x.PlayerCode == playerCode, cancellationToken)
             .ConfigureAwait(false);
 
@@ -495,23 +491,32 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
     public IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,
         IEnumerable<string> playerCodes,
+        PlayerStatus? status = null,
+        Guid? vipId = null,
+        string? userName = null,
+        Guid? agentId = null,
+        string? parentPlayerCode = null,
+        DateTime? beginRegisterTime = null,
+        DateTime? endRegisterTime = null,
         CancellationToken cancellationToken = default)
-        => _dbContext.Players
-            .Where(p => p.BrandId == brandId && playerCodes.Contains(p.PlayerCode))
-            .Select(p => new
-            {
-                p.PlayerCode,
-                p.BrandId,
-                p.Username,
-                p.IdentityAuthentication,
-                p.PhoneAuthentication,
-                p.Email,
-                p.WithdrawPassword,
-                p.VipId,
-                p.RegisteredOn,
-                p.Status
-            })
-            .ToAsyncEnumerable()
+    {
+        var query = InternalQueryPlayerList(
+            brandId,
+            status,
+            vipId,
+            userName,
+            agentId,
+            null,
+            null,
+            beginRegisterTime,
+            endRegisterTime);
+
+        var playerCodeArray = playerCodes.ToArray();
+
+        if (playerCodeArray.Length > 0)
+            query = query.Where(player => playerCodeArray.Contains(player.PlayerCode));
+
+        return query.ToAsyncEnumerable()
             .Do(_ => cancellationToken.ThrowIfCancellationRequested())
             .Select(player => new PlayerInfo(
                 player.PlayerCode,
@@ -524,6 +529,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 player.VipId,
                 player.RegisteredOn,
                 (PlayerStatus)player.Status));
+    }
 
     public IAsyncEnumerable<PlayerInfo> QueryPlayerInfosByUserNameAsync(
         Guid brandId,
@@ -604,10 +610,10 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                             p.VipId,
                             p.Status
                         })
-                    join parent in _dbContext.PlayerParents
+                    join parent in dbContext.PlayerParents
                         on player.PlayerCode equals parent.PlayerCode into pg
                     from parent in pg.DefaultIfEmpty()
-                    join ipRecord in _dbContext.PlayerIpRecords
+                    join ipRecord in dbContext.PlayerIpRecords
                         on new
                         {
                             player.PlayerCode,
@@ -693,10 +699,10 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                             p.VipId,
                             p.Status
                         })
-                    join parent in _dbContext.PlayerParents
+                    join parent in dbContext.PlayerParents
                         on player.PlayerCode equals parent.PlayerCode into pg
                     from parent in pg.DefaultIfEmpty()
-                    join ipRecord in _dbContext.PlayerIpRecords
+                    join ipRecord in dbContext.PlayerIpRecords
                         on new
                         {
                             player.PlayerCode,
@@ -768,10 +774,10 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                             p.VipId,
                             p.Status
                         })
-                    join parent in _dbContext.PlayerParents
+                    join parent in dbContext.PlayerParents
                         on player.PlayerCode equals parent.PlayerCode into pg
                     from parent in pg.DefaultIfEmpty()
-                    join ipRecord in _dbContext.PlayerIpRecords
+                    join ipRecord in dbContext.PlayerIpRecords
                         on new
                         {
                             player.PlayerCode,
@@ -818,11 +824,11 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
     {
         var recordTimeUtc = recordTime.ToUniversalTime();
 
-        var record = await _dbContext.PlayerIpRecords
+        var record = await dbContext.PlayerIpRecords
                 .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
                 .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false)
-            ?? (await _dbContext.PlayerIpRecords
+            ?? (await dbContext.PlayerIpRecords
                 .AddAsync(new PlayerIpRecord
                 {
                     PlayerCode = playerCode,
@@ -837,7 +843,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         record.Host = host;
         record.RecordOn = recordTimeUtc;
 
-        _ = await _dbContext
+        _ = await dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
     }
@@ -849,7 +855,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         DateTime recordTime,
         CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players
+        var player = await dbContext.Players
             .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
@@ -862,11 +868,11 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         player.UpdatedByUsername = playerCode;
         player.UpdatedOn = DateTime.UtcNow;
 
-        var loginRecord = await _dbContext.PlayerIpRecords
+        var loginRecord = await dbContext.PlayerIpRecords
                 .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
                 .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false)
-            ?? (await _dbContext.PlayerIpRecords
+            ?? (await dbContext.PlayerIpRecords
                 .AddAsync(new PlayerIpRecord
                 {
                     PlayerCode = playerCode,
@@ -881,7 +887,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         loginRecord.Host = host;
         loginRecord.RecordOn = recordTimeUtc;
 
-        _ = await _dbContext.PlayerIpRecords
+        _ = await dbContext.PlayerIpRecords
             .AddAsync(
                 new PlayerIpRecord
                 {
@@ -894,7 +900,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _ = await _dbContext
+        _ = await dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
     }
@@ -906,7 +912,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         string? modifyUsername,
         CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players
+        var player = await dbContext.Players
             .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
@@ -919,7 +925,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         player.UpdatedByUsername = modifyUsername;
         player.UpdatedOn = DateTime.UtcNow;
 
-        _ = await _dbContext
+        _ = await dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
     }
@@ -930,7 +936,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         IEnumerable<IDataCommand> modifyCommands,
         CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players
+        var player = await dbContext.Players
             .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
@@ -939,20 +945,22 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
 
         var context = new PlayerModifyCommandContext(
             player,
-            _dbContext.PlayerProperties
+            dbContext.PlayerProperties
                 .Where(pp => pp.BrandId == brandId
                     && pp.PlayerCode == playerCode)
                 .ToDictionary(prop => prop.Name),
-            _dbContext);
+            dbContext);
 
         foreach (var command in modifyCommands)
+        {
             await command
                 .ExecuteAsync(context, cancellationToken)
                 .ConfigureAwait(false);
+        }
 
         player.UpdatedOn = DateTime.UtcNow;
 
-        _ = await _dbContext
+        _ = await dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
     }
@@ -960,7 +968,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
     public async ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status,
         CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players
+        var player = await dbContext.Players
             .FindAsync([playerCode], cancellationToken)
             .ConfigureAwait(false);
 
@@ -970,14 +978,14 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         player.Status = (short)status;
         player.UpdatedOn = DateTime.UtcNow;
 
-        _ = await _dbContext
+        _ = await dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
     }
 
     public async ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default)
     {
-        var player = await _dbContext.Players.FindAsync(
+        var player = await dbContext.Players.FindAsync(
             [playerCode],
             cancellationToken: cancellationToken).ConfigureAwait(false);
 
@@ -989,15 +997,15 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         player.UpdatedByUsername = playerCode;
         player.UpdatedOn = DateTime.UtcNow;
 
-        _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _ = await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async ValueTask UpdatePlayerSnapshotAsync(string playerCode, Guid snapshotId, DateTime updatedOn, CancellationToken cancellationToken = default)
     {
-        var dbSnapshot = await _dbContext.Players
+        var dbSnapshot = await dbContext.Players
             .FindAsync([playerCode], cancellationToken: cancellationToken)
             .ConfigureAwait(false)
-            ?? (await _dbContext.Players.AddAsync(new Player
+            ?? (await dbContext.Players.AddAsync(new Player
             {
                 PlayerCode = playerCode
             }, cancellationToken).ConfigureAwait(false)).Entity;
@@ -1008,7 +1016,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             dbSnapshot.UpdatedOn = updatedOn;
         }
 
-        _ = await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _ = await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async ValueTask CreatePlayerAgentRelationAsync(Guid brandId,
@@ -1016,7 +1024,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         string playerCode,
         CancellationToken cancellationToken = default)
     {
-        _ = await _dbContext.PlayerAgentRelations.AddAsync(new PlayerAgentRelation
+        _ = await dbContext.PlayerAgentRelations.AddAsync(new PlayerAgentRelation
         {
             BrandId = brandId,
             AgentId = agentId,
@@ -1024,7 +1032,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         },
             cancellationToken);
 
-        _ = await _dbContext
+        _ = await dbContext
             .SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
     }
@@ -1041,7 +1049,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         DateTime? beginRegisterTime = null,
         DateTime? endRegisterTime = null)
     {
-        var players = _dbContext.Players.AsQueryable()
+        var players = dbContext.Players.AsQueryable()
             .Where(p => p.BrandId == brandId);
 
         if (status is not null)
@@ -1073,7 +1081,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
 
     private IQueryable<PlayerEventSource> MakePlayerHistoriesQuery(PlayerEventQueryConditions conditions)
     {
-        var dataQuery = from p in _dbContext.PlayerEventSources.AsQueryable()
+        var dataQuery = from p in dbContext.PlayerEventSources.AsQueryable()
                         where p.PlayerCode == conditions.PlayerCode
                             && p.CreatedOn >= conditions.From
                             && p.CreatedOn < conditions.To
