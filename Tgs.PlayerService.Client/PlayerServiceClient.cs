@@ -437,13 +437,13 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
     public IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,
-        IEnumerable<string> playerCodes,
+        QueryPlayerListConditions conditions,
         CancellationToken cancellationToken = default)
     {
         _httpClient.DefaultRequestHeaders.Add("Basic", string.Empty);
 
         return _httpClient.GetAsync(
-            $"/player/{brandId}?PlayerCodes={string.Join(',', playerCodes)}",
+            $"/player/{brandId}?PlayerCodes={string.Join(',', conditions.PlayerCodes)}",
             cancellationToken)
             .ToAsyncEnumerable()
             .Take(1)

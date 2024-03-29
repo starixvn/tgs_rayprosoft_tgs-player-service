@@ -68,7 +68,7 @@ public interface IPlayerServiceClient
 
     IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,
-        IEnumerable<string> playerCodes,
+        QueryPlayerListConditions conditions,
         CancellationToken cancellationToken = default);
 
     [Obsolete("淘汰API")]
@@ -104,7 +104,7 @@ public interface IPlayerServiceClient
 
     IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int page = 1, int rows = 100, CancellationToken cancellationToken = default);
     IAsyncEnumerable<string> QueryPlayerLoginRecordGroupPlayerAsync(Guid brandId, DateTimeOffset startOn, DateTimeOffset endOn, int page = 1, int rows = 100, CancellationToken cancellationToken = default);
-    
+
     ValueTask UpgradePlayerToAgentAsync(
         Guid brandId,
         Guid agentId,

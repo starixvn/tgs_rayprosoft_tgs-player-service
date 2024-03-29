@@ -297,6 +297,69 @@ public class PlayerQueryTests
     }
 
     [Test]
+    public async Task 整合測試_以PlayerStatus取得玩家列表()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = [],
+                Salt = [],
+                Username = "player1",
+                WithdrawPassword = [],
+                WithdrawSalt = [],
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = [],
+                Salt = [],
+                Username = "player2",
+                WithdrawPassword = [],
+                WithdrawSalt = [],
+                Status = (short)Client.PlayerStatus.RegisterUndone
+            },
+            new Player
+            {
+                PlayerCode = "player3",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = [],
+                Salt = [],
+                Username = "player3",
+                WithdrawPassword = [],
+                WithdrawSalt = [],
+                RegisteredOn = DateTime.Parse("2022-7-2")
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var query = new PlayerListQuery
+        {
+            Status = Client.PlayerStatus.RegisterUndone
+        };
+
+        var actual = await sut.QueryPlayerListAsync(brandId, query).ToArrayAsync();
+
+        ClassicAssert.AreEqual(1, actual.Length);
+        Assert.Fail();
+    }
+
+    [Test]
     public async Task QueryPlayer_List_By_Status()
     {
         await using var web = new TestPlayerServiceApplication();
@@ -1133,7 +1196,12 @@ public class PlayerQueryTests
 
         var playerCodes = new[] { "player1", "player2" };
 
-        var actual = await sut.QueryPlayerInfoListAsync(brandId, playerCodes)
+        var actual = await sut.QueryPlayerInfoListAsync(
+            brandId,
+            QueryPlayerListConditions.Empty with
+            {
+                PlayerCodes = playerCodes
+            })
             .ToArrayAsync();
 
         ClassicAssert.AreEqual(2, actual.Length);

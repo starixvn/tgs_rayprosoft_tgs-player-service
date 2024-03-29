@@ -27,9 +27,6 @@ public class PlayerQueryCoditionViewModel
     public string? RealName { get; set; }
 
     [FromQuery]
-    public string? RegisteredDomainName { get; set; }
-
-    [FromQuery]
     public PlayerStatus? Status { get; set; }
 
     [FromQuery]
