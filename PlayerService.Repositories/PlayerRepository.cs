@@ -252,7 +252,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
-                player.RegisteredOn);
+                player.RegisteredOn,
+                (PlayerStatus)player.Status);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
@@ -278,7 +279,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
-                player.RegisteredOn);
+                player.RegisteredOn,
+                (PlayerStatus)player.Status);
     }
 
     public async ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone,
@@ -302,7 +304,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
-                player.RegisteredOn);
+                player.RegisteredOn,
+                (PlayerStatus)player.Status);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
@@ -326,7 +329,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
-                player.RegisteredOn);
+                player.RegisteredOn,
+                (PlayerStatus)player.Status);
     }
 
     public IAsyncEnumerable<PlayerInfo> GetPlayerInfosByUserNamesAsync(
@@ -345,7 +349,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 p.Email,
                 p.WithdrawPassword,
                 p.VipId,
-                p.RegisteredOn
+                p.RegisteredOn,
+                p.Status
             })
             .ToAsyncEnumerable()
             .Select(p => new PlayerInfo(
@@ -357,7 +362,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(p.Email),
                 p.WithdrawPassword.Length > 0,
                 p.VipId,
-                p.RegisteredOn));
+                p.RegisteredOn,
+                (PlayerStatus)p.Status));
 
     public async ValueTask<PlayerLoginInfo?> GetPlayerLoginInfoAsync(string playerCode,
         CancellationToken cancellationToken = default)
@@ -501,7 +507,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 p.Email,
                 p.WithdrawPassword,
                 p.VipId,
-                p.RegisteredOn
+                p.RegisteredOn,
+                p.Status
             })
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -516,7 +523,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
-                player.RegisteredOn);
+                player.RegisteredOn,
+                (PlayerStatus)player.Status);
     }
 
     public IAsyncEnumerable<PlayerInfo> QueryPlayerInfosByUserNameAsync(
@@ -543,7 +551,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 p.Email,
                 p.WithdrawPassword,
                 p.VipId,
-                p.RegisteredOn
+                p.RegisteredOn,
+                p.Status
             })
             .OrderBy(p => p.Username)
             .Take(1000)
@@ -557,7 +566,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(p.Email),
                 p.WithdrawPassword.Length > 0,
                 p.VipId,
-                p.RegisteredOn));
+                p.RegisteredOn,
+                (PlayerStatus)p.Status));
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
@@ -1009,11 +1019,11 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         CancellationToken cancellationToken = default)
     {
         _ = await _dbContext.PlayerAgentRelations.AddAsync(new PlayerAgentRelation
-            {
-                BrandId = brandId,
-                AgentId = agentId,
-                PlayerCode = playerCode
-            },
+        {
+            BrandId = brandId,
+            AgentId = agentId,
+            PlayerCode = playerCode
+        },
             cancellationToken);
 
         _ = await _dbContext

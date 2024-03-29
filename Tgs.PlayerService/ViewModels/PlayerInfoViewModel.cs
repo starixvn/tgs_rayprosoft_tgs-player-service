@@ -4,22 +4,24 @@ namespace Tgs.PlayerService.ViewModels;
 
 public class PlayerInfoViewModel
 {
-    public Guid BrandId { get; init; }
+    public required string PlayerCode { get; set; }
 
-    public bool EmailAuthentication { get; init; }
+    public required Guid BrandId { get; set; }
 
-    public bool IdentityAuthentication { get; init; }
+    [JsonPropertyName("username")]
+    public required string UserName { get; set; }
 
-    public bool IsSetPayPassword { get; init; }
+    public required bool EmailAuthentication { get; set; }
 
-    public bool PhoneAuthentication { get; init; }
+    public required bool IdentityAuthentication { get; set; }
 
-    public string PlayerCode { get; init; } = default!;
+    public required bool IsSetPayPassword { get; set; }
+
+    public required bool PhoneAuthentication { get; set; }
 
     public DateTime? RegisteredOn { get; set; }
 
-    [JsonPropertyName("username")]
-    public string UserName { get; init; } = default!;
+    public Guid? VipLevelId { get; set; }
 
-    public Guid? VipLevelId { get; init; }
+    public required PlayerStatus Status { get; set; }
 }

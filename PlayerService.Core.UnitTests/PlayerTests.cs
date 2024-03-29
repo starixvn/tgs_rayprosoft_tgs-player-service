@@ -84,7 +84,8 @@ public class PlayerTests
             false,
             false,
             null,
-            DateTime.Parse("2022/05/17 00:00:00"));
+            DateTime.Parse("2022/05/17 00:00:00"),
+            PlayerStatus.Enabled);
 
         var playerProperties = new Dictionary<string, string?>
         {
@@ -147,7 +148,8 @@ public class PlayerTests
             false,
             false,
             null,
-            DateTime.Parse("2022/05/17 00:00:00"));
+            DateTime.Parse("2022/05/17 00:00:00"),
+            PlayerStatus.Enabled);
 
         var playerProperties = new Dictionary<string, string?>
         {
@@ -284,7 +286,8 @@ public class PlayerTests
             false,
             false,
             null,
-            DateTime.Parse("2022/05/17 00:00:00"));
+            DateTime.Parse("2022/05/17 00:00:00"),
+            PlayerStatus.Enabled);
 
         var playerProperties = new Dictionary<string, string?>
         {
@@ -355,7 +358,8 @@ public class PlayerTests
             false,
             false,
             null,
-            DateTime.Parse("2022/05/17 00:00:00"));
+            DateTime.Parse("2022/05/17 00:00:00"),
+            PlayerStatus.Enabled);
 
         var playerProperties = new Dictionary<string, string?>
         {
@@ -418,7 +422,8 @@ public class PlayerTests
             false,
             false,
             null,
-            DateTime.Parse("2022/05/17 00:00:00"));
+            DateTime.Parse("2022/05/17 00:00:00"),
+            PlayerStatus.Enabled);
 
         var playerProperties = new Dictionary<string, string?>
         {
@@ -481,7 +486,8 @@ public class PlayerTests
             false,
             false,
             null,
-            DateTime.Parse("2022/05/17 00:00:00"));
+            DateTime.Parse("2022/05/17 00:00:00"),
+            PlayerStatus.Enabled);
 
         var playerProperties = new Dictionary<string, string?>
         {
@@ -543,7 +549,17 @@ public class PlayerTests
 
         _ = fakePlayerRepository
             .GetPlayerInfoAsync(playerCode)
-            .Returns(new PlayerInfo(playerCode, brandId, "4ucmqplxb029", true, true, true, true, Guid.NewGuid(), DateTime.Now.AddDays(-1)));
+            .Returns(new PlayerInfo(
+                playerCode,
+                brandId,
+                "4ucmqplxb029",
+                true,
+                true,
+                true,
+                true,
+                Guid.NewGuid(),
+                DateTime.Now.AddDays(-1),
+                PlayerStatus.Enabled));
 
         _ = fakeSerialNumberGenerator.GenerateAsync()
             .Returns(eventId);
@@ -874,7 +890,8 @@ public class PlayerTests
             false,
             false,
             Guid.NewGuid(),
-            DateTime.Now.AddDays(-1));
+            DateTime.Now.AddDays(-1),
+            PlayerStatus.Enabled);
 
         _ = fakePlayerRepository
             .GetPlayerInfoAsync(Arg.Is(playerCode))
@@ -919,7 +936,8 @@ public class PlayerTests
             false,
             false,
             null,
-            DateTime.Parse("2022/05/17 00:00:00"));
+            DateTime.Parse("2022/05/17 00:00:00"),
+            PlayerStatus.Enabled);
 
         var playerProperties = new Dictionary<string, string?>
         {

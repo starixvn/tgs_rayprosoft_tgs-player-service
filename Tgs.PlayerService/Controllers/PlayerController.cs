@@ -99,7 +99,8 @@ public class PlayerController : ControllerBase
                 EmailAuthentication = parentPlayer.EmailAuthentication,
                 IsSetPayPassword = parentPlayer.IsSetPayPassword,
                 VipLevelId = parentPlayer.VipLevelId,
-                RegisteredOn = parentPlayer.RegisteredOn
+                RegisteredOn = parentPlayer.RegisteredOn,
+                Status = parentPlayer.Status
             };
     }
 
@@ -201,7 +202,8 @@ public class PlayerController : ControllerBase
                 EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
-                RegisteredOn = playerInfo.RegisteredOn
+                RegisteredOn = playerInfo.RegisteredOn,
+                Status = playerInfo.Status
             };
     }
 
@@ -229,7 +231,8 @@ public class PlayerController : ControllerBase
                 EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
-                RegisteredOn = playerInfo.RegisteredOn
+                RegisteredOn = playerInfo.RegisteredOn,
+                Status = playerInfo.Status
             };
     }
 
@@ -261,7 +264,8 @@ public class PlayerController : ControllerBase
                 EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
-                RegisteredOn = playerInfo.RegisteredOn
+                RegisteredOn = playerInfo.RegisteredOn,
+                Status = playerInfo.Status
             };
     }
 
@@ -290,7 +294,8 @@ public class PlayerController : ControllerBase
                 EmailAuthentication = playerInfo.EmailAuthentication,
                 IsSetPayPassword = playerInfo.IsSetPayPassword,
                 VipLevelId = playerInfo.VipLevelId,
-                RegisteredOn = playerInfo.RegisteredOn
+                RegisteredOn = playerInfo.RegisteredOn,
+                Status = playerInfo.Status
             };
     }
 
@@ -382,7 +387,8 @@ public class PlayerController : ControllerBase
                 PhoneAuthentication = info.PhoneAuthentication,
                 IsSetPayPassword = info.IsSetPayPassword,
                 RegisteredOn = info.RegisteredOn,
-                VipLevelId = info.VipLevelId
+                VipLevelId = info.VipLevelId,
+                Status = info.Status
             });
     }
 
