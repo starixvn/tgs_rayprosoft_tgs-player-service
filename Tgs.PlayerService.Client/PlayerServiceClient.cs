@@ -409,6 +409,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
                     cancellationToken)
                 .ToAsyncEnumerable()
                 .SelectMany(arr => arr!));
+
     public async IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int page = 1, int rows = 100, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var queryStrings = new List<KeyValuePair<string, string>>
@@ -434,25 +435,23 @@ internal class PlayerServiceClient : IPlayerServiceClient
             yield return item!;
     }
 
-    public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
+    public IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,
         IEnumerable<string> playerCodes,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
         _httpClient.DefaultRequestHeaders.Add("Basic", string.Empty);
 
-        var response = await _httpClient
-            .GetAsync(
-                $"/player/{brandId}?playercodes={string.Join(',', playerCodes)}",
-                cancellationToken)
-            .ConfigureAwait(false);
-
-        _ = response.EnsureSuccessStatusCode();
-
-        foreach (var item in await response.Content
-                     .ReadFromJsonAsync<IEnumerable<PlayerInfo>>(_SerializerOptions, cancellationToken)
-                     .ConfigureAwait(false) ?? Array.Empty<PlayerInfo>())
-            yield return item!;
+        return _httpClient.GetAsync(
+            $"/player/{brandId}?PlayerCodes={string.Join(',', playerCodes)}",
+            cancellationToken)
+            .ToAsyncEnumerable()
+            .Take(1)
+            .Do(response => response.EnsureSuccessStatusCode())
+            .SelectMany(response => response.Content
+                .ReadFromJsonAsync<IAsyncEnumerable<PlayerInfo>>(_SerializerOptions, cancellationToken)
+                .ToAsyncEnumerable()
+                .SelectMany(arr => arr!));
     }
 
     public async IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(

@@ -14,6 +14,7 @@ namespace Tgs.PlayerService.Repositories;
 internal class PlayerRepository(TgsContext context, ISerialNumberGenerator serialNumberGenerator) : IPlayerRepository
 {
     private readonly TgsContext _dbContext = context ?? throw new ArgumentNullException(nameof(context));
+
     private readonly ISerialNumberGenerator _serialNumberGenerator =
             serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
 
@@ -444,6 +445,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             .Select(player => (short?)player.Status)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false) ?? 1);
+
     public IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int offset = 0, int limit = 100, CancellationToken cancellationToken = default)
     => context.Players
         .Where(predicate: pl => pl.BrandId == brandId && pl.Birthdate.HasValue && pl.Birthdate.Value.Month == birthday.Month && pl.Birthdate.Value.Day == birthday.Day)
@@ -490,12 +492,11 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 row.CreatedOn));
     }
 
-    public async IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
+    public IAsyncEnumerable<PlayerInfo> QueryPlayerInfoListAsync(
         Guid brandId,
         IEnumerable<string> playerCodes,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        var players = await _dbContext.Players
+        CancellationToken cancellationToken = default)
+        => _dbContext.Players
             .Where(p => p.BrandId == brandId && playerCodes.Contains(p.PlayerCode))
             .Select(p => new
             {
@@ -510,11 +511,9 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 p.RegisteredOn,
                 p.Status
             })
-            .ToArrayAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        foreach (var player in players)
-            yield return new PlayerInfo(
+            .ToAsyncEnumerable()
+            .Do(_ => cancellationToken.ThrowIfCancellationRequested())
+            .Select(player => new PlayerInfo(
                 player.PlayerCode,
                 player.BrandId,
                 player.Username,
@@ -524,8 +523,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
                 player.RegisteredOn,
-                (PlayerStatus)player.Status);
-    }
+                (PlayerStatus)player.Status));
 
     public IAsyncEnumerable<PlayerInfo> QueryPlayerInfosByUserNameAsync(
         Guid brandId,
@@ -571,7 +569,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(
-            Guid brandId,
+        Guid brandId,
         PlayerStatus? status = null,
         Guid? vipId = null,
         string? userName = null,

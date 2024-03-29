@@ -19,7 +19,7 @@ public class PlayerListQueryViewModel
     [FromQuery]
     public string? Phone { get; set; }
 
-    [FromQuery(Name = "PlayerCode")]
+    [FromQuery(Name = "playerCode")]
     public string[] PlayerCodes { get; set; } = [];
 
     [FromQuery]

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Tgs.Paging;
 using Tgs.PlayerService.ApplicationServices;
 using Tgs.PlayerService.Constraints;
+using Tgs.PlayerService.ModelBinders;
 using Tgs.PlayerService.ViewModels;
 using Tgs.ServiceUtility;
 using Tgs.WebApi.Toolkits;
@@ -370,7 +371,7 @@ public class PlayerController : ControllerBase
     public IAsyncEnumerable<PlayerInfoViewModel> QueryPlayerInfoListAsync(
         [FromServices] IQueryService<PlayerInfoListQuery, PlayerInfo> queryService,
         Guid brandId,
-        [FromQuery(Name = "playercodes")] PlayerInfoListQueryViewModel viewModel)
+        PlayerQueryCoditionViewModel viewModel)
     {
         var query = new PlayerInfoListQuery(
             brandId,
@@ -457,7 +458,11 @@ public class PlayerController : ControllerBase
         string playerCode,
         [FromBody] string password)
     {
-        var command = new SetPlayerPasswordCommand(playerCode, password, modifyUsername, modifyUserId);
+        var command = new SetPlayerPasswordCommand(
+            playerCode,
+            password,
+            modifyUsername,
+            modifyUserId);
 
         return commandService.ExecuteAsync(command, HttpContext.RequestAborted);
     }
