@@ -26,11 +26,70 @@ public class PlayerQueryTests
         var agentId = Guid.NewGuid();
         var agentId2 = Guid.NewGuid();
 
-        var agentIds = new[]
-        {
-            agentId,
-            agentId2
-        };
+        var dbContext = web.Services.GetRequiredService<TgsContext>();
+
+        await dbContext.Players.AddRangeAsync(
+            new Player
+            {
+                PlayerCode = "player1",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = [],
+                Salt = [],
+                Username = "player1",
+                AgentId = agentId,
+                WithdrawPassword = [],
+                WithdrawSalt = [],
+                Status = (short)PlayerStatus.Enabled
+            },
+            new Player
+            {
+                PlayerCode = "player2",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = [],
+                Salt = [],
+                Username = "player1",
+                AgentId = agentId,
+                WithdrawPassword = [],
+                WithdrawSalt = [],
+                Status = (short)PlayerStatus.Enabled
+            },
+            new Player
+            {
+                PlayerCode = "player3",
+                BrandId = brandId,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = [],
+                Salt = [],
+                Username = "player1",
+                AgentId = agentId2,
+                WithdrawPassword = [],
+                WithdrawSalt = [],
+                Status = (short)PlayerStatus.RegisterUndone
+            });
+
+        _ = await dbContext.SaveChangesAsync();
+
+        var actual = await sut.GetPlayerCountInfosByBrandIdAsync(brandId, default).ToArrayAsync();
+
+        var actualPlayerCount = actual.Sum(x => x.PlayerCount);
+
+        ClassicAssert.AreEqual(3, actualPlayerCount);
+    }
+
+    [Test]
+    public async Task Get_Not_Include_Un_Registered_Player_Count_By_AgentIds()
+    {
+        await using var web = new TestPlayerServiceApplication();
+
+        var httpClient = web.CreateClient();
+
+        var sut = new PlayerServiceClient(httpClient);
+
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var agentId2 = Guid.NewGuid();
 
         var dbContext = web.Services.GetRequiredService<TgsContext>();
 
@@ -45,7 +104,8 @@ public class PlayerQueryTests
                 Username = "player1",
                 AgentId = agentId,
                 WithdrawPassword = [],
-                WithdrawSalt = []
+                WithdrawSalt = [],
+                Status = (short)PlayerStatus.Enabled
             },
             new Player
             {
@@ -57,7 +117,8 @@ public class PlayerQueryTests
                 Username = "player1",
                 AgentId = agentId,
                 WithdrawPassword = [],
-                WithdrawSalt = []
+                WithdrawSalt = [],
+                Status = (short)PlayerStatus.Enabled
             },
             new Player
             {
@@ -69,16 +130,17 @@ public class PlayerQueryTests
                 Username = "player1",
                 AgentId = agentId2,
                 WithdrawPassword = [],
-                WithdrawSalt = []
+                WithdrawSalt = [],
+                Status = (short)PlayerStatus.RegisterUndone
             });
 
         _ = await dbContext.SaveChangesAsync();
 
-        var actual = await sut.GetPlayerCountInfosByBrandIdAsync(brandId, default).ToArrayAsync();
+        var actual = await sut.GetPlayerCountInfosByBrandIdAsync(brandId, false, default).ToArrayAsync();
 
         var actualPlayerCount = actual.Sum(x => x.PlayerCount);
 
-        ClassicAssert.AreEqual(3, actualPlayerCount);
+        ClassicAssert.AreEqual(2, actualPlayerCount);
     }
 
     [Test]

@@ -10,5 +10,5 @@ internal class GetPlayerCountByBrandIdQueryService(
     public IAsyncEnumerable<PlayerCountInfo> QueryAsync(
         GetPlayerCountByBrandIdQuery query,
         CancellationToken cancellationToken = default)
-        => _playerRepository.GetPlayerCountByBrandIdAsync(query.BrandId, cancellationToken);
+        => _playerRepository.GetPlayerCountByBrandIdAsync(query.BrandId, query.IncludeUnRegistered, cancellationToken);
 }

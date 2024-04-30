@@ -139,7 +139,23 @@ internal class PlayerServiceClient : IPlayerServiceClient
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var response = await _httpClient
-            .GetAsync($"/player/playerCount/{brandId}", cancellationToken)
+            .GetAsync($"/player/playerCount/{brandId}?includeUnRegistered=true", cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+
+        var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+
+        await foreach (var playerCountInfo in JsonSerializer.DeserializeAsyncEnumerable<PlayerCountInfo>(contentStream,
+                           _SerializerOptions, cancellationToken)) yield return playerCountInfo!;
+    }
+
+    public async IAsyncEnumerable<PlayerCountInfo> GetPlayerCountInfosByBrandIdAsync(Guid brandId,
+        bool includeUnRegistered,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var response = await _httpClient
+            .GetAsync($"/player/playerCount/{brandId}?includeUnRegistered={includeUnRegistered}", cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();

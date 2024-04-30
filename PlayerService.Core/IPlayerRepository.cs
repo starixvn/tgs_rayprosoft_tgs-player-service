@@ -38,7 +38,7 @@ public interface IPlayerRepository
 
     ValueTask<string?> GetParentPlayerCodeAsync(string playerCode, CancellationToken cancellationToken = default);
 
-    IAsyncEnumerable<PlayerCountInfo> GetPlayerCountByBrandIdAsync(Guid brandId, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<PlayerCountInfo> GetPlayerCountByBrandIdAsync(Guid brandId, bool includeUnRegistered, CancellationToken cancellationToken = default);
 
     ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
 
