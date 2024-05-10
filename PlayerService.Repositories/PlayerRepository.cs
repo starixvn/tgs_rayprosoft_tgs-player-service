@@ -201,9 +201,11 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
     public IAsyncEnumerable<PlayerCountInfo> GetPlayerCountByBrandIdAsync(Guid brandId,
+        bool includeUnRegistered,
         CancellationToken cancellationToken)
     {
         return _dbContext.Players.Where(x => x.BrandId == brandId)
+            .Where(x => includeUnRegistered || !includeUnRegistered && x.Status != (short)PlayerStatus.RegisterUndone)
             .GroupBy(x => x.AgentId, (agentId, list) => new PlayerCountInfo(agentId, list.Count())).ToAsyncEnumerable();
     }
 

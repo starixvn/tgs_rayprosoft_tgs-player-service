@@ -24,6 +24,10 @@ public interface IPlayerServiceClient
     IAsyncEnumerable<PlayerCountInfo> GetPlayerCountInfosByBrandIdAsync(Guid brandId,
         CancellationToken cancellationToken = default);
 
+    IAsyncEnumerable<PlayerCountInfo> GetPlayerCountInfosByBrandIdAsync(Guid brandId,
+        bool includeUnRegistered,
+        CancellationToken cancellationToken = default);
+
     ValueTask<decimal> GetPlayerDepositedAmountAsync(string playerCode, CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<PlayerHistoryInfo> GetPlayerHistoriesAsync(

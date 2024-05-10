@@ -122,9 +122,10 @@ public class PlayerController : ControllerBase
     [SuccessStatusCode(200, "PlayerCount")]
     public IAsyncEnumerable<PlayerCountInfoViewModel> GetPlayerCountInfosByBrandIdAsync(
         [FromServices] IQueryService<GetPlayerCountByBrandIdQuery, PlayerCountInfo> queryService,
+        [FromQuery] PlayerCountInfoQueryViewModel request,
         Guid brandId)
     {
-        var query = new GetPlayerCountByBrandIdQuery(brandId);
+        var query = new GetPlayerCountByBrandIdQuery(brandId, request.IncludeUnRegistered);
 
         return queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Select(x => new PlayerCountInfoViewModel(x.AgentId, x.PlayerCount));
