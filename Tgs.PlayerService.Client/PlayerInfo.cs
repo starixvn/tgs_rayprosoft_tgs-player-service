@@ -22,4 +22,6 @@ public record PlayerInfo
     public Guid? VipLevelId { get; init; }
 
     public DateTime? RegisteredOn { get; init; }
+
+    public Guid? AgentId { get; init; }
 }

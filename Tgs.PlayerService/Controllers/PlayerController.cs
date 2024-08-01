@@ -383,7 +383,8 @@ public class PlayerController : ControllerBase
                 PhoneAuthentication = info.PhoneAuthentication,
                 IsSetPayPassword = info.IsSetPayPassword,
                 RegisteredOn = info.RegisteredOn,
-                VipLevelId = info.VipLevelId
+                VipLevelId = info.VipLevelId,
+                AgentId = info.AgentId
             });
     }
 

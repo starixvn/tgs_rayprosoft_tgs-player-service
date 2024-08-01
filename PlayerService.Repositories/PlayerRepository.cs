@@ -254,7 +254,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
-                player.RegisteredOn);
+                player.RegisteredOn,
+                player.AgentId);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
@@ -280,7 +281,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
-                player.RegisteredOn);
+                player.RegisteredOn,
+                player.AgentId);
     }
 
     public async ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone,
@@ -304,7 +306,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
-                player.RegisteredOn);
+                player.RegisteredOn,
+                player.AgentId);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
@@ -328,7 +331,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
-                player.RegisteredOn);
+                player.RegisteredOn,
+                player.AgentId);
     }
 
     public IAsyncEnumerable<PlayerInfo> GetPlayerInfosByUserNamesAsync(
@@ -347,7 +351,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 p.Email,
                 p.WithdrawPassword,
                 p.VipId,
-                p.RegisteredOn
+                p.RegisteredOn,
+                p.AgentId
             })
             .ToAsyncEnumerable()
             .Select(p => new PlayerInfo(
@@ -359,7 +364,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(p.Email),
                 p.WithdrawPassword.Length > 0,
                 p.VipId,
-                p.RegisteredOn));
+                p.RegisteredOn,
+                p.AgentId));
 
     public async ValueTask<PlayerLoginInfo?> GetPlayerLoginInfoAsync(string playerCode,
         CancellationToken cancellationToken = default)
@@ -503,7 +509,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 p.Email,
                 p.WithdrawPassword,
                 p.VipId,
-                p.RegisteredOn
+                p.RegisteredOn,
+                p.AgentId
             })
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -518,7 +525,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(player.Email),
                 player.WithdrawPassword.Length > 0,
                 player.VipId,
-                player.RegisteredOn);
+                player.RegisteredOn,
+                player.AgentId);
     }
 
     public IAsyncEnumerable<PlayerInfo> QueryPlayerInfosByUserNameAsync(
@@ -545,7 +553,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 p.Email,
                 p.WithdrawPassword,
                 p.VipId,
-                p.RegisteredOn
+                p.RegisteredOn,
+                p.AgentId
             })
             .OrderBy(p => p.Username)
             .Take(1000)
@@ -559,7 +568,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
                 !string.IsNullOrEmpty(p.Email),
                 p.WithdrawPassword.Length > 0,
                 p.VipId,
-                p.RegisteredOn));
+                p.RegisteredOn,
+                p.AgentId));
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:使用 'StringComparison' 方法多載來執行不區分大小寫的字串比較", Justification = "<暫止>")]
     public IAsyncEnumerable<PlayerListItem> QueryPlayerListAsync(

@@ -9,4 +9,5 @@ public record PlayerInfo(
     bool EmailAuthentication,
     bool IsSetPayPassword,
     Guid? VipLevelId,
-    DateTime? RegisteredOn);
+    DateTime? RegisteredOn,
+    Guid? AgentId);
