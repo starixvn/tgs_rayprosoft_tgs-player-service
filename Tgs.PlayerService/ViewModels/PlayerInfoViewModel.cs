@@ -22,4 +22,6 @@ public class PlayerInfoViewModel
     public string UserName { get; init; } = default!;
 
     public Guid? VipLevelId { get; init; }
+
+    public Guid? AgentId { get; init; }
 }
