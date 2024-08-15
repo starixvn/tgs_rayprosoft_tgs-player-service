@@ -4,13 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Npgsql;
-using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.PlayerService.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("appsettings.json",
+    optional: true,
+    reloadOnChange: false);
+
 
 builder.Logging
     .AddOpenTelemetry(options =>
@@ -66,7 +70,7 @@ builder.Services
         .AddAspNetCoreInstrumentation(options => options.Filter =
             httpContext => !httpContext.Request.Path.HasValue
                 || !httpContext.Request.Path.StartsWithSegments("/swagger")
-                && !httpContext.Request.Path.StartsWithSegments("/healthz")
+                && !httpContext.Request.Path.StartsWithSegments("/health")
                 && !httpContext.Request.Path.StartsWithSegments("/metrics")
                 && !httpContext.Request.Path.StartsWithSegments("/profiler/")
                 && !excludeExtensions.Any(
@@ -126,6 +130,6 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/obsolete/swagger.json", "Obsolete");
 });
 
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/health");
 
 app.Run();
