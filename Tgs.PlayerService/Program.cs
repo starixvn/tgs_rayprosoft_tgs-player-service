@@ -7,14 +7,10 @@ using Npgsql;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.PlayerService.Middlewares;
 using Tgs.PlayerService.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Configuration.AddJsonFile("appsettings.json",
-    optional: true,
-    reloadOnChange: false);
-
 
 builder.Logging
     .AddOpenTelemetry(options =>
@@ -34,6 +30,8 @@ builder.Logging
                 }));
         });
     });
+
+builder.WebHost.UseSentry();
 
 builder.Services
     .AddRouting(options => options.LowercaseUrls = true)
@@ -60,9 +58,8 @@ builder.Services
 var excludeExtensions = new[] { "html", "ico", "png", "jpg" };
 builder.Services
     .AddOpenTelemetry()
-    .WithTracing(tracingBuilder => tracingBuilder
-        .SetResourceBuilder(ResourceBuilder.CreateDefault()
-            .AddEnvironmentVariableDetector())
+    .ConfigureResource(_ => _.AddService(builder.Configuration.GetValue<string>("OTEL:OTEL_SERVICE_NAME")))
+    .WithTracing(traceProviderBuilder => traceProviderBuilder
         .AddSource("Tgs.*")
         .AddSource("TGS.*")
         .AddSource("Valhalla.*")
@@ -76,7 +73,7 @@ builder.Services
                 && !excludeExtensions.Any(
                     ext => httpContext.Request.Path.Value.EndsWith($".{ext}")))
         .AddProfileViewExporter()
-        .AddOtlpExporter())
+        .AddOtlpExporter(options => options.Endpoint = builder.Configuration.GetValue<Uri>("OTEL:OTEL_COLLECTOR")))
     .WithMetrics(meterBuiler => meterBuiler
         .SetResourceBuilder(ResourceBuilder.CreateDefault()
             .AddEnvironmentVariableDetector())
@@ -118,9 +115,11 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services
     .AddHealthChecks();
+builder.Services.AddScoped<ExceptionMiddleware>();
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.MapProfileViewer();
 app.MapSwagger();
