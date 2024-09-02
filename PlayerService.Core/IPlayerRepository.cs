@@ -141,7 +141,7 @@ public interface IPlayerRepository
         CancellationToken cancellationToken = default);
 
     ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status, CancellationToken cancellationToken = default);
-    ValueTask SetPlayerLoginTypeAsync(string playerCode, string loginType, CancellationToken cancellationToken = default);
+    ValueTask SetPlayerLoginTypeAsync(string playerCode, PlayerLoginType loginType, CancellationToken cancellationToken = default);
 
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
 

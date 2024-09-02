@@ -729,7 +729,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
 
     public async ValueTask SetPlayerLoginTypeAsync(
        string playerCode,
-       string loginType,
+       PlayerLoginType loginType,
        string? modifyUser = null,
        CancellationToken cancellationToken = default)
     {

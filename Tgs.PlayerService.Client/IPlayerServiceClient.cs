@@ -106,7 +106,7 @@ public interface IPlayerServiceClient
 
     ValueTask SetPlayerLoginTypeAsync(
         string playerCode,
-        string loginType,
+        PlayerLoginType loginType,
         string? modifyUser = null,
         CancellationToken cancellationToken = default);
 

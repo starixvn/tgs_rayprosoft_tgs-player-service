@@ -24,4 +24,8 @@
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Tgs.PlayerService.Client\Tgs.PlayerService.Client.csproj" />
+  </ItemGroup>
+
 </Project>

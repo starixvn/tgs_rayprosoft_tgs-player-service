@@ -34,7 +34,7 @@ public partial class Player
     public DateTime LastActiveOn { get; set; }
 
     public short Status { get; set; }
-    public string LoginType { get; set; } = string.Empty;
+    public short LoginType { get; set; } = 0;
 
     public int BetLimitId { get; set; }
 

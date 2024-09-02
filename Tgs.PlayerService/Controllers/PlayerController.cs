@@ -498,7 +498,7 @@ public class PlayerController : ControllerBase
         [FromServices] ICommandService<SetPlayerLoginTypeCommand> setService,
         [FromHeader(Name = "ModifyUser")] string? modifyUser,
         string playerCode,
-        string loginType)
+        [FromBody] PlayerLoginType loginType)
     {
         var command = new SetPlayerLoginTypeCommand(playerCode, loginType, modifyUser);
 

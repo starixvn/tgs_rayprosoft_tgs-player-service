@@ -977,7 +977,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             .ConfigureAwait(false);
     }
 
-    public async ValueTask SetPlayerLoginTypeAsync(string playerCode, string loginType,
+    public async ValueTask SetPlayerLoginTypeAsync(string playerCode, PlayerLoginType loginType,
        CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players
@@ -987,7 +987,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         if (player == null)
             return;
 
-        player.LoginType = loginType;
+        player.LoginType = (short)loginType;
         player.UpdatedOn = DateTime.UtcNow;
 
         _ = await _dbContext
