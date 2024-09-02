@@ -742,7 +742,7 @@ internal class PlayerServiceClient : IPlayerServiceClient
             requestContent.Headers.Add("ModifyUser", modifyUser);
 
         var response = await _httpClient
-            .PutAsync($"/player/status/{playerCode}", requestContent, cancellationToken)
+            .PutAsync($"/player/login-type/{playerCode}", requestContent, cancellationToken)
             .ConfigureAwait(false);
 
         _ = response.EnsureSuccessStatusCode();
