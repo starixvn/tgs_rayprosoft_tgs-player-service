@@ -1,8 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Utility;
 using Tgs.Paging;
@@ -979,6 +977,25 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             .ConfigureAwait(false);
     }
 
+    public async ValueTask SetPlayerLoginTypeAsync(string playerCode, string loginType,
+       CancellationToken cancellationToken = default)
+    {
+        var player = await _dbContext.Players
+            .FindAsync([playerCode], cancellationToken)
+            .ConfigureAwait(false);
+
+        if (player == null)
+            return;
+
+        player.LoginType = loginType;
+        player.UpdatedOn = DateTime.UtcNow;
+
+        _ = await _dbContext
+            .SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+
     public async ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default)
     {
         var player = await _dbContext.Players.FindAsync(
@@ -1021,11 +1038,11 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         CancellationToken cancellationToken = default)
     {
         _ = await _dbContext.PlayerAgentRelations.AddAsync(new PlayerAgentRelation
-            {
-                BrandId = brandId,
-                AgentId = agentId,
-                PlayerCode = playerCode
-            },
+        {
+            BrandId = brandId,
+            AgentId = agentId,
+            PlayerCode = playerCode
+        },
             cancellationToken);
 
         _ = await _dbContext

@@ -78,6 +78,7 @@ namespace Tgs.PlayerService.Repositories.Entities.Configurations
             entity.Property(e => e.Salt).HasColumnName("salt");
             entity.Property(e => e.SnapshotEventId).HasColumnName("snapshot_event_id");
             entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.LoginType).HasColumnName("login_type");
             entity.Property(e => e.Type).HasColumnName("type");
             entity.Property(e => e.UpdatedByUsername).HasColumnName("updated_by_username");
             entity.Property(e => e.UpdatedOn).HasColumnName("updated_on");

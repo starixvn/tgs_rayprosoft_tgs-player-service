@@ -1,0 +1,8 @@
+variables:
+  PUBLISH_NUGET: 'true'
+  PROJECT_FOLDER: Tgs.PlayerService.Client
+
+include:
+  - project: ci/core-cicd
+    ref: main
+    file: luminet.gitlab-ci.yml

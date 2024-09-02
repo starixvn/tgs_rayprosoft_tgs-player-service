@@ -727,6 +727,27 @@ internal class PlayerServiceClient : IPlayerServiceClient
         _ = response.EnsureSuccessStatusCode();
     }
 
+    public async ValueTask SetPlayerLoginTypeAsync(
+       string playerCode,
+       string loginType,
+       string? modifyUser = null,
+       CancellationToken cancellationToken = default)
+    {
+        var requestContent = new StringContent(
+            JsonSerializer.Serialize(loginType, _SerializerOptions),
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json);
+
+        if (!string.IsNullOrWhiteSpace(modifyUser))
+            requestContent.Headers.Add("ModifyUser", modifyUser);
+
+        var response = await _httpClient
+            .PutAsync($"/player/status/{playerCode}", requestContent, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = response.EnsureSuccessStatusCode();
+    }
+
     public async ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PutAsJsonAsync(

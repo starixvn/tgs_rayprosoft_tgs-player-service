@@ -104,11 +104,17 @@ public interface IPlayerServiceClient
         string? modifyUser = null,
         CancellationToken cancellationToken = default);
 
+    ValueTask SetPlayerLoginTypeAsync(
+        string playerCode,
+        string loginType,
+        string? modifyUser = null,
+        CancellationToken cancellationToken = default);
+
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<string> QueryPlayerBirthdayAsync(Guid brandId, DateOnly birthday, int page = 1, int rows = 100, CancellationToken cancellationToken = default);
     IAsyncEnumerable<string> QueryPlayerLoginRecordGroupPlayerAsync(Guid brandId, DateTimeOffset startOn, DateTimeOffset endOn, int page = 1, int rows = 100, CancellationToken cancellationToken = default);
-    
+
     ValueTask UpgradePlayerToAgentAsync(
         Guid brandId,
         Guid agentId,

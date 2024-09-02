@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Tgs.PlayerService;
 
@@ -143,6 +141,7 @@ public interface IPlayerRepository
         CancellationToken cancellationToken = default);
 
     ValueTask SetPlayerStatusAsync(string playerCode, PlayerStatus status, CancellationToken cancellationToken = default);
+    ValueTask SetPlayerLoginTypeAsync(string playerCode, string loginType, CancellationToken cancellationToken = default);
 
     ValueTask TopUpAccumulatedDepositAsync(string playerCode, decimal amount, CancellationToken cancellationToken = default);
 

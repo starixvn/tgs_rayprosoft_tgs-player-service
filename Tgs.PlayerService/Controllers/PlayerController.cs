@@ -492,6 +492,19 @@ public class PlayerController : ControllerBase
         return setService.ExecuteAsync(command, HttpContext.RequestAborted);
     }
 
+    [HttpPut("login-type/{playerCode}", Name = "SetLoginType")]
+    [SuccessStatusCode(200, "Login Type set")]
+    public ValueTask SetPlayerLoginTYpeAsync(
+        [FromServices] ICommandService<SetPlayerLoginTypeCommand> setService,
+        [FromHeader(Name = "ModifyUser")] string? modifyUser,
+        string playerCode,
+        string loginType)
+    {
+        var command = new SetPlayerLoginTypeCommand(playerCode, loginType, modifyUser);
+
+        return setService.ExecuteAsync(command, HttpContext.RequestAborted);
+    }
+
     [HttpGet("{brandId:guid}/player-birthday", Name = "QueryPlayerBirthday")]
     [SuccessStatusCode(200, "PlayerCodes returns")]
     public IAsyncEnumerable<string> QueryPlayerBirthdayAsync(
