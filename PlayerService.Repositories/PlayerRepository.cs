@@ -120,7 +120,8 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
             AgentId = data.AgentId,
             UpdatedByUsername = username,
             UpdatedOn = createdOn,
-            VipId = data.VipId
+            VipId = data.VipId,
+            LoginType = (short)PlayerLoginType.None
         };
         _ = await _dbContext.Players.AddAsync(player, cancellationToken);
 
