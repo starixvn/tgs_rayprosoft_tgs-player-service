@@ -3,6 +3,7 @@
 public record CreatePlayerData(
     Guid BrandId,
     string UserName,
+    string Email,
     string CurrencyCode,
     int BetLimitId,
     PlayerStatus PlayerStatus,

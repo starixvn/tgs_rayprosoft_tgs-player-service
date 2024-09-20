@@ -43,6 +43,7 @@ internal class CreatePlayerCommandService(
         var createData = new CreatePlayerData(
             command.BrandId,
             command.Username,
+            command.Email,
             command.CurrencyCode,
             command.BetLimitId,
             PlayerStatus.RegisterUndone,
@@ -87,6 +88,7 @@ internal class CreatePlayerCommandService(
             createData.AgentId,
             createData.VipId,
             createData.UserName,
+            createData.Email,
             createData.CurrencyCode,
             createData.BetLimitId,
             createData.Type,

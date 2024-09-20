@@ -6,6 +6,7 @@ public record CreatePlayerCommand(
     Guid VipId,
     string CurrencyCode,
     string Username,
+    string Email,
     string Password,
     string? UpperPlayerCode,
     int BetLimitId,

@@ -62,6 +62,7 @@ public class PlayerController : ControllerBase
             player.VipId,
             player.CurrencyCode,
             player.Username,
+            player.Email,
             player.Password,
             player.UpperPlayerCode,
             player.BetLimitId,

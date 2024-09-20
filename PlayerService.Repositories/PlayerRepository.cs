@@ -106,6 +106,7 @@ internal class PlayerRepository(TgsContext context, ISerialNumberGenerator seria
         {
             PlayerCode = playerCode,
             Username = username,
+            Email = data.Email,
             Password = data.Password,
             Salt = data.Salt,
             WithdrawPassword = [],

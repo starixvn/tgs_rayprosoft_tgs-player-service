@@ -6,6 +6,7 @@ public record CreatePlayerViewModel(
     Guid VipId,
     string CurrencyCode,
     string Username,
+    string Email,
     string Password,
     string? UpperPlayerCode,
     int BetLimitId,
