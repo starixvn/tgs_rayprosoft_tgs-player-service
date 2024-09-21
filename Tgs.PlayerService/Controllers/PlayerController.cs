@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -233,6 +234,13 @@ public class PlayerController : ControllerBase
                 VipLevelId = playerInfo.VipLevelId,
                 RegisteredOn = playerInfo.RegisteredOn
             };
+    }
+
+    [HttpGet("check-email/{email}")]
+    public bool CheckEmail(string email)
+    {
+        var emailRegex = new Regex(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", RegexOptions.IgnoreCase);
+        return emailRegex.IsMatch(email);
     }
 
     [HttpGet("{brandId}/{areaCode:regex(\\+?\\d+)}/{phone}", Name = "GetPlayerInfoByPhone")]

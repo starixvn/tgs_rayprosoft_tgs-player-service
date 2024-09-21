@@ -48,7 +48,10 @@ public interface IPlayerServiceClient
         string phone,
         CancellationToken cancellationToken = default);
 
+    ValueTask<bool?> CheckPlayerInfoEmailAsync(string email, CancellationToken cancellationToken = default);
+
     ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName, CancellationToken cancellationToken = default);
+
 
     ValueTask<PlayerLoginInfo?> GetPlayerLoginInfoAsync(string playerCode, CancellationToken cancellationToken = default);
 

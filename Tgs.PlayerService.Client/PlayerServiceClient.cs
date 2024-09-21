@@ -281,6 +281,26 @@ internal class PlayerServiceClient : IPlayerServiceClient
         }
     }
 
+    public async ValueTask<bool?> CheckPlayerInfoEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient
+            .GetAsync($"/player/check-email/{email}", cancellationToken)
+            .ConfigureAwait(false);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content
+                .ReadFromJsonAsync<bool>(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            return result;
+        }
+
+        return null;
+    }
+
     public async ValueTask<PlayerInfo?> GetPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient
