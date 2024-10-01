@@ -130,5 +130,6 @@ app.UseSwaggerUI(options =>
 });
 
 app.MapHealthChecks("/health");
+SentrySdk.CaptureMessage($"Started result Tgs-PaymentService at {DateTime.Now.ToString()}");
 
 app.Run();
